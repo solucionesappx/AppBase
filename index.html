@@ -175,8 +175,8 @@
             const successText = document.getElementById('successText');
             const errorText = document.getElementById('errorText');
 
-            // ** IMPORTANTE: Reemplaza 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE' con la URL de tu script de GAS desplegado **
-            const gasWebAppUrl = 'https://script.google.com/macros/s/AKfycbyIwkU4tGvWBk9gyYoYWkMLhFimBVSMQl-9RS4jXn_epgCn10cVUFYqWj6zOb_bIiuJ/exec';
+            // ** CAMBIO: Apuntamos al servidor Node.js local **
+            const nodeJsServerUrl = 'http://localhost:3000'; 
 
             // Función para mostrar mensajes
             function showMessage(type, message) {
@@ -225,12 +225,12 @@
             async function loadProfileData(clienteId) {
                 showSection('loadingSection'); // Muestra el spinner de carga
                 try {
-                    const response = await fetch(gasWebAppUrl, {
+                    const response = await fetch(nodeJsServerUrl, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json', // CAMBIO: Ahora enviamos JSON
+                            'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ // CAMBIO: Convertimos el objeto a JSON string
+                        body: JSON.stringify({
                             action: 'getData',
                             Cliente_ID: clienteId
                         }),
@@ -238,7 +238,7 @@
 
                     const result = await response.json();
 
-                    if (result.success) {
+                    if (response.ok && result.success) { // Verifica response.ok y result.success
                         const data = result.data;
                         document.getElementById('profileClienteId').textContent = data.Cliente_ID;
                         document.getElementById('profileClienteNombre').textContent = data.Cliente_Nombre;
@@ -281,17 +281,17 @@
                 };
 
                 try {
-                    const response = await fetch(gasWebAppUrl, {
+                    const response = await fetch(nodeJsServerUrl, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json', // CAMBIO: Ahora enviamos JSON
+                            'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify(data), // CAMBIO: Convertimos el objeto a JSON string
+                        body: JSON.stringify(data),
                     });
 
                     const result = await response.json();
 
-                    if (result.success) {
+                    if (response.ok && result.success) { // Verifica response.ok y result.success
                         sessionStorage.setItem('loggedInClientId', result.clienteId); // Guarda el ID del cliente en la sesión
                         showMessage('success', '¡Inicio de sesión exitoso!');
                         loadProfileData(result.clienteId); // Carga los datos del perfil
@@ -320,17 +320,17 @@
                 data.action = 'register';
 
                 try {
-                    const response = await fetch(gasWebAppUrl, {
+                    const response = await fetch(nodeJsServerUrl, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json', // CAMBIO: Ahora enviamos JSON
+                            'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify(data), // CAMBIO: Convertimos el objeto a JSON string
+                        body: JSON.stringify(data),
                     });
 
                     const result = await response.json();
 
-                    if (result.success) {
+                    if (response.ok && result.success) { // Verifica response.ok y result.success
                         showMessage('success', '¡Cliente registrado correctamente!');
                         customerForm.reset(); // Limpia el formulario
                         showSection('loginSection'); // Vuelve al login después del registro
