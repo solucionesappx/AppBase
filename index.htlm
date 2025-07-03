@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Clientes</title>
+    <!-- Carga de Tailwind CSS para estilos rápidos y responsivos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos personalizados para la fuente Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Un gris claro para el fondo */
+        }
+        /* Ocultar el mensaje de éxito por defecto */
+        #successMessage {
+            display: none;
+        }
+        /* Ocultar el mensaje de error por defecto */
+        #errorMessage {
+            display: none;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Registro de Clientes</h1>
+        <p class="text-center text-gray-600 mb-8">Por favor, introduce los datos del cliente.</p>
+
+        <!-- Mensaje de éxito -->
+        <div id="successMessage" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md relative mb-4" role="alert">
+            <strong class="font-bold">¡Éxito!</strong>
+            <span class="block sm:inline">Datos enviados correctamente.</span>
+        </div>
+
+        <!-- Mensaje de error -->
+        <div id="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative mb-4" role="alert">
+            <strong class="font-bold">¡Error!</strong>
+            <span class="block sm:inline">Hubo un problema al enviar los datos. Por favor, inténtalo de nuevo.</span>
+        </div>
+
+        <form id="customerForm" class="space-y-4">
+            <div>
+                <label for="clienteId" class="block text-sm font-medium text-gray-700">Cliente_ID</label>
+                <input type="text" id="clienteId" name="Cliente_ID" required
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="clienteNombre" class="block text-sm font-medium text-gray-700">Cliente_Nombre</label>
+                <input type="text" id="clienteNombre" name="Cliente_Nombre" required
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="clienteCorreo" class="block text-sm font-medium text-gray-700">Cliente_Correo</label>
+                <input type="email" id="clienteCorreo" name="Cliente_Correo" required
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="clienteTelefono" class="block text-sm font-medium text-gray-700">Cliente_Telefono</label>
+                <input type="tel" id="clienteTelefono" name="Cliente_Telefono" required
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="clienteIdx" class="block text-sm font-medium text-gray-700">Cliente_IDX</label>
+                <input type="text" id="clienteIdx" name="Cliente_IDX" required
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="clienteClave" class="block text-sm font-medium text-gray-700">Cliente_Clave</label>
+                <input type="password" id="clienteClave" name="Cliente_Clave" required
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+
+            <button type="submit"
+                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
+                Registrar Cliente
+            </button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('customerForm');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault(); // Previene el envío del formulario por defecto
+
+                // Oculta cualquier mensaje previo
+                successMessage.style.display = 'none';
+                errorMessage.style.display = 'none';
+
+                // Recopila los datos del formulario
+                const formData = new FormData(form);
+                const data = {};
+                for (let [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+
+                // ** IMPORTANTE: Reemplaza 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE' con la URL de tu script de GAS desplegado **
+                const gasWebAppUrl = 'https://script.google.com/macros/s/AKfycbw3bJSdiWbgOUsFFvUt15HRGQYuaJ_gtZstO38YftRlbrU6Ok8uOCzJ--TG5ocbYUlu/exec';
+
+                try {
+                    const response = await fetch(gasWebAppUrl, {
+                        method: 'POST',
+                        mode: 'no-cors', // Necesario para evitar problemas de CORS con GAS
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(data).toString(), // Envía los datos como URL-encoded
+                    });
+
+                    // Debido a 'no-cors', no podemos leer la respuesta directamente.
+                    // Asumimos éxito si la solicitud se envía sin errores de red.
+                    // Para una confirmación real, GAS podría redirigir o devolver un JSON
+                    // si se configura para ello, pero 'no-cors' lo limita.
+                    // Para esta implementación simple, mostraremos éxito si no hay error de fetch.
+
+                    successMessage.style.display = 'block'; // Muestra el mensaje de éxito
+                    form.reset(); // Limpia el formulario después del envío exitoso
+
+                } catch (error) {
+                    console.error('Error al enviar los datos:', error);
+                    errorMessage.style.display = 'block'; // Muestra el mensaje de error
+                }
+            });
+        });
+    </script>
+</body>
+</html>
