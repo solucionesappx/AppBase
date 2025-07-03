@@ -228,12 +228,12 @@
                     const response = await fetch(gasWebAppUrl, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'Content-Type': 'application/json', // CAMBIO: Ahora enviamos JSON
                         },
-                        body: new URLSearchParams({
-                            action: 'getData', // Acción para obtener datos del cliente
+                        body: JSON.stringify({ // CAMBIO: Convertimos el objeto a JSON string
+                            action: 'getData',
                             Cliente_ID: clienteId
-                        }).toString(),
+                        }),
                     });
 
                     const result = await response.json();
@@ -275,7 +275,7 @@
 
                 const formData = new FormData(loginForm);
                 const data = {
-                    action: 'login', // Acción para iniciar sesión
+                    action: 'login',
                     Cliente_ID: formData.get('Cliente_ID'),
                     Cliente_Clave: formData.get('Cliente_Clave')
                 };
@@ -284,9 +284,9 @@
                     const response = await fetch(gasWebAppUrl, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'Content-Type': 'application/json', // CAMBIO: Ahora enviamos JSON
                         },
-                        body: new URLSearchParams(data).toString(),
+                        body: JSON.stringify(data), // CAMBIO: Convertimos el objeto a JSON string
                     });
 
                     const result = await response.json();
@@ -317,18 +317,18 @@
                 for (let [key, value] of formData.entries()) {
                     data[key] = value;
                 }
-                data.action = 'register'; // Acción para registrar
+                data.action = 'register';
 
                 try {
                     const response = await fetch(gasWebAppUrl, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'Content-Type': 'application/json', // CAMBIO: Ahora enviamos JSON
                         },
-                        body: new URLSearchParams(data).toString(),
+                        body: JSON.stringify(data), // CAMBIO: Convertimos el objeto a JSON string
                     });
 
-                    const result = await response.json(); // Espera una respuesta JSON
+                    const result = await response.json();
 
                     if (result.success) {
                         showMessage('success', '¡Cliente registrado correctamente!');
