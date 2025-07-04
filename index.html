@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal de Clientes</title>
-    <!-- Tailwind CSS para un diseño moderno y responsivo -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,7 +13,7 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Pequeña animación para las transiciones */
+        /* Pequeña animación para las transiciones de formulario */
         .form-container {
             transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
         }
@@ -25,72 +23,89 @@
             position: absolute;
             pointer-events: none;
         }
+        /* Animaciones para botones e inputs */
+        .btn-animation {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-animation:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .input-focus-animation:focus {
+            outline: none;
+            border-color: #6366f1; /* Tailwind indigo-500 */
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25); /* Tailwind indigo-500 with opacity */
+        }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<body class="bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center min-h-screen p-4">
 
-    <div class="w-full max-w-md mx-auto p-4">
-        <div class="bg-white rounded-2xl shadow-xl p-8">
-            <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Portal de Clientes</h1>
-            <p class="text-center text-gray-500 mb-8">Registra tus datos o consulta tu información.</p>
+    <div class="w-full max-w-md mx-auto">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 sm:p-10 border border-gray-100">
+            <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-3">Portal de Clientes</h1>
+            <p class="text-center text-gray-500 mb-8 max-w-sm mx-auto">Gestiona tus datos de forma rápida y segura.</p>
 
-            <!-- Pestañas para cambiar de formulario -->
-            <div class="flex border-b border-gray-200 mb-6">
-                <button id="tab-new" class="flex-1 py-2 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600">Nuevo Usuario</button>
-                <button id="tab-existing" class="flex-1 py-2 text-center font-semibold text-gray-500">Usuario Existente</button>
+            <div class="flex bg-gray-100 rounded-xl p-1 mb-8">
+                <button id="tab-new" class="flex-1 py-2.5 px-4 text-center font-semibold text-indigo-700 bg-white rounded-lg shadow-md transition-all duration-300 ease-in-out">
+                    Nuevo Usuario
+                </button>
+                <button id="tab-existing" class="flex-1 py-2.5 px-4 text-center font-semibold text-gray-600 hover:text-indigo-700 transition-all duration-300 ease-in-out">
+                    Usuario Existente
+                </button>
             </div>
 
-            <!-- Contenedor para los formularios -->
-            <div class="relative">
-                <!-- Formulario de Registro (Nuevo Usuario) -->
-                <div id="form-new" class="form-container">
+            <div class="relative min-h-[300px]"> <div id="form-new" class="form-container">
                     <form id="newUserForm">
-                        <div class="space-y-4">
+                        <div class="space-y-5">
                             <div>
-                                <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
-                                <input type="text" id="nombre" name="nombre" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
+                                <input type="text" id="nombre" name="nombre" required 
+                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
                             </div>
                             <div>
-                                <label for="correo" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
-                                <input type="email" id="correo" name="correo" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <label for="correo" class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+                                <input type="email" id="correo" name="correo" required 
+                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
                             </div>
                             <div>
-                                <label for="telefono" class="block text-sm font-medium text-gray-700">Teléfono</label>
-                                <input type="tel" id="telefono" name="telefono" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                                <input type="tel" id="telefono" name="telefono" required 
+                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
                             </div>
                             <div>
-                                <label for="clave" class="block text-sm font-medium text-gray-700">Crear Clave</label>
-                                <input type="password" id="clave" name="clave" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <label for="clave" class="block text-sm font-medium text-gray-700 mb-1">Crear Clave</label>
+                                <input type="password" id="clave" name="clave" required 
+                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
                             </div>
                         </div>
-                        <button type="submit" class="w-full mt-8 flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button type="submit" class="btn-animation w-full mt-8 flex items-center justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             Registrarme
                         </button>
                     </form>
                 </div>
 
-                <!-- Formulario de Consulta (Usuario Existente) -->
                 <div id="form-existing" class="form-container hidden-form">
                     <form id="existingUserForm">
-                        <div class="space-y-4">
+                        <div class="space-y-5">
                             <div>
-                                <label for="correo-existente" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
-                                <input type="email" id="correo-existente" name="correo" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <label for="correo-existente" class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+                                <input type="email" id="correo-existente" name="correo" required 
+                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
                             </div>
                             <div>
-                                <label for="clave-existente" class="block text-sm font-medium text-gray-700">Clave</label>
-                                <input type="password" id="clave-existente" name="clave" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <label for="clave-existente" class="block text-sm font-medium text-gray-700 mb-1">Clave</label>
+                                <input type="password" id="clave-existente" name="clave" required 
+                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
                             </div>
                         </div>
-                        <button type="submit" class="w-full mt-8 flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        <button type="submit" class="btn-animation w-full mt-8 flex items-center justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                             Consultar Mis Datos
                         </button>
                     </form>
                 </div>
             </div>
 
-            <!-- Área para mostrar mensajes y resultados -->
-            <div id="result-container" class="mt-6 text-center"></div>
+            <div id="result-container" class="mt-8 text-center p-4 rounded-xl transition-all duration-300 ease-in-out"></div>
         </div>
     </div>
 
@@ -120,25 +135,32 @@
         // Manejador para cambiar de pestaña
         function switchTab(tabToShow) {
             if (tabToShow === 'new') {
-                tabNew.classList.add('text-indigo-600', 'border-indigo-600');
-                tabNew.classList.remove('text-gray-500');
-                tabExisting.classList.add('text-gray-500');
-                tabExisting.classList.remove('text-indigo-600', 'border-indigo-600');
+                tabNew.classList.add('bg-white', 'shadow-md', 'text-indigo-700');
+                tabNew.classList.remove('text-gray-600');
+                tabExisting.classList.remove('bg-white', 'shadow-md', 'text-indigo-700');
+                tabExisting.classList.add('text-gray-600');
+                
                 formNew.classList.remove('hidden-form');
                 formExisting.classList.add('hidden-form');
             } else {
-                tabExisting.classList.add('text-indigo-600', 'border-indigo-600');
-                tabExisting.classList.remove('text-gray-500');
-                tabNew.classList.add('text-gray-500');
-                tabNew.classList.remove('text-indigo-600', 'border-indigo-600');
+                tabExisting.classList.add('bg-white', 'shadow-md', 'text-indigo-700');
+                tabExisting.classList.remove('text-gray-600');
+                tabNew.classList.remove('bg-white', 'shadow-md', 'text-indigo-700');
+                tabNew.classList.add('text-gray-600');
+
                 formExisting.classList.remove('hidden-form');
                 formNew.classList.add('hidden-form');
             }
             resultContainer.innerHTML = ''; // Limpiar resultados al cambiar de pestaña
+            resultContainer.className = 'mt-8 text-center p-4 rounded-xl transition-all duration-300 ease-in-out'; // Resetear clases de color
         }
 
         tabNew.addEventListener('click', () => switchTab('new'));
         tabExisting.addEventListener('click', () => switchTab('existing'));
+
+        // Inicializar la pestaña 'Nuevo Usuario' como activa al cargar
+        switchTab('new');
+
 
         // Manejador del formulario de registro
         newUserForm.addEventListener('submit', e => {
@@ -155,17 +177,18 @@
                 .then(data => {
                     console.log('Success:', data);
                     showResult(`
-                        <h3 class="text-lg font-bold text-green-600">¡Registro Exitoso!</h3>
-                        <p class="text-gray-600 mt-2">Tus datos han sido guardados correctamente. Tu ID de cliente es:</p>
-                        <p class="font-mono bg-gray-100 p-2 rounded-md mt-2 text-sm">${data.data.cliente_id}</p>
+                        <h3 class="text-xl font-bold text-green-700 mb-2">¡Registro Exitoso!</h3>
+                        <p class="text-gray-700 mt-2">Tus datos han sido guardados correctamente. Tu ID de cliente es:</p>
+                        <p class="font-mono bg-green-50 text-green-800 p-3 rounded-lg mt-3 text-base break-all select-all">${data.data.cliente_id}</p>
+                        <p class="text-sm text-gray-500 mt-2">Guarda este ID para futuras consultas.</p>
                     `, 'success');
                     newUserForm.reset();
                 })
                 .catch(error => {
                     console.error('Error!', error.message);
                     showResult(`
-                        <h3 class="text-lg font-bold text-red-600">Error en el Registro</h3>
-                        <p class="text-gray-600 mt-2">No se pudo completar el registro. Inténtalo de nuevo más tarde.</p>
+                        <h3 class="text-xl font-bold text-red-700 mb-2">Error en el Registro</h3>
+                        <p class="text-gray-700 mt-2">No se pudo completar el registro. Inténtalo de nuevo más tarde o contacta soporte.</p>
                     `, 'error');
                 })
                 .finally(() => {
@@ -190,28 +213,28 @@
                     if (data.status === 'success' && data.data) {
                         const clientData = data.data;
                         showResult(`
-                            <h3 class="text-lg font-bold text-green-700">Datos Encontrados</h3>
-                            <div class="text-left bg-gray-50 p-4 rounded-lg mt-4 space-y-2">
-                                <p><strong>ID Cliente:</strong> <span class="font-mono">${clientData.Cliente_ID}</span></p>
-                                <p><strong>Nombre:</strong> ${clientData.Cliente_Nombre}</p>
-                                <p><strong>Correo:</strong> ${clientData.Cliente_Correo}</p>
-                                <p><strong>Teléfono:</strong> ${clientData.Cliente_Telefono}</p>
-                                <p><strong>Índice Fila:</strong> ${clientData.Cliente_IDX}</p>
+                            <h3 class="text-xl font-bold text-green-700 mb-2">Datos Encontrados</h3>
+                            <div class="text-left bg-gray-50 p-5 rounded-lg mt-4 space-y-3 border border-gray-200">
+                                <p><strong class="text-gray-700">ID Cliente:</strong> <span class="font-mono text-indigo-700">${clientData.Cliente_ID}</span></p>
+                                <p><strong class="text-gray-700">Nombre:</strong> <span class="text-gray-800">${clientData.Cliente_Nombre}</span></p>
+                                <p><strong class="text-gray-700">Correo:</strong> <span class="text-gray-800">${clientData.Cliente_Correo}</span></p>
+                                <p><strong class="text-gray-700">Teléfono:</strong> <span class="text-gray-800">${clientData.Cliente_Telefono}</span></p>
+                                <p><strong class="text-gray-700">Índice Fila:</strong> <span class="text-gray-800">${clientData.Cliente_IDX}</span></p>
                             </div>
                         `, 'success');
                     } else {
-                         showResult(`
-                            <h3 class="text-lg font-bold text-red-600">Datos no encontrados</h3>
-                            <p class="text-gray-600 mt-2">${data.message || 'El correo o la clave son incorrectos. Por favor, verifica tus datos.'}</p>
-                        `, 'error');
+                           showResult(`
+                                <h3 class="text-xl font-bold text-red-700 mb-2">Datos no encontrados</h3>
+                                <p class="text-gray-700 mt-2">${data.message || 'El correo o la clave son incorrectos. Por favor, verifica tus datos.'}</p>
+                            `, 'error');
                     }
                 })
                 .catch(error => {
-                     console.error('Error!', error.message);
-                     showResult(`
-                        <h3 class="text-lg font-bold text-red-600">Error en la Consulta</h3>
-                        <p class="text-gray-600 mt-2">Ocurrió un problema al conectar con el servidor.</p>
-                    `, 'error');
+                       console.error('Error!', error.message);
+                       showResult(`
+                            <h3 class="text-xl font-bold text-red-700 mb-2">Error en la Consulta</h3>
+                            <p class="text-gray-700 mt-2">Ocurrió un problema al conectar con el servidor. Inténtalo de nuevo.</p>
+                        `, 'error');
                 })
                 .finally(() => {
                     resetButton(submitButton, 'Consultar Mis Datos');
@@ -221,6 +244,7 @@
         // Funciones de utilidad para la UI
         function setLoading(button, text) {
             button.disabled = true;
+            button.classList.add('opacity-75', 'cursor-not-allowed');
             button.innerHTML = `
                 <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -232,12 +256,19 @@
 
         function resetButton(button, text) {
             button.disabled = false;
+            button.classList.remove('opacity-75', 'cursor-not-allowed');
             button.innerHTML = text;
         }
 
         function showResult(htmlContent, type) {
             resultContainer.innerHTML = htmlContent;
-            resultContainer.className = `mt-6 text-center p-4 rounded-lg ${type === 'success' ? 'bg-green-100' : 'bg-red-100'}`;
+            if (type === 'success') {
+                resultContainer.classList.add('bg-green-100', 'border-green-300', 'text-green-800', 'shadow-md');
+                resultContainer.classList.remove('bg-red-100', 'border-red-300', 'text-red-800');
+            } else {
+                resultContainer.classList.add('bg-red-100', 'border-red-300', 'text-red-800', 'shadow-md');
+                resultContainer.classList.remove('bg-green-100', 'border-green-300', 'text-green-800');
+            }
         }
     </script>
 </body>
