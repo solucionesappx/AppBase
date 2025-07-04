@@ -125,8 +125,19 @@
                             </div>
                             <div>
                                 <label for="clave" class="block text-sm font-medium text-gray-700 mb-1">Crear Clave</label>
-                                <input type="password" id="clave" name="clave" required 
-                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
+                                <!-- //------// Contenedor para el input de clave y el botón de generar -->
+                                <div class="relative flex items-center mt-1">
+                                    <input type="password" id="clave" name="clave" required 
+                                           class="input-focus-animation block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800 pr-12">
+                                    <!-- //------// Botón para generar clave aleatoria -->
+                                    <button type="button" id="generate-password-btn" 
+                                            class="absolute right-0 top-0 h-full px-3 text-gray-500 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-r-lg">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M5.5 9a.5.5 0 01.5-.5h2a.5.5 0 010 1H6a.5.5 0 01-.5-.5zm4 0a.5.5 0 01.5-.5h2a.5.5 0 010 1h-2a.5.5 0 01-.5-.5zm4 0a.5.5 0 01.5-.5h2a.5.5 0 010 1h-2a.5.5 0 01-.5-.5z" clip-rule="evenodd" />
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-5.5-8.5a.5.5 0 011 0v1a.5.5 0 01-1 0v-1zm2 0a.5.5 0 011 0v1a.5.5 0 01-1 0v-1zm2 0a.5.5 0 011 0v1a.5.5 0 01-1 0v-1zm2 0a.5.5 0 011 0v1a.5.5 0 01-1 0v-1zm2 0a.5.5 0 011 0v1a.5.5 0 01-1 0v-1z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <button type="submit" class="btn-animation w-full mt-8 flex items-center justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -170,15 +181,33 @@
         const existingUserForm = document.getElementById('existingUserForm');
         const resultContainer = document.getElementById('result-container');
         const linkRegister = document.getElementById('link-register'); 
-        // //------// Nuevas referencias al modal
         const registrationModal = document.getElementById('registration-modal');
         const modalContentDetails = document.getElementById('modal-content-details');
+        // //------// Nueva referencia al botón de generar contraseña
+        const generatePasswordBtn = document.getElementById('generate-password-btn');
+        // //------// Nueva referencia al input de la clave en el formulario de nuevo usuario
+        const newPasswordInput = document.getElementById('clave');
+
 
         // Función para generar un UUID (ID único de cliente)
         function generateUUID() {
-            return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-            );
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // //------// Nueva función para generar una contraseña aleatoria
+        function generateRandomPassword(length = 6) {
+            const charset = "abcefghijklmnoqrstuvwxyzABCEFGHIJKLMNOQRSTUVWXYZ0123456789";
+            let password = "";
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * charset.length);
+                password += charset[randomIndex];
+            }
+            return password;
         }
 
         // Manejador para cambiar de pestaña
@@ -206,6 +235,11 @@
             switchTab('new'); 
         });
 
+        // //------// Listener para el botón de generar contraseña
+        generatePasswordBtn.addEventListener('click', () => {
+            newPasswordInput.value = generateRandomPassword();
+        });
+
         // Inicializar la pestaña 'Usuario Existente' como activa al cargar la página
         switchTab('existing');
 
@@ -224,8 +258,7 @@
                 .then(response => response.json())
                 .then(responseData => { 
                     console.log('Success:', responseData);
-                    // //------// Llamada a la función para mostrar el modal de registro
-                    showRegistrationSuccessModal(formDataObj, responseData.data.cliente_id); // //------// Asegúrate de que responseData.data.cliente_id es el path correcto para el ID
+                    showRegistrationSuccessModal(formDataObj, formDataObj.cliente_id); 
                 })
                 .catch(error => {
                     console.error('Error!', error.message);
@@ -290,7 +323,7 @@
                 });
         });
 
-        // //------// Nueva función para mostrar el modal de registro con los datos
+        // Función para mostrar el modal de registro con los datos
         function showRegistrationSuccessModal(formData, clienteId) {
             modalContentDetails.innerHTML = `
                 <p><strong>Nombre:</strong> ${formData.nombre}</p>
@@ -299,23 +332,21 @@
                 <p><strong>ID Cliente:</strong> <span class="font-mono">${clienteId}</span></p>
             `;
             registrationModal.classList.remove('hidden');
-            // //------// Añadir clase para la animación de entrada
             setTimeout(() => {
                 registrationModal.querySelector('.modal-content').classList.add('show');
-            }, 10); // Pequeño retraso para asegurar que la transición se aplique
+            }, 10); 
         }
 
-        // //------// Función para manejar el clic en el botón "Aceptar" del modal
+        // Función para manejar el clic en el botón "Aceptar" del modal
         function handleAcceptRegistration() {
-            // //------// Eliminar clase para la animación de salida
             registrationModal.querySelector('.modal-content').classList.remove('show');
             setTimeout(() => {
-                registrationModal.classList.add('hidden'); // Ocultar el modal después de la animación
-                newUserForm.reset(); // Limpiar el formulario de nuevo usuario
-                resultContainer.innerHTML = ''; // Limpiar el mensaje de resultado (aunque ya no se usa para registro)
-                resultContainer.className = 'mt-8 text-center p-4 rounded-xl transition-all duration-300 ease-in-out'; // Resetear clases de color
-                switchTab('existing'); // Regresar a la pantalla inicial
-            }, 300); // Coincide con la duración de la transición CSS
+                registrationModal.classList.add('hidden'); 
+                newUserForm.reset(); 
+                resultContainer.innerHTML = ''; 
+                resultContainer.className = 'mt-8 text-center p-4 rounded-xl transition-all duration-300 ease-in-out'; 
+                switchTab('existing'); 
+            }, 300); 
         }
 
         // Funciones de utilidad para la UI
