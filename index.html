@@ -3,368 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Clientes</title>
-    <!-- Carga de Tailwind CSS para estilos rápidos y responsivos -->
+    <title>Portal de Clientes</title>
+    <!-- Tailwind CSS para un diseño moderno y responsivo -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Estilos personalizados para la fuente Inter */
+        /* Estilo base con la fuente Inter */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Un gris claro para el fondo */
         }
-        /* Ocultar mensajes por defecto */
-        .message-box {
-            display: none;
+        /* Pequeña animación para las transiciones */
+        .form-container {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
         }
-        /* Estilos para el spinner de carga */
-        .loader {
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #3498db; /* Blue */
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            vertical-align: middle;
-            margin-left: 8px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .hidden-form {
+            opacity: 0;
+            transform: scale(0.95);
+            position: absolute;
+            pointer-events: none;
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6" id="mainTitle">Gestión de Clientes</h1>
-        <p class="text-center text-gray-600 mb-8" id="mainSubtitle">Bienvenido</p>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
-        <!-- Mensaje de éxito global -->
-        <div id="globalSuccessMessage" class="message-box bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md relative mb-4" role="alert">
-            <strong class="font-bold">¡Éxito!</strong>
-            <span class="block sm:inline" id="successText"></span>
-        </div>
+    <div class="w-full max-w-md mx-auto p-4">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Portal de Clientes</h1>
+            <p class="text-center text-gray-500 mb-8">Registra tus datos o consulta tu información.</p>
 
-        <!-- Mensaje de error global -->
-        <div id="globalErrorMessage" class="message-box bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative mb-4" role="alert">
-            <strong class="font-bold">¡Error!</strong>
-            <span class="block sm:inline" id="errorText"></span>
-        </div>
-
-        <!-- Sección de Carga -->
-        <div id="loadingSection" class="hidden text-center py-4">
-            <div class="loader"></div>
-            <p class="text-gray-600 mt-2">Cargando...</p>
-        </div>
-
-        <!-- Sección de Inicio de Sesión -->
-        <div id="loginSection" class="space-y-4">
-            <h2 class="text-2xl font-semibold text-center text-gray-700 mb-4">Iniciar Sesión</h2>
-            <form id="loginForm" class="space-y-4">
-                <div>
-                    <label for="loginClienteId" class="block text-sm font-medium text-gray-700">Cliente_ID</label>
-                    <input type="text" id="loginClienteId" name="Cliente_ID" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="loginClienteClave" class="block text-sm font-medium text-gray-700">Cliente_Clave</label>
-                    <input type="password" id="loginClienteClave" name="Cliente_Clave" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-                <button type="submit"
-                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
-                    Iniciar Sesión
-                </button>
-            </form>
-            <p class="text-center text-gray-600 mt-4">¿No tienes cuenta? <a href="#" id="showRegister" class="text-blue-600 hover:underline">Regístrate aquí</a></p>
-        </div>
-
-        <!-- Sección de Registro (existente) -->
-        <div id="registerSection" class="hidden space-y-4">
-            <h2 class="text-2xl font-semibold text-center text-gray-700 mb-4">Registrar Nuevo Cliente</h2>
-            <form id="customerForm" class="space-y-4">
-                <div>
-                    <label for="clienteId" class="block text-sm font-medium text-gray-700">Cliente_ID</label>
-                    <input type="text" id="clienteId" name="Cliente_ID" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="clienteNombre" class="block text-sm font-medium text-gray-700">Cliente_Nombre</label>
-                    <input type="text" id="clienteNombre" name="Cliente_Nombre" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="clienteCorreo" class="block text-sm font-medium text-gray-700">Cliente_Correo</label>
-                    <input type="email" id="clienteCorreo" name="Cliente_Correo" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="clienteTelefono" class="block text-sm font-medium text-gray-700">Cliente_Telefono</label>
-                    <input type="tel" id="clienteTelefono" name="Cliente_Telefono" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="clienteIdx" class="block text-sm font-medium text-gray-700">Cliente_IDX</label>
-                    <input type="text" id="clienteIdx" name="Cliente_IDX" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="clienteClave" class="block text-sm font-medium text-gray-700">Cliente_Clave</label>
-                    <input type="password" id="clienteClave" name="Cliente_Clave" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-
-                <button type="submit"
-                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
-                    Registrar Cliente
-                </button>
-            </form>
-            <p class="text-center text-gray-600 mt-4">¿Ya tienes cuenta? <a href="#" id="showLogin" class="text-blue-600 hover:underline">Inicia sesión aquí</a></p>
-        </div>
-
-        <!-- Sección de Perfil del Cliente -->
-        <div id="profileSection" class="hidden space-y-4">
-            <h2 class="text-2xl font-semibold text-center text-gray-700 mb-4">Datos del Cliente</h2>
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Cliente_ID:</label>
-                    <p id="profileClienteId" class="mt-1 text-lg text-gray-900"></p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Cliente_Nombre:</label>
-                    <p id="profileClienteNombre" class="mt-1 text-lg text-gray-900"></p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Cliente_Correo:</label>
-                    <p id="profileClienteCorreo" class="mt-1 text-lg text-gray-900"></p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Cliente_Telefono:</label>
-                    <p id="profileClienteTelefono" class="mt-1 text-lg text-gray-900"></p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Cliente_IDX:</label>
-                    <p id="profileClienteIdx" class="mt-1 text-lg text-gray-900"></p>
-                </div>
-                <!-- La clave no se muestra por seguridad -->
+            <!-- Pestañas para cambiar de formulario -->
+            <div class="flex border-b border-gray-200 mb-6">
+                <button id="tab-new" class="flex-1 py-2 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600">Nuevo Usuario</button>
+                <button id="tab-existing" class="flex-1 py-2 text-center font-semibold text-gray-500">Usuario Existente</button>
             </div>
-            <button id="logoutButton"
-                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out mt-6">
-                Cerrar Sesión
-            </button>
+
+            <!-- Contenedor para los formularios -->
+            <div class="relative">
+                <!-- Formulario de Registro (Nuevo Usuario) -->
+                <div id="form-new" class="form-container">
+                    <form id="newUserForm">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
+                                <input type="text" id="nombre" name="nombre" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label for="correo" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+                                <input type="email" id="correo" name="correo" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label for="telefono" class="block text-sm font-medium text-gray-700">Teléfono</label>
+                                <input type="tel" id="telefono" name="telefono" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label for="clave" class="block text-sm font-medium text-gray-700">Crear Clave</label>
+                                <input type="password" id="clave" name="clave" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full mt-8 flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Registrarme
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Formulario de Consulta (Usuario Existente) -->
+                <div id="form-existing" class="form-container hidden-form">
+                    <form id="existingUserForm">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="correo-existente" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+                                <input type="email" id="correo-existente" name="correo" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label for="clave-existente" class="block text-sm font-medium text-gray-700">Clave</label>
+                                <input type="password" id="clave-existente" name="clave" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full mt-8 flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            Consultar Mis Datos
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Área para mostrar mensajes y resultados -->
+            <div id="result-container" class="mt-6 text-center"></div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Referencias a elementos del DOM
-            const loginSection = document.getElementById('loginSection');
-            const registerSection = document.getElementById('registerSection');
-            const profileSection = document.getElementById('profileSection');
-            const loadingSection = document.getElementById('loadingSection');
+        // --- CONFIGURACIÓN ---
+        // PEGA AQUÍ LA URL DE TU SCRIPT DE GOOGLE APPS SCRIPT DESPLEGADO
+        const scriptURL = 'URL_DE_TU_SCRIPT_AQUI';
 
-            const loginForm = document.getElementById('loginForm');
-            const customerForm = document.getElementById('customerForm');
-            const logoutButton = document.getElementById('logoutButton');
+        // --- LÓGICA DE LA APLICACIÓN ---
 
-            const showRegisterLink = document.getElementById('showRegister');
-            const showLoginLink = document.getElementById('showLogin');
+        // Elementos del DOM
+        const tabNew = document.getElementById('tab-new');
+        const tabExisting = document.getElementById('tab-existing');
+        const formNew = document.getElementById('form-new');
+        const formExisting = document.getElementById('form-existing');
+        const newUserForm = document.getElementById('newUserForm');
+        const existingUserForm = document.getElementById('existingUserForm');
+        const resultContainer = document.getElementById('result-container');
 
-            const globalSuccessMessage = document.getElementById('globalSuccessMessage');
-            const globalErrorMessage = document.getElementById('globalErrorMessage');
-            const successText = document.getElementById('successText');
-            const errorText = document.getElementById('errorText');
+        // Función para generar un UUID (ID único de cliente)
+        function generateUUID() {
+            return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+            );
+        }
 
-            // ** CAMBIO: Apuntamos al servidor Node.js local **
-            const nodeJsServerUrl = 'https://script.google.com/macros/s/AKfycbyDXswwLD2EWq5vmDAE1Et5PlljiIHbm3g0dngrTGx91DEIl0XiWw7PTLlsDIaR3XnT/exec'; 
-
-            // Función para mostrar mensajes
-            function showMessage(type, message) {
-                hideMessages();
-                if (type === 'success') {
-                    successText.textContent = message;
-                    globalSuccessMessage.style.display = 'block';
-                } else if (type === 'error') {
-                    errorText.textContent = message;
-                    globalErrorMessage.style.display = 'block';
-                }
-            }
-
-            // Función para ocultar todos los mensajes
-            function hideMessages() {
-                globalSuccessMessage.style.display = 'none';
-                globalErrorMessage.style.display = 'none';
-            }
-
-            // Función para mostrar una sección específica y ocultar las demás
-            function showSection(sectionId) {
-                loginSection.classList.add('hidden');
-                registerSection.classList.add('hidden');
-                profileSection.classList.add('hidden');
-                loadingSection.classList.add('hidden');
-                hideMessages(); // Oculta mensajes al cambiar de sección
-
-                if (sectionId === 'loginSection') {
-                    loginSection.classList.remove('hidden');
-                    document.getElementById('mainTitle').textContent = 'Gestión de Clientes';
-                    document.getElementById('mainSubtitle').textContent = 'Bienvenido';
-                } else if (sectionId === 'registerSection') {
-                    registerSection.classList.remove('hidden');
-                    document.getElementById('mainTitle').textContent = 'Registro de Clientes';
-                    document.getElementById('mainSubtitle').textContent = 'Por favor, introduce los datos del cliente.';
-                } else if (sectionId === 'profileSection') {
-                    profileSection.classList.remove('hidden');
-                    document.getElementById('mainTitle').textContent = 'Perfil del Cliente';
-                    document.getElementById('mainSubtitle').textContent = 'Aquí están tus datos.';
-                } else if (sectionId === 'loadingSection') {
-                    loadingSection.classList.remove('hidden');
-                }
-            }
-
-            // Función para cargar los datos del perfil
-            async function loadProfileData(clienteId) {
-                showSection('loadingSection'); // Muestra el spinner de carga
-                try {
-                    const response = await fetch(nodeJsServerUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            action: 'getData',
-                            Cliente_ID: clienteId
-                        }),
-                    });
-
-                    const result = await response.json();
-
-                    if (response.ok && result.success) { // Verifica response.ok y result.success
-                        const data = result.data;
-                        document.getElementById('profileClienteId').textContent = data.Cliente_ID;
-                        document.getElementById('profileClienteNombre').textContent = data.Cliente_Nombre;
-                        document.getElementById('profileClienteCorreo').textContent = data.Cliente_Correo;
-                        document.getElementById('profileClienteTelefono').textContent = data.Cliente_Telefono;
-                        document.getElementById('profileClienteIdx').textContent = data.Cliente_IDX;
-                        showSection('profileSection'); // Muestra la sección de perfil
-                    } else {
-                        showMessage('error', result.message || 'Error al cargar los datos del perfil.');
-                        showSection('loginSection'); // Vuelve al login si hay un error
-                        sessionStorage.removeItem('loggedInClientId'); // Limpia la sesión
-                    }
-                } catch (error) {
-                    console.error('Error al cargar datos del perfil:', error);
-                    showMessage('error', 'Error de red al cargar los datos del perfil.');
-                    showSection('loginSection'); // Vuelve al login si hay un error de red
-                    sessionStorage.removeItem('loggedInClientId'); // Limpia la sesión
-                }
-            }
-
-            // Verificar sesión al cargar la página
-            const storedClienteId = sessionStorage.getItem('loggedInClientId');
-            if (storedClienteId) {
-                loadProfileData(storedClienteId);
+        // Manejador para cambiar de pestaña
+        function switchTab(tabToShow) {
+            if (tabToShow === 'new') {
+                tabNew.classList.add('text-indigo-600', 'border-indigo-600');
+                tabNew.classList.remove('text-gray-500');
+                tabExisting.classList.add('text-gray-500');
+                tabExisting.classList.remove('text-indigo-600', 'border-indigo-600');
+                formNew.classList.remove('hidden-form');
+                formExisting.classList.add('hidden-form');
             } else {
-                showSection('loginSection'); // Muestra la sección de login por defecto
+                tabExisting.classList.add('text-indigo-600', 'border-indigo-600');
+                tabExisting.classList.remove('text-gray-500');
+                tabNew.classList.add('text-gray-500');
+                tabNew.classList.remove('text-indigo-600', 'border-indigo-600');
+                formExisting.classList.remove('hidden-form');
+                formNew.classList.add('hidden-form');
             }
+            resultContainer.innerHTML = ''; // Limpiar resultados al cambiar de pestaña
+        }
 
-            // Event listener para el formulario de inicio de sesión
-            loginForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
-                hideMessages();
-                showSection('loadingSection'); // Muestra el spinner de carga
+        tabNew.addEventListener('click', () => switchTab('new'));
+        tabExisting.addEventListener('click', () => switchTab('existing'));
 
-                const formData = new FormData(loginForm);
-                const data = {
-                    action: 'login',
-                    Cliente_ID: formData.get('Cliente_ID'),
-                    Cliente_Clave: formData.get('Cliente_Clave')
-                };
+        // Manejador del formulario de registro
+        newUserForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const submitButton = newUserForm.querySelector('button[type="submit"]');
+            setLoading(submitButton, 'Registrando...');
 
-                try {
-                    const response = await fetch(nodeJsServerUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data),
-                    });
+            const formData = new FormData(newUserForm);
+            const data = Object.fromEntries(formData.entries());
+            data.cliente_id = generateUUID(); // Añadir el ID único
 
-                    const result = await response.json();
-
-                    if (response.ok && result.success) { // Verifica response.ok y result.success
-                        sessionStorage.setItem('loggedInClientId', result.clienteId); // Guarda el ID del cliente en la sesión
-                        showMessage('success', '¡Inicio de sesión exitoso!');
-                        loadProfileData(result.clienteId); // Carga los datos del perfil
-                    } else {
-                        showMessage('error', result.message || 'Credenciales inválidas. Inténtalo de nuevo.');
-                        showSection('loginSection'); // Permanece en la sección de login
-                    }
-                } catch (error) {
-                    console.error('Error al iniciar sesión:', error);
-                    showMessage('error', 'Error de red al intentar iniciar sesión.');
-                    showSection('loginSection'); // Permanece en la sección de login
-                }
-            });
-
-            // Event listener para el formulario de registro (existente)
-            customerForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
-                hideMessages();
-                showSection('loadingSection'); // Muestra el spinner de carga
-
-                const formData = new FormData(customerForm);
-                const data = {};
-                for (let [key, value] of formData.entries()) {
-                    data[key] = value;
-                }
-                data.action = 'register';
-
-                try {
-                    const response = await fetch(nodeJsServerUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data),
-                    });
-
-                    const result = await response.json();
-
-                    if (response.ok && result.success) { // Verifica response.ok y result.success
-                        showMessage('success', '¡Cliente registrado correctamente!');
-                        customerForm.reset(); // Limpia el formulario
-                        showSection('loginSection'); // Vuelve al login después del registro
-                    } else {
-                        showMessage('error', result.message || 'Hubo un problema al registrar el cliente.');
-                        showSection('registerSection'); // Permanece en la sección de registro
-                    }
-
-                } catch (error) {
-                    console.error('Error al enviar los datos de registro:', error);
-                    showMessage('error', 'Error de red al registrar el cliente.');
-                    showSection('registerSection'); // Permanece en la sección de registro
-                }
-            });
-
-            // Event listener para el botón de cerrar sesión
-            logoutButton.addEventListener('click', () => {
-                sessionStorage.removeItem('loggedInClientId'); // Elimina el ID de la sesión
-                showMessage('success', '¡Sesión cerrada correctamente!');
-                showSection('loginSection'); // Vuelve a la sección de inicio de sesión
-                loginForm.reset(); // Limpia el formulario de login
-            });
-
-            // Event listeners para cambiar entre secciones
-            showRegisterLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                showSection('registerSection');
-            });
-
-            showLoginLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                showSection('loginSection');
-            });
+            fetch(scriptURL, { method: 'POST', body: JSON.stringify(data) })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    showResult(`
+                        <h3 class="text-lg font-bold text-green-600">¡Registro Exitoso!</h3>
+                        <p class="text-gray-600 mt-2">Tus datos han sido guardados correctamente. Tu ID de cliente es:</p>
+                        <p class="font-mono bg-gray-100 p-2 rounded-md mt-2 text-sm">${data.data.cliente_id}</p>
+                    `, 'success');
+                    newUserForm.reset();
+                })
+                .catch(error => {
+                    console.error('Error!', error.message);
+                    showResult(`
+                        <h3 class="text-lg font-bold text-red-600">Error en el Registro</h3>
+                        <p class="text-gray-600 mt-2">No se pudo completar el registro. Inténtalo de nuevo más tarde.</p>
+                    `, 'error');
+                })
+                .finally(() => {
+                    resetButton(submitButton, 'Registrarme');
+                });
         });
+
+        // Manejador del formulario de consulta
+        existingUserForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const submitButton = existingUserForm.querySelector('button[type="submit"]');
+            setLoading(submitButton, 'Consultando...');
+            
+            const correo = document.getElementById('correo-existente').value;
+            const clave = document.getElementById('clave-existente').value;
+            
+            const lookupUrl = `${scriptURL}?action=lookup&correo=${encodeURIComponent(correo)}&clave=${encodeURIComponent(clave)}`;
+
+            fetch(lookupUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success' && data.data) {
+                        const clientData = data.data;
+                        showResult(`
+                            <h3 class="text-lg font-bold text-green-700">Datos Encontrados</h3>
+                            <div class="text-left bg-gray-50 p-4 rounded-lg mt-4 space-y-2">
+                                <p><strong>ID Cliente:</strong> <span class="font-mono">${clientData.Cliente_ID}</span></p>
+                                <p><strong>Nombre:</strong> ${clientData.Cliente_Nombre}</p>
+                                <p><strong>Correo:</strong> ${clientData.Cliente_Correo}</p>
+                                <p><strong>Teléfono:</strong> ${clientData.Cliente_Telefono}</p>
+                                <p><strong>Índice Fila:</strong> ${clientData.Cliente_IDX}</p>
+                            </div>
+                        `, 'success');
+                    } else {
+                         showResult(`
+                            <h3 class="text-lg font-bold text-red-600">Datos no encontrados</h3>
+                            <p class="text-gray-600 mt-2">${data.message || 'El correo o la clave son incorrectos. Por favor, verifica tus datos.'}</p>
+                        `, 'error');
+                    }
+                })
+                .catch(error => {
+                     console.error('Error!', error.message);
+                     showResult(`
+                        <h3 class="text-lg font-bold text-red-600">Error en la Consulta</h3>
+                        <p class="text-gray-600 mt-2">Ocurrió un problema al conectar con el servidor.</p>
+                    `, 'error');
+                })
+                .finally(() => {
+                    resetButton(submitButton, 'Consultar Mis Datos');
+                });
+        });
+
+        // Funciones de utilidad para la UI
+        function setLoading(button, text) {
+            button.disabled = true;
+            button.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                ${text}
+            `;
+        }
+
+        function resetButton(button, text) {
+            button.disabled = false;
+            button.innerHTML = text;
+        }
+
+        function showResult(htmlContent, type) {
+            resultContainer.innerHTML = htmlContent;
+            resultContainer.className = `mt-6 text-center p-4 rounded-lg ${type === 'success' ? 'bg-green-100' : 'bg-red-100'}`;
+        }
     </script>
 </body>
 </html>
