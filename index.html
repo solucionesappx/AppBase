@@ -46,15 +46,40 @@
             <p class="text-center text-gray-500 mb-8 max-w-sm mx-auto">Gestiona tus datos de forma rápida y segura.</p>
 
             <div class="flex bg-gray-100 rounded-xl p-1 mb-8">
-                <button id="tab-new" class="flex-1 py-2.5 px-4 text-center font-semibold text-indigo-700 bg-white rounded-lg shadow-md transition-all duration-300 ease-in-out">
-                    Nuevo Usuario
-                </button>
-                <button id="tab-existing" class="flex-1 py-2.5 px-4 text-center font-semibold text-gray-600 hover:text-indigo-700 transition-all duration-300 ease-in-out">
+                <button id="tab-existing" class="flex-1 py-2.5 px-4 text-center font-semibold text-indigo-700 bg-white rounded-lg shadow-md transition-all duration-300 ease-in-out">
                     Usuario Existente
+                </button>
+                <button id="tab-new" class="flex-1 py-2.5 px-4 text-center font-semibold text-gray-600 hover:text-indigo-700 transition-all duration-300 ease-in-out">
+                    Nuevo Usuario
                 </button>
             </div>
 
-            <div class="relative min-h-[300px]"> <div id="form-new" class="form-container">
+            <div class="relative min-h-[300px]"> <div id="form-existing" class="form-container">
+                    <form id="existingUserForm">
+                        <div class="space-y-5">
+                            <div>
+                                <label for="correo-existente" class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+                                <input type="email" id="correo-existente" name="correo" required 
+                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
+                            </div>
+                            <div>
+                                <label for="clave-existente" class="block text-sm font-medium text-gray-700 mb-1">Clave</label>
+                                <input type="password" id="clave-existente" name="clave" required 
+                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-animation w-full mt-8 flex items-center justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            Consultar Mis Datos
+                        </button>
+                        
+                        <p class="text-center text-gray-600 mt-6">
+                            ¿No tienes cuenta? 
+                            <a href="#" id="link-register" class="font-semibold text-indigo-600 hover:text-indigo-800 transition-colors duration-200">Regístrate aquí</a>
+                        </p>
+                    </form>
+                </div>
+
+                <div id="form-new" class="form-container hidden-form">
                     <form id="newUserForm">
                         <div class="space-y-5">
                             <div>
@@ -83,26 +108,6 @@
                         </button>
                     </form>
                 </div>
-
-                <div id="form-existing" class="form-container hidden-form">
-                    <form id="existingUserForm">
-                        <div class="space-y-5">
-                            <div>
-                                <label for="correo-existente" class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
-                                <input type="email" id="correo-existente" name="correo" required 
-                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
-                            </div>
-                            <div>
-                                <label for="clave-existente" class="block text-sm font-medium text-gray-700 mb-1">Clave</label>
-                                <input type="password" id="clave-existente" name="clave" required 
-                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn-animation w-full mt-8 flex items-center justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                            Consultar Mis Datos
-                        </button>
-                    </form>
-                </div>
             </div>
 
             <div id="result-container" class="mt-8 text-center p-4 rounded-xl transition-all duration-300 ease-in-out"></div>
@@ -124,6 +129,7 @@
         const newUserForm = document.getElementById('newUserForm');
         const existingUserForm = document.getElementById('existingUserForm');
         const resultContainer = document.getElementById('result-container');
+        const linkRegister = document.getElementById('link-register'); // NUEVO: Enlace para ir a registro
 
         // Función para generar un UUID (ID único de cliente)
         function generateUUID() {
@@ -142,7 +148,7 @@
                 
                 formNew.classList.remove('hidden-form');
                 formExisting.classList.add('hidden-form');
-            } else {
+            } else { // tabToShow === 'existing'
                 tabExisting.classList.add('bg-white', 'shadow-md', 'text-indigo-700');
                 tabExisting.classList.remove('text-gray-600');
                 tabNew.classList.remove('bg-white', 'shadow-md', 'text-indigo-700');
@@ -155,11 +161,19 @@
             resultContainer.className = 'mt-8 text-center p-4 rounded-xl transition-all duration-300 ease-in-out'; // Resetear clases de color
         }
 
+        // EVENT LISTENERS
         tabNew.addEventListener('click', () => switchTab('new'));
         tabExisting.addEventListener('click', () => switchTab('existing'));
+        
+        // NUEVO: Listener para el enlace de registro
+        linkRegister.addEventListener('click', (e) => {
+            e.preventDefault(); // Evitar que el enlace haga algo por defecto
+            switchTab('new'); // Cambiar al formulario de nuevo usuario
+        });
 
-        // Inicializar la pestaña 'Nuevo Usuario' como activa al cargar
-        switchTab('new');
+        // Inicializar la pestaña 'Usuario Existente' como activa al cargar la página
+        // Este es el cambio clave para el comportamiento por defecto
+        switchTab('existing');
 
 
         // Manejador del formulario de registro
@@ -233,7 +247,7 @@
                        console.error('Error!', error.message);
                        showResult(`
                             <h3 class="text-xl font-bold text-red-700 mb-2">Error en la Consulta</h3>
-                            <p class="text-gray-700 mt-2">Ocurrió un problema al conectar con el servidor. Inténtalo de nuevo.</p>
+                            <p class="text-gray-700 mt-2">Ocurrió un problema al conectar con el servidor.</p>
                         `, 'error');
                 })
                 .finally(() => {
