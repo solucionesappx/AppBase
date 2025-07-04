@@ -38,6 +38,21 @@
             border-color: #6366f1; /* Tailwind indigo-500 */
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25); /* Tailwind indigo-500 with opacity */
         }
+        /* //------// Estilos para el modal */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999; /* Asegura que esté por encima de todo */
+        }
+        .modal-content {
+            z-index: 1000; /* Asegura que el contenido esté por encima del overlay */
+            transform: translateY(-20px); /* Para la animación de entrada */
+            opacity: 0;
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+        .modal-content.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center min-h-screen p-4">
@@ -126,6 +141,20 @@
         </div>
     </div>
 
+    <!-- //------// Estructura del Modal (Pop-up) -->
+    <div id="registration-modal" class="fixed inset-0 flex items-center justify-center hidden modal-overlay">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full modal-content">
+            <h3 class="text-2xl font-bold text-green-700 text-center mb-4">¡Registro Exitoso!</h3>
+            <p class="text-gray-700 text-center mb-4">Tus datos han sido guardados correctamente:</p>
+            <div id="modal-content-details" class="text-left bg-green-50 text-green-800 p-4 rounded-lg space-y-2 mb-6">
+                <!-- Los detalles del registro se insertarán aquí por JavaScript -->
+            </div>
+            <button type="button" onclick="handleAcceptRegistration()" class="btn-animation w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Aceptar
+            </button>
+        </div>
+    </div>
+
     <script>
         // --- CONFIGURACIÓN ---
         // PEGA AQUÍ LA URL DE TU SCRIPT DE GOOGLE APPS SCRIPT DESPLEGADO
@@ -134,14 +163,16 @@
         // --- LÓGICA DE LA APLICACIÓN ---
 
         // Elementos del DOM
-        // //------// const tabNew = document.getElementById('tab-new'); // Eliminado: Ya no necesitamos esta referencia
-        const tabExisting = document.getElementById('tab-existing'); // Renombrado lógicamente a "Datos de Usuario"
+        const tabExisting = document.getElementById('tab-existing');
         const formNew = document.getElementById('form-new');
         const formExisting = document.getElementById('form-existing');
         const newUserForm = document.getElementById('newUserForm');
         const existingUserForm = document.getElementById('existingUserForm');
         const resultContainer = document.getElementById('result-container');
         const linkRegister = document.getElementById('link-register'); 
+        // //------// Nuevas referencias al modal
+        const registrationModal = document.getElementById('registration-modal');
+        const modalContentDetails = document.getElementById('modal-content-details');
 
         // Función para generar un UUID (ID único de cliente)
         function generateUUID() {
@@ -153,18 +184,14 @@
         // Manejador para cambiar de pestaña
         function switchTab(tabToShow) {
             if (tabToShow === 'new') {
-                // //------// tabNew.classList.add('bg-white', 'shadow-md', 'text-indigo-700'); // Eliminado
-                // //------// tabNew.classList.remove('text-gray-600'); // Eliminado
-                tabExisting.classList.remove('bg-white', 'shadow-md', 'text-indigo-700'); // Asegura que la pestaña "Datos de Usuario" no esté activa
-                tabExisting.classList.add('text-gray-600'); // Asegura que la pestaña "Datos de Usuario" no esté activa
+                tabExisting.classList.remove('bg-white', 'shadow-md', 'text-indigo-700');
+                tabExisting.classList.add('text-gray-600');
                 
                 formNew.classList.remove('hidden-form');
                 formExisting.classList.add('hidden-form');
             } else { // tabToShow === 'existing'
                 tabExisting.classList.add('bg-white', 'shadow-md', 'text-indigo-700');
                 tabExisting.classList.remove('text-gray-600');
-                // //------// tabNew.classList.remove('bg-white', 'shadow-md', 'text-indigo-700'); // Eliminado
-                // //------// tabNew.classList.add('text-gray-600'); // Eliminado
 
                 formExisting.classList.remove('hidden-form');
                 formNew.classList.add('hidden-form');
@@ -174,13 +201,9 @@
         }
 
         // EVENT LISTENERS
-        // //------// tabNew.addEventListener('click', () => switchTab('new')); // Eliminado: Ya no hay pestaña "Nuevo Usuario"
-        // //------// tabExisting.addEventListener('click', () => switchTab('existing')); // Se mantiene, pero su funcionalidad principal será la de "volver" a esta vista.
-        
-        // Listener para el enlace de registro
         linkRegister.addEventListener('click', (e) => {
-            e.preventDefault(); // Evitar que el enlace haga algo por defecto
-            switchTab('new'); // Cambiar al formulario de nuevo usuario
+            e.preventDefault(); 
+            switchTab('new'); 
         });
 
         // Inicializar la pestaña 'Usuario Existente' como activa al cargar la página
@@ -194,23 +217,15 @@
             setLoading(submitButton, 'Registrando...');
 
             const formData = new FormData(newUserForm);
-            const data = Object.fromEntries(formData.entries());
-            data.cliente_id = generateUUID(); // Añadir el ID único
+            const formDataObj = Object.fromEntries(formData.entries()); 
+            formDataObj.cliente_id = generateUUID(); 
 
-            fetch(scriptURL, { method: 'POST', body: JSON.stringify(data) })
+            fetch(scriptURL, { method: 'POST', body: JSON.stringify(formDataObj) })
                 .then(response => response.json())
-                .then(data => {
-                    console.log('Success:', data);
-                    showResult(`
-                        <h3 class="text-xl font-bold text-green-700 mb-2">¡Registro Exitoso!</h3>
-                        <p class="text-gray-700 mt-2">Tus datos han sido guardados correctamente.</p> 
-            // //------// Tu ID de cliente es:</p>
-            // //------// <p class="font-mono bg-green-50 text-green-800 p-3 rounded-lg mt-3 text-base break-all select-all">${data.data.Cliente_Correo}</p>
-            // //------// <p class="text-sm text-gray-500 mt-2">Guarda este ID para futuras consultas.</p>
-                    `, 'success');
-                    newUserForm.reset();
-                    // //------// Nuevo: Regresar a la pantalla inicial de "Datos de Usuario" después del registro exitoso
-                    switchTab('existing'); 
+                .then(responseData => { 
+                    console.log('Success:', responseData);
+                    // //------// Llamada a la función para mostrar el modal de registro
+                    showRegistrationSuccessModal(formDataObj, responseData.data.cliente_id); // //------// Asegúrate de que responseData.data.cliente_id es el path correcto para el ID
                 })
                 .catch(error => {
                     console.error('Error!', error.message);
@@ -256,7 +271,7 @@
                                 <p class="text-gray-700 mt-2">${data.message || 'El correo o la clave son incorrectos. Por favor, verifica tus datos.'}</p>
                             `, 'error');
                     }
-                    // //------// Nuevo: Limpiar el formulario y regresar a la pantalla inicial después de la consulta (éxito o error)
+                    // Limpiar el formulario y regresar a la pantalla inicial después de la consulta (éxito o error)
                     existingUserForm.reset();
                     switchTab('existing');
                 })
@@ -266,7 +281,7 @@
                             <h3 class="text-xl font-bold text-red-700 mb-2">Error en la Consulta</h3>
                             <p class="text-gray-700 mt-2">Ocurrió un problema al conectar con el servidor.</p>
                         `, 'error');
-                    // //------// Nuevo: Limpiar el formulario y regresar a la pantalla inicial después de un error en la consulta
+                    // Limpiar el formulario y regresar a la pantalla inicial después de un error en la consulta
                     existingUserForm.reset();
                     switchTab('existing');
                 })
@@ -274,6 +289,34 @@
                     resetButton(submitButton, 'Consultar Mis Datos');
                 });
         });
+
+        // //------// Nueva función para mostrar el modal de registro con los datos
+        function showRegistrationSuccessModal(formData, clienteId) {
+            modalContentDetails.innerHTML = `
+                <p><strong>Nombre:</strong> ${formData.nombre}</p>
+                <p><strong>Correo:</strong> ${formData.correo}</p>
+                <p><strong>Clave:</strong> ${formData.clave}</p>
+                <p><strong>ID Cliente:</strong> <span class="font-mono">${clienteId}</span></p>
+            `;
+            registrationModal.classList.remove('hidden');
+            // //------// Añadir clase para la animación de entrada
+            setTimeout(() => {
+                registrationModal.querySelector('.modal-content').classList.add('show');
+            }, 10); // Pequeño retraso para asegurar que la transición se aplique
+        }
+
+        // //------// Función para manejar el clic en el botón "Aceptar" del modal
+        function handleAcceptRegistration() {
+            // //------// Eliminar clase para la animación de salida
+            registrationModal.querySelector('.modal-content').classList.remove('show');
+            setTimeout(() => {
+                registrationModal.classList.add('hidden'); // Ocultar el modal después de la animación
+                newUserForm.reset(); // Limpiar el formulario de nuevo usuario
+                resultContainer.innerHTML = ''; // Limpiar el mensaje de resultado (aunque ya no se usa para registro)
+                resultContainer.className = 'mt-8 text-center p-4 rounded-xl transition-all duration-300 ease-in-out'; // Resetear clases de color
+                switchTab('existing'); // Regresar a la pantalla inicial
+            }, 300); // Coincide con la duración de la transición CSS
+        }
 
         // Funciones de utilidad para la UI
         function setLoading(button, text) {
