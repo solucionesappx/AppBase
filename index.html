@@ -38,7 +38,7 @@
             border-color: #6366f1; /* Tailwind indigo-500 */
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25); /* Tailwind indigo-500 with opacity */
         }
-        /* //------// Estilos para el modal */
+        /* Estilos para el modal */
         .modal-overlay {
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 999; /* Asegura que esté por encima de todo */
@@ -68,10 +68,6 @@
                 <button id="tab-existing" class="flex-1 py-2.5 px-4 text-center font-semibold text-indigo-700 bg-white rounded-lg shadow-md transition-all duration-300 ease-in-out w-full">
                     Datos de Usuario <!-- Etiqueta cambiada -->
                 </button>
-                <!-- //------// La pestaña "Nuevo Usuario" ha sido eliminada de aquí. -->
-                <!-- //------// <button id="tab-new" class="flex-1 py-2.5 px-4 text-center font-semibold text-gray-600 hover:text-indigo-700 transition-all duration-300 ease-in-out">
-                //------//    Nuevo Usuario
-                //------// </button> -->
             </div>
 
             <!-- Contenedor para los formularios -->
@@ -125,19 +121,8 @@
                             </div>
                             <div>
                                 <label for="clave" class="block text-sm font-medium text-gray-700 mb-1">Crear Clave</label>
-                                <!-- //------// Contenedor para el input de clave y el botón de generar -->
-                                <div class="relative flex items-center mt-1">
-                                    <input type="password" id="clave" name="clave" required 
-                                           class="input-focus-animation block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800 pr-12">
-                                    <!-- //------// Botón para generar clave aleatoria -->
-                                    <button type="button" id="generate-password-btn" 
-                                            class="absolute right-0 top-0 h-full px-3 text-gray-500 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-r-lg">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M5.5 9a.5.5 0 01.5-.5h2a.5.5 0 010 1H6a.5.5 0 01-.5-.5zm4 0a.5.5 0 01.5-.5h2a.5.5 0 010 1h-2a.5.5 0 01-.5-.5zm4 0a.5.5 0 01.5-.5h2a.5.5 0 010 1h-2a.5.5 0 01-.5-.5z" clip-rule="evenodd" />
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-5.5-8.5a.5.5 0 011 0v1a.5.5 0 01-1 0v-1zm2 0a.5.5 0 011 0v1a.5.5 0 01-1 0v-1zm2 0a.5.5 0 011 0v1a.5.5 0 01-1 0v-1zm2 0a.5.5 0 011 0v1a.5.5 0 01-1 0v-1zm2 0a.5.5 0 011 0v1a.5.5 0 01-1 0v-1z" clip-rule="evenodd" />
-                                        </svg>
-                                    </button>
-                                </div>
+                                <input type="password" id="clave" name="clave" 
+                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
                             </div>
                         </div>
                         <button type="submit" class="btn-animation w-full mt-8 flex items-center justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -152,7 +137,7 @@
         </div>
     </div>
 
-    <!-- //------// Estructura del Modal (Pop-up) -->
+    <!-- Estructura del Modal (Pop-up) -->
     <div id="registration-modal" class="fixed inset-0 flex items-center justify-center hidden modal-overlay">
         <div class="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full modal-content">
             <h3 class="text-2xl font-bold text-green-700 text-center mb-4">¡Registro Exitoso!</h3>
@@ -233,12 +218,14 @@
         linkRegister.addEventListener('click', (e) => {
             e.preventDefault(); 
             switchTab('new'); 
-        });
-
+        });        
+        
         // //------// Listener para el botón de generar contraseña
         generatePasswordBtn.addEventListener('click', () => {
             newPasswordInput.value = generateRandomPassword();
         });
+
+
 
         // Inicializar la pestaña 'Usuario Existente' como activa al cargar la página
         switchTab('existing');
