@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Clientes</title>
+    <title>Registro de Nuevo Usuario</title>
     <!-- Tailwind CSS para un diseño moderno y responsivo -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter -->
@@ -18,12 +18,6 @@
         /* Pequeña animación para las transiciones de formulario */
         .form-container {
             transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-        }
-        .hidden-form {
-            opacity: 0;
-            transform: scale(0.95);
-            position: absolute;
-            pointer-events: none;
         }
         /* Animaciones para botones e inputs */
         .btn-animation {
@@ -59,84 +53,33 @@
 
     <div class="w-full max-w-md mx-auto">
         <div class="bg-white rounded-3xl shadow-2xl p-8 sm:p-10 border border-gray-100">
-            <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-3">Portal de Clientes</h1>
-            <p class="text-center text-gray-500 mb-8 max-w-sm mx-auto">Gestiona tus datos de forma rápida y segura.</p>
+            <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-3">Registrar Nuevo Usuario</h1>
+            <p class="text-center text-gray-500 mb-8 max-w-sm mx-auto">Completa el formulario para crear una nueva cuenta.</p>
 
-            <!-- Pestañas para cambiar de formulario - Se mantiene solo una pestaña visible -->
-            <div class="flex bg-gray-100 rounded-xl p-1 mb-8">
-                <!-- Se ha renombrado la etiqueta y se ha ajustado para que ocupe todo el ancho -->
-                <button id="tab-existing" class="flex-1 py-2.5 px-4 text-center font-semibold text-indigo-700 bg-white rounded-lg shadow-md transition-all duration-300 ease-in-out w-full">
-                    Datos de Usuario <!-- Etiqueta cambiada -->
-                </button>
-            </div>
-
-            <!-- Contenedor para los formularios -->
-            <div class="relative min-h-[300px]"> <!-- Altura mínima para evitar saltos al cambiar de form -->
-                
-                <!-- Formulario de Consulta (Usuario Existente) - AHORA ES EL PREDETERMINADO -->
-                <div id="form-existing" class="form-container">
-                    <form id="existingUserForm">
-                        <div class="space-y-5">
-                            <div>
-                                <label for="correo-existente" class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
-                                <input type="email" id="correo-existente" name="correo" required 
-                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
-                            </div>
-                            <div>
-                                <label for="clave-existente" class="block text-sm font-medium text-gray-700 mb-1">Clave</label>
-                                <input type="password" id="clave-existente" name="clave" required 
-                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
-                            </div>
+            <!-- Formulario de Registro (Nuevo Usuario) - AHORA ES EL ÚNICO Y PREDETERMINADO -->
+            <div id="form-new" class="form-container">
+                <form id="newUserForm">
+                    <div class="space-y-5">
+                        <div>
+                            <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
+                            <input type="text" id="nombre" name="nombre" required
+                                   class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
                         </div>
-                        <button type="submit" class="btn-animation w-full mt-8 flex items-center justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                            Consultar Mis Datos
-                        </button>
-                        
-                        <!-- ENLACE PARA REGISTRAR NUEVO USUARIO -->
-                        <p class="text-center text-gray-600 mt-6">
-                            ¿No tienes cuenta? 
-                            <a href="#" id="link-register" class="font-semibold text-indigo-600 hover:text-indigo-800 transition-colors duration-200">Regístrate aquí</a>
-                        </p>
-                    </form>
-                </div>
-
-                <!-- Formulario de Registro (Nuevo Usuario) - AHORA OCULTO POR DEFECTO -->
-                <div id="form-new" class="form-container hidden-form">
-                    <form id="newUserForm">
-                        <div class="space-y-5">
-                            <div>
-                                <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
-                                <input type="text" id="nombre" name="nombre" required 
-                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
-                            </div>
-                            <div>
-                                <label for="correo" class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
-                                <input type="email" id="correo" name="correo" required 
-                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
-                            </div>
-                            <div>
-                                <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                                <input type="tel" id="telefono" name="telefono" required 
-                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
-                            </div>
-                            <!-- El campo de "Crear Clave" se ha eliminado del HTML, ya que se genera automáticamente -->
-                            <!--
-                            <div>
-                                <label for="clave" class="block text-sm font-medium text-gray-700 mb-1">Crear Clave</label>
-                                <input type="password" id="clave" name="clave" 
-                                       class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
-                            </div>
-                            -->
+                        <div>
+                            <label for="correo" class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+                            <input type="email" id="correo" name="correo" required
+                                   class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
                         </div>
-                        <button type="submit" class="btn-animation w-full mt-8 flex items-center justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            Registrarme
-                        </button>
-                        <!-- //------// Botón de Cancelar/Volver añadido al formulario de Nuevo Usuario con estilo rojo -->
-                        <button type="button" id="cancel-registration-btn" class="btn-animation w-full mt-4 flex items-center justify-center py-3.5 px-4 border border-red-600 rounded-xl shadow-sm text-base font-semibold text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                            Cancelar
-                        </button>
-                    </form>
-                </div>
+                        <div>
+                            <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                            <input type="tel" id="telefono" name="telefono" required
+                                   class="input-focus-animation mt-1 block w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-800">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-animation w-full mt-8 flex items-center justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Registrarme
+                    </button>
+                </form>
             </div>
 
             <!-- Área para mostrar mensajes y resultados -->
@@ -161,22 +104,16 @@
     <script>
         // --- CONFIGURACIÓN ---
         // PEGA AQUÍ LA URL DE TU SCRIPT DE GOOGLE APPS SCRIPT DESPLEGADO
+        // ¡IMPORTANTE! Reemplaza esta URL con la URL de tu Google Apps Script desplegado como aplicación web.
         const scriptURL = 'https://script.google.com/macros/s/AKfycbyDXswwLD2EWq5vmDAE1Et5PlljiIHbm3g0dngrTGx91DEIl0XiWw7PTLlsDIaR3XnT/exec';
 
         // --- LÓGICA DE LA APLICACIÓN ---
 
         // Elementos del DOM
-        const tabExisting = document.getElementById('tab-existing');
-        const formNew = document.getElementById('form-new');
-        const formExisting = document.getElementById('form-existing');
         const newUserForm = document.getElementById('newUserForm');
-        const existingUserForm = document.getElementById('existingUserForm');
         const resultContainer = document.getElementById('result-container');
-        const linkRegister = document.getElementById('link-register'); 
         const registrationModal = document.getElementById('registration-modal');
         const modalContentDetails = document.getElementById('modal-content-details');
-        const cancelRegistrationBtn = document.getElementById('cancel-registration-btn');
-
 
         // Función para generar un UUID (ID único de cliente)
         function generateUUID() {
@@ -190,7 +127,7 @@
 
         // Función para generar una contraseña aleatoria
         function generateRandomPassword(length = 6) {
-            const charset = "abcefghijklmnoqrstuvwxyzABCEFGHIJKLMNOQRSTUVWXYZ0123456789";
+            const charset = "abcefghijkmnoqrstuvwxyzABCEFGHIJKLMNQRSTUVWXYZ23456789";
             let password = "";
             for (let i = 0; i < length; i++) {
                 const randomIndex = Math.floor(Math.random() * charset.length);
@@ -199,123 +136,47 @@
             return password;
         }
 
-        // Manejador para cambiar de pestaña
-        function switchTab(tabToShow) {
-            if (tabToShow === 'new') {
-                tabExisting.classList.remove('bg-white', 'shadow-md', 'text-indigo-700');
-                tabExisting.classList.add('text-gray-600');
-                
-                formNew.classList.remove('hidden-form');
-                formExisting.classList.add('hidden-form');
-            } else { // tabToShow === 'existing'
-                tabExisting.classList.add('bg-white', 'shadow-md', 'text-indigo-700');
-                tabExisting.classList.remove('text-gray-600');
-
-                formExisting.classList.remove('hidden-form');
-                formNew.classList.add('hidden-form');
-            }
-            resultContainer.innerHTML = ''; // Limpiar resultados al cambiar de pestaña
-            resultContainer.className = 'mt-8 text-center p-4 rounded-xl transition-all duration-300 ease-in-out'; // Resetear clases de color
-        }
-
-        // EVENT LISTENERS
-        linkRegister.addEventListener('click', (e) => {
-            e.preventDefault(); 
-            switchTab('new'); 
-        });
-
-        // Listener para el botón de cancelar registro
-        cancelRegistrationBtn.addEventListener('click', () => {
-            newUserForm.reset(); // Limpiar el formulario de nuevo usuario
-            resultContainer.innerHTML = ''; // Limpiar cualquier mensaje de resultado
-            resultContainer.className = 'mt-8 text-center p-4 rounded-xl transition-all duration-300 ease-in-out'; // Resetear clases de color
-            switchTab('existing'); // Regresar a la vista de usuario existente
-        });
-
-        // Inicializar la pestaña 'Usuario Existente' como activa al cargar la página
-        switchTab('existing');
-
-
         // Manejador del formulario de registro
         newUserForm.addEventListener('submit', e => {
-            e.preventDefault();
+            e.preventDefault(); // Previene el envío de formulario por defecto
             const submitButton = newUserForm.querySelector('button[type="submit"]');
-            setLoading(submitButton, 'Registrando...');
+            setLoading(submitButton, 'Registrando...'); // Muestra el estado de carga en el botón
 
             const formData = new FormData(newUserForm);
-            const formDataObj = Object.fromEntries(formData.entries()); 
-            
-            // Generar la contraseña automáticamente y asignarla directamente a formDataObj.clave
-            formDataObj.clave = generateRandomPassword(); 
-            
-            formDataObj.cliente_id = generateUUID(); 
+            const formDataObj = Object.fromEntries(formData.entries());
 
+            // Generar la contraseña automáticamente y asignarla
+            formDataObj.clave = generateRandomPassword();
+            // Generar el ID de cliente
+            formDataObj.cliente_id = generateUUID();
+
+            // Envía los datos al Google Apps Script
             fetch(scriptURL, { method: 'POST', body: JSON.stringify(formDataObj) })
-                .then(response => response.json())
-                .then(responseData => { 
+                .then(response => response.json()) // Parsea la respuesta JSON
+                .then(responseData => {
                     console.log('Success:', responseData);
-                    showRegistrationSuccessModal(formDataObj, formDataObj.cliente_id); 
+                    if (responseData.status === 'success') {
+                        // Si el registro fue exitoso, muestra el modal de éxito
+                        showRegistrationSuccessModal(formDataObj, formDataObj.cliente_id);
+                    } else {
+                        // Si hubo un error en el registro (según la respuesta del GAS)
+                         showResult(`
+                            <h3 class="text-xl font-bold text-red-700 mb-2">Error en el Registro</h3>
+                            <p class="text-gray-700 mt-2">${responseData.message || 'No se pudo completar el registro. Inténtalo de nuevo.'}</p>
+                        `, 'error');
+                    }
                 })
                 .catch(error => {
+                    // Captura errores de red o del fetch
                     console.error('Error!', error.message);
                     showResult(`
-                        <h3 class="text-xl font-bold text-red-700 mb-2">Error en el Registro</h3>
-                        <p class="text-gray-700 mt-2">No se pudo completar el registro. Inténtalo de nuevo más tarde o contacta soporte.</p>
+                        <h3 class="text-xl font-bold text-red-700 mb-2">Error en la Conexión</h3>
+                        <p class="text-gray-700 mt-2">Ocurrió un problema al conectar con el servidor. Inténtalo de nuevo más tarde o contacta soporte.</p>
                     `, 'error');
                 })
                 .finally(() => {
+                    // Siempre restablece el botón a su estado original
                     resetButton(submitButton, 'Registrarme');
-                });
-        });
-
-        // Manejador del formulario de consulta
-        existingUserForm.addEventListener('submit', e => {
-            e.preventDefault();
-            const submitButton = existingUserForm.querySelector('button[type="submit"]');
-            setLoading(submitButton, 'Consultando...');
-            
-            const correo = document.getElementById('correo-existente').value;
-            const clave = document.getElementById('clave-existente').value;
-            
-            const lookupUrl = `${scriptURL}?action=lookup&correo=${encodeURIComponent(correo)}&clave=${encodeURIComponent(clave)}`;
-
-            fetch(lookupUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success' && data.data) {
-                        const clientData = data.data;
-                        showResult(`
-                            <h3 class="text-xl font-bold text-green-700 mb-2">Datos Encontrados</h3>
-                            <div class="text-left bg-gray-50 p-5 rounded-lg mt-4 space-y-3 border border-gray-200">
-                                <p><strong class="text-gray-700">ID Cliente:</strong> <span class="font-mono text-indigo-700">${clientData.Cliente_ID}</span></p>
-                                <p><strong class="text-gray-700">Nombre:</strong> <span class="text-gray-800">${clientData.Cliente_Nombre}</span></p>
-                                <p><strong class="text-gray-700">Correo:</strong> <span class="text-gray-800">${clientData.Cliente_Correo}</span></p>
-                                <p><strong class="text-gray-700">Teléfono:</strong> <span class="text-gray-800">${clientData.Cliente_Telefono}</span></p>
-                                <p><strong class="text-gray-700">Índice Fila:</strong> <span class="text-gray-800">${clientData.Cliente_IDX}</span></p>
-                            </div>
-                        `, 'success');
-                    } else {
-                           showResult(`
-                                <h3 class="text-xl font-bold text-red-700 mb-2">Datos no encontrados</h3>
-                                <p class="text-gray-700 mt-2">${data.message || 'El correo o la clave son incorrectos. Por favor, verifica tus datos.'}</p>
-                            `, 'error');
-                    }
-                    // Limpiar el formulario y regresar a la pantalla inicial después de la consulta (éxito o error)
-                    existingUserForm.reset();
-                    switchTab('existing');
-                })
-                .catch(error => {
-                       console.error('Error!', error.message);
-                       showResult(`
-                            <h3 class="text-xl font-bold text-red-700 mb-2">Error en la Consulta</h3>
-                            <p class="text-gray-700 mt-2">Ocurrió un problema al conectar con el servidor.</p>
-                        `, 'error');
-                    // Limpiar el formulario y regresar a la pantalla inicial después de un error en la consulta
-                    existingUserForm.reset();
-                    switchTab('existing');
-                })
-                .finally(() => {
-                    resetButton(submitButton, 'Consultar Mis Datos');
                 });
         });
 
@@ -325,47 +186,49 @@
                 <p><strong>Nombre:</strong> ${formData.nombre}</p>
                 <p><strong>Correo:</strong> ${formData.correo}</p>
                 <p><strong>Clave:</strong> ${formData.clave}</p>
-                <p><strong>ID Cliente:</strong> <span class="font-mono">${clienteId}</span></p>
+                <p><strong>ID Cliente:</strong> ${clienteId}</p>
+                <!-- Si deseas que el ID Cliente tenga una fuente monoespaciada (como un código), usa esta línea en su lugar: -->
+                <!-- <p><strong>ID Cliente:</strong> <span class="font-mono">${clienteId}</span></p> -->
             `;
-            registrationModal.classList.remove('hidden');
+            registrationModal.classList.remove('hidden'); // Muestra el overlay del modal
             setTimeout(() => {
-                registrationModal.querySelector('.modal-content').classList.add('show');
-            }, 10); 
+                registrationModal.querySelector('.modal-content').classList.add('show'); // Añade la clase para la animación de entrada
+            }, 10); // Pequeño retraso para asegurar que la transición CSS se aplique
         }
 
         // Función para manejar el clic en el botón "Aceptar" del modal
         function handleAcceptRegistration() {
-            registrationModal.querySelector('.modal-content').classList.remove('show');
+            registrationModal.querySelector('.modal-content').classList.remove('show'); // Remueve la clase para la animación de salida
             setTimeout(() => {
-                registrationModal.classList.add('hidden'); 
-                newUserForm.reset(); 
-                resultContainer.innerHTML = ''; 
-                resultContainer.className = 'mt-8 text-center p-4 rounded-xl transition-all duration-300 ease-in-out'; 
-                switchTab('existing'); 
-            }, 300); 
+                registrationModal.classList.add('hidden'); // Oculta el overlay del modal
+                newUserForm.reset(); // Limpia el formulario después del éxito
+                resultContainer.innerHTML = ''; // Limpia cualquier mensaje de resultado
+                resultContainer.className = 'mt-8 text-center p-4 rounded-xl transition-all duration-300 ease-in-out'; // Restablece las clases de color del contenedor de resultados
+            }, 300); // Espera a que termine la animación de salida antes de ocultar completamente
         }
 
-        // Funciones de utilidad para la UI
+        // Funciones de utilidad para la UI (mostrar carga, restablecer botón, mostrar resultados)
         function setLoading(button, text) {
-            button.disabled = true;
-            button.classList.add('opacity-75', 'cursor-not-allowed');
+            button.disabled = true; // Deshabilita el botón
+            button.classList.add('opacity-75', 'cursor-not-allowed'); // Cambia el estilo para indicar que está deshabilitado
             button.innerHTML = `
                 <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 ${text}
-            `;
+            `; // Muestra un spinner y el texto de carga
         }
 
         function resetButton(button, text) {
-            button.disabled = false;
-            button.classList.remove('opacity-75', 'cursor-not-allowed');
-            button.innerHTML = text;
+            button.disabled = false; // Habilita el botón
+            button.classList.remove('opacity-75', 'cursor-not-allowed'); // Restablece el estilo
+            button.innerHTML = text; // Restablece el texto original del botón
         }
 
         function showResult(htmlContent, type) {
-            resultContainer.innerHTML = htmlContent;
+            resultContainer.innerHTML = htmlContent; // Inserta el contenido HTML en el contenedor de resultados
+            // Aplica clases de estilo según el tipo de mensaje (éxito o error)
             if (type === 'success') {
                 resultContainer.classList.add('bg-green-100', 'border-green-300', 'text-green-800', 'shadow-md');
                 resultContainer.classList.remove('bg-red-100', 'border-red-300', 'text-red-800');
