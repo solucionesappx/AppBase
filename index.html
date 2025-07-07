@@ -107,7 +107,7 @@
     <div class="tabs-container">
         <!-- Contenedor de navegación de pestañas con wrapper para el icono de desplazamiento -->
         <div class="tabs-nav-wrapper">
-            <div class="tabs-nav">
+            <div class="tabs-nav" id="tabs-nav-scroll-area">
                 <button class="tab-button active" id="tab1-button" data-tab="tab1" role="tab" aria-selected="true" aria-controls="tab1">
                     Información General
                 </button>
@@ -130,7 +130,7 @@
             <!-- Icono de desplazamiento para indicar más pestañas -->
             <div class="scroll-indicator">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                    <path id="scroll-indicator-path" stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
             </div>
         </div>
@@ -244,7 +244,7 @@
             tab6: {
                 title: "Lo que dicen nuestros Clientes",
                 paragraphs: [
-                    "La satisfacción de nuestros clientes es nuestra prioridad. Lee lo que algunos de ellos tienen que decir sobre su experiencia con nuestros productos y servicios."
+                    "La satisfacción de nuestros clientes es nuestra prioridad. Lee lo que algunos de ellos tienen que decir sobre su experiencia con sus productos y servicios."
                 ],
                 testimonials: [
                     { name: "Ana García", quote: "Un servicio excepcional y productos de alta calidad. ¡Totalmente recomendado!" },
@@ -326,6 +326,40 @@
             const tabButtons = document.querySelectorAll('.tab-button');
             // Selecciona todos los paneles de contenido de las pestañas
             const tabPanes = document.querySelectorAll('.tab-pane');
+            // Selecciona el área de desplazamiento de las pestañas
+            const tabsNavScrollArea = document.getElementById('tabs-nav-scroll-area');
+            // Selecciona el elemento path dentro del SVG del indicador de desplazamiento
+            const scrollIndicatorPath = document.getElementById('scroll-indicator-path');
+            // Selecciona el contenedor del indicador de desplazamiento
+            const scrollIndicator = document.querySelector('.scroll-indicator');
+
+            // Rutas SVG para las flechas izquierda y derecha
+            const rightArrowPath = "M9 5l7 7-7 7";
+            const leftArrowPath = "M15 19l-7-7 7-7";
+
+            // Función para actualizar el icono de desplazamiento
+            function updateScrollIndicator() {
+                // Comprueba si el área de desplazamiento existe
+                if (!tabsNavScrollArea || !scrollIndicatorPath || !scrollIndicator) return;
+
+                const { scrollLeft, scrollWidth, clientWidth } = tabsNavScrollArea;
+                const scrollThreshold = 20; // Un pequeño margen para considerar que se ha llegado al final
+
+                // Si no hay necesidad de desplazamiento (todo el contenido cabe), oculta el indicador
+                if (scrollWidth <= clientWidth) {
+                    scrollIndicator.style.display = 'none';
+                    return;
+                } else {
+                    scrollIndicator.style.display = 'block'; // Asegura que el indicador sea visible si hay desplazamiento
+                }
+
+                // Si el usuario ha llegado al final del desplazamiento horizontal
+                if (scrollLeft + clientWidth >= scrollWidth - scrollThreshold) {
+                    scrollIndicatorPath.setAttribute('d', leftArrowPath); // Cambia a flecha izquierda
+                } else {
+                    scrollIndicatorPath.setAttribute('d', rightArrowPath); // Vuelve a flecha derecha
+                }
+            }
 
             // Itera sobre cada botón de pestaña para añadir un 'event listener' de clic
             tabButtons.forEach(button => {
@@ -349,6 +383,9 @@
 
                     targetTabPane.classList.add('active'); // Muestra el panel
                     renderTabContent(targetTabId, targetTabPane); // Renderiza el contenido dinámicamente
+
+                    // Después de un clic, actualiza el indicador de desplazamiento
+                    updateScrollIndicator();
                 });
             });
 
@@ -361,30 +398,48 @@
                         nextIndex = (index + 1) % tabButtons.length;
                         tabButtons[nextIndex].focus(); // Mueve el foco al siguiente botón
                         tabButtons[nextIndex].click(); // Simula un clic para activar la pestaña
+                        // Desplaza el contenedor para que la pestaña activa sea visible
+                        tabsNavScrollArea.scrollLeft = tabButtons[nextIndex].offsetLeft - (tabsNavScrollArea.clientWidth / 2) + (tabButtons[nextIndex].clientWidth / 2);
                     } else if (e.key === 'ArrowLeft') {
                         // Mueve a la pestaña anterior, si es la primera, va a la última
                         nextIndex = (index - 1 + tabButtons.length) % tabButtons.length;
                         tabButtons[nextIndex].focus(); // Mueve el foco al botón anterior
                         tabButtons[nextIndex].click(); // Simula un clic para activar la pestaña
+                        // Desplaza el contenedor para que la pestaña activa sea visible
+                        tabsNavScrollArea.scrollLeft = tabButtons[nextIndex].offsetLeft - (tabsNavScrollArea.clientWidth / 2) + (tabButtons[nextIndex].clientWidth / 2);
                     } else if (e.key === 'Home') {
                         // Mueve a la primera pestaña
                         e.preventDefault(); // Previene el comportamiento por defecto del navegador
                         tabButtons[0].focus();
                         tabButtons[0].click();
+                        tabsNavScrollArea.scrollLeft = 0; // Desplaza al inicio
                     } else if (e.key === 'End') {
                         // Mueve a la última pestaña
                         e.preventDefault(); // Previene el comportamiento por defecto del navegador
-                        tabButtons[tabButtons.length - 1].focus();
-                        tabButtons[tabButtons.length - 1].click();
+                        const lastTabIndex = tabButtons.length - 1;
+                        tabButtons[lastTabIndex].focus();
+                        tabButtons[lastTabIndex].click();
+                        tabsNavScrollArea.scrollLeft = tabsNavScrollArea.scrollWidth; // Desplaza al final
                     }
+                    // Después de un evento de teclado, actualiza el indicador de desplazamiento
+                    updateScrollIndicator();
                 });
             });
+
+            // Añade un listener para el evento 'scroll' en el área de navegación de pestañas
+            tabsNavScrollArea.addEventListener('scroll', updateScrollIndicator);
+
+            // Añade un listener para el evento 'resize' de la ventana
+            window.addEventListener('resize', updateScrollIndicator);
 
             // Asegura que la primera pestaña esté activa y visible al cargar la página
             // Esto simula un clic en el primer botón de pestaña
             if (tabButtons.length > 0) {
                 tabButtons[0].click();
             }
+
+            // Llama a updateScrollIndicator al cargar para establecer el estado inicial
+            updateScrollIndicator();
         });
     </script>
 </body>
