@@ -38,6 +38,7 @@
             border-radius: 0.5rem 0.5rem 0 0; /* Esquinas superiores redondeadas */
             margin-right: 2px; /* Pequeño espacio entre pestañas */
             white-space: nowrap; /* Evita que el texto se rompa */
+            flex-shrink: 0; /* Evita que los botones se encojan */
         }
         /* Estilo para el botón de pestaña activo */
         .tab-button.active {
@@ -56,6 +57,16 @@
         /* Estilo para el panel de contenido activo */
         .tab-pane.active {
             display: block; /* Muestra el panel activo */
+        }
+        /* Nuevo estilo para permitir el desplazamiento horizontal en el contenedor de navegación */
+        .tabs-nav {
+            overflow-x: auto; /* Permite el desplazamiento horizontal */
+            -webkit-overflow-scrolling: touch; /* Mejora el desplazamiento en iOS */
+            scrollbar-width: none; /* Oculta la barra de desplazamiento para Firefox */
+        }
+        /* Oculta la barra de desplazamiento para navegadores basados en WebKit (Chrome, Safari) */
+        .tabs-nav::-webkit-scrollbar {
+            display: none;
         }
     </style>
 </head>
