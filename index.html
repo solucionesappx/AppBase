@@ -3,367 +3,333 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Clientes</title>
-    <!-- Carga de Tailwind CSS para estilos rápidos y responsivos -->
+    <title>Sistema de Pestañas Interactivo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Estilos personalizados para la fuente Inter */
+        /* Estilos personalizados para la fuente Inter y asegurar que el fondo sea blanco */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Un gris claro para el fondo */
+            background-color: #f8fafc; /* Color de fondo claro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Asegura que ocupe toda la altura de la ventana */
+            margin: 0;
         }
-        /* Ocultar mensajes por defecto */
-        .message-box {
+        /* Estilo para el contenedor principal de las pestañas */
+        .tabs-container {
+            max-width: 800px;
+            width: 95%; /* Ancho fluido para responsividad */
+            background-color: #ffffff;
+            border-radius: 12px; /* Esquinas redondeadas */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Sombra sutil */
+            overflow: hidden; /* Asegura que el contenido no se desborde */
+        }
+        /* Contenedor de navegación de pestañas con desplazamiento y posición relativa para el icono */
+        .tabs-nav-wrapper {
+            position: relative; /* Necesario para posicionar el icono de desplazamiento */
+            border-bottom: 1px solid #cbd5e1; /* Borde inferior para la barra de pestañas */
+        }
+        /* Estilo para los botones de las pestañas */
+        .tab-button {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            border: none;
+            background-color: #e2e8f0; /* Color de fondo para pestañas inactivas */
+            color: #475569; /* Color de texto para pestañas inactivas */
+            font-weight: 600;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            border-radius: 0.5rem 0.5rem 0 0; /* Esquinas superiores redondeadas */
+            margin-right: 2px; /* Pequeño espacio entre pestañas */
+            white-space: nowrap; /* Evita que el texto se rompa */
+            flex-shrink: 0; /* Evita que los botones se encojan */
+            font-size: 0.875rem; /* text-sm para pantallas pequeñas */
+        }
+        /* Tamaño de fuente base para pantallas medianas y grandes */
+        @media (min-width: 640px) { /* sm: breakpoint de Tailwind */
+            .tab-button {
+                font-size: 1rem; /* text-base */
+            }
+        }
+        /* Estilo para el botón de pestaña activo */
+        .tab-button.active {
+            background-color: #ffffff; /* Fondo blanco para la pestaña activa */
+            color: #1e3a8a; /* Color azul oscuro para el texto activo */
+            border-bottom: 2px solid #3b82f6; /* Borde inferior azul para indicar activo */
+            z-index: 10; /* Para que parezca que está por encima de la línea */
+            position: relative;
+        }
+        /* Estilo para los paneles de contenido de las pestañas */
+        .tab-pane {
+            display: none; /* Oculta los paneles por defecto */
+            padding: 1.5rem;
+            /* El borde superior se mueve al wrapper de la navegación para evitar doble borde */
+        }
+        /* Estilo para el panel de contenido activo */
+        .tab-pane.active {
+            display: block; /* Muestra el panel activo */
+        }
+        /* Estilo para permitir el desplazamiento horizontal en el contenedor de navegación */
+        .tabs-nav {
+            overflow-x: auto; /* Permite el desplazamiento horizontal */
+            -webkit-overflow-scrolling: touch; /* Mejora el desplazamiento en iOS */
+            scrollbar-width: none; /* Oculta la barra de desplazamiento para Firefox */
+            display: flex; /* Asegura que los botones estén en línea */
+            flex-wrap: nowrap; /* Evita que los botones salten de línea */
+            padding-right: 2rem; /* Espacio para el icono de desplazamiento */
+        }
+        /* Oculta la barra de desplazamiento para navegadores basados en WebKit (Chrome, Safari) */
+        .tabs-nav::-webkit-scrollbar {
             display: none;
         }
-        /* Estilos para el spinner de carga */
-        .loader {
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #3498db; /* Blue */
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            vertical-align: middle;
-            margin-left: 8px;
+        /* Estilo para el icono de desplazamiento */
+        .scroll-indicator {
+            position: absolute;
+            right: 0.5rem; /* Ajusta la posición desde la derecha */
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b; /* Color del icono */
+            pointer-events: none; /* Permite hacer clic a través del icono en las pestañas */
+            z-index: 11; /* Asegura que esté por encima de las pestañas */
+            display: none; /* Oculto por defecto */
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* Muestra el icono de desplazamiento solo en pantallas pequeñas (hasta sm) */
+        @media (max-width: 639px) { /* sm: breakpoint de Tailwind */
+            .scroll-indicator {
+                display: block;
+            }
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6" id="mainTitle">Gestión de Clientes</h1>
-        <p class="text-center text-gray-600 mb-8" id="mainSubtitle">Bienvenido</p>
+<body>
 
-        <!-- Mensaje de éxito global -->
-        <div id="globalSuccessMessage" class="message-box bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md relative mb-4" role="alert">
-            <strong class="font-bold">¡Éxito!</strong>
-            <span class="block sm:inline" id="successText"></span>
-        </div>
-
-        <!-- Mensaje de error global -->
-        <div id="globalErrorMessage" class="message-box bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative mb-4" role="alert">
-            <strong class="font-bold">¡Error!</strong>
-            <span class="block sm:inline" id="errorText"></span>
-        </div>
-
-        <!-- Sección de Carga -->
-        <div id="loadingSection" class="hidden text-center py-4">
-            <div class="loader"></div>
-            <p class="text-gray-600 mt-2">Cargando...</p>
-        </div>
-
-        <!-- Sección de Inicio de Sesión -->
-        <div id="loginSection" class="space-y-4">
-            <h2 class="text-2xl font-semibold text-center text-gray-700 mb-4">Iniciar Sesión</h2>
-            <form id="loginForm" class="space-y-4">
-                <div>
-                    <label for="loginClienteId" class="block text-sm font-medium text-gray-700">Cliente_ID</label>
-                    <input type="text" id="loginClienteId" name="Cliente_ID" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="loginClienteClave" class="block text-sm font-medium text-gray-700">Cliente_Clave</label>
-                    <input type="password" id="loginClienteClave" name="Cliente_Clave" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-                <button type="submit"
-                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
-                    Iniciar Sesión
+    <div class="tabs-container">
+        <div class="tabs-nav-wrapper">
+            <div class="tabs-nav" id="tabs-nav-scroll-area">
+                <button class="tab-button active" id="tab1-button" data-tab="tab1" role="tab" aria-selected="true" aria-controls="tab1">
+                    Información General
                 </button>
-            </form>
-            <p class="text-center text-gray-600 mt-4">¿No tienes cuenta? <a href="#" id="showRegister" class="text-blue-600 hover:underline">Regístrate aquí</a></p>
-        </div>
-
-        <!-- Sección de Registro (existente) -->
-        <div id="registerSection" class="hidden space-y-4">
-            <h2 class="text-2xl font-semibold text-center text-gray-700 mb-4">Registrar Nuevo Cliente</h2>
-            <form id="customerForm" class="space-y-4">
-                <div>
-                    <label for="clienteId" class="block text-sm font-medium text-gray-700">Cliente_ID</label>
-                    <input type="text" id="clienteId" name="Cliente_ID" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="clienteNombre" class="block text-sm font-medium text-gray-700">Cliente_Nombre</label>
-                    <input type="text" id="clienteNombre" name="Cliente_Nombre" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="clienteCorreo" class="block text-sm font-medium text-gray-700">Cliente_Correo</label>
-                    <input type="email" id="clienteCorreo" name="Cliente_Correo" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="clienteTelefono" class="block text-sm font-medium text-gray-700">Cliente_Telefono</label>
-                    <input type="tel" id="clienteTelefono" name="Cliente_Telefono" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="clienteIdx" class="block text-sm font-medium text-gray-700">Cliente_IDX</label>
-                    <input type="text" id="clienteIdx" name="Cliente_IDX" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="clienteClave" class="block text-sm font-medium text-gray-700">Cliente_Clave</label>
-                    <input type="password" id="clienteClave" name="Cliente_Clave" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-
-                <button type="submit"
-                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
-                    Registrar Cliente
+                <button class="tab-button" id="tab2-button" data-tab="tab2" role="tab" aria-selected="false" aria-controls="tab2">
+                    Detalles del Producto
                 </button>
-            </form>
-            <p class="text-center text-gray-600 mt-4">¿Ya tienes cuenta? <a href="#" id="showLogin" class="text-blue-600 hover:underline">Inicia sesión aquí</a></p>
-        </div>
-
-        <!-- Sección de Perfil del Cliente -->
-        <div id="profileSection" class="hidden space-y-4">
-            <h2 class="text-2xl font-semibold text-center text-gray-700 mb-4">Datos del Cliente</h2>
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Cliente_ID:</label>
-                    <p id="profileClienteId" class="mt-1 text-lg text-gray-900"></p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Cliente_Nombre:</label>
-                    <p id="profileClienteNombre" class="mt-1 text-lg text-gray-900"></p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Cliente_Correo:</label>
-                    <p id="profileClienteCorreo" class="mt-1 text-lg text-gray-900"></p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Cliente_Telefono:</label>
-                    <p id="profileClienteTelefono" class="mt-1 text-lg text-gray-900"></p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Cliente_IDX:</label>
-                    <p id="profileClienteIdx" class="mt-1 text-lg text-gray-900"></p>
-                </div>
-                <!-- La clave no se muestra por seguridad -->
+                <button class="tab-button" id="tab3-button" data-tab="tab3" role="tab" aria-selected="false" aria-controls="tab3">
+                    Preguntas Frecuentes
+                </button>
+                <button class="tab-button" id="tab4-button" data-tab="tab4" role="tab" aria-selected="false" aria-controls="tab4">
+                    Contacto
+                </button>
+                <button class="tab-button" id="tab5-button" data-tab="tab5" role="tab" aria-selected="false" aria-controls="tab5">
+                    Novedades
+                </button>
+                <button class="tab-button" id="tab6-button" data-tab="tab6" role="tab" aria-selected="false" aria-controls="tab6">
+                    Testimonios
+                </button>
             </div>
-            <button id="logoutButton"
-                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out mt-6">
-                Cerrar Sesión
-            </button>
+            <div class="scroll-indicator">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path id="scroll-indicator-path" stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+            </div>
+        </div>
+
+        <div class="tabs-content">
+            <div id="tab1" class="tab-pane active" role="tabpanel" aria-labelledby="tab1-button">
+                <p class="text-gray-600">Cargando contenido...</p>
+            </div>
+
+            <div id="tab2" class="tab-pane" role="tabpanel" aria-labelledby="tab2-button">
+                <p class="text-gray-600">Cargando contenido...</p>
+            </div>
+
+            <div id="tab3" class="tab-pane" role="tabpanel" aria-labelledby="tab3-button">
+                <p class="text-gray-600">Cargando contenido...</p>
+            </div>
+
+            <div id="tab4" class="tab-pane" role="tabpanel" aria-labelledby="tab4-button">
+                <p class="text-gray-600">Cargando contenido...</p>
+            </div>
+
+            <div id="tab5" class="tab-pane" role="tabpanel" aria-labelledby="tab5-button">
+                <p class="text-gray-600">Cargando contenido...</p>
+            </div>
+
+            <div id="tab6" class="tab-pane" role="tabpanel" aria-labelledby="tab6-button">
+                <p class="text-gray-600">Cargando contenido...</p>
+            </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Referencias a elementos del DOM
-            const loginSection = document.getElementById('loginSection');
-            const registerSection = document.getElementById('registerSection');
-            const profileSection = document.getElementById('profileSection');
-            const loadingSection = document.getElementById('loadingSection');
+        // **IMPORTANTE:** Reemplaza esta URL con la URL de tu aplicación web de Google Apps Script.
+        // La obtendrás después de publicar tu script de GAS.
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzGMsc609qjhWznXsuWR_KgrRw7Trurmvea1kjpjQW7zSUY1-hTp9fvYD7ocEqatCDWIQ/exec';
 
-            const loginForm = document.getElementById('loginForm');
-            const customerForm = document.getElementById('customerForm');
-            const logoutButton = document.getElementById('logoutButton');
+        let cachedTabContent = {}; // Caché para almacenar el contenido una vez cargado
 
-            const showRegisterLink = document.getElementById('showRegister');
-            const showLoginLink = document.getElementById('showLogin');
+        // Función para obtener el contenido de las pestañas desde Google Apps Script
+        async function fetchTabContentFromGAS() {
+            if (Object.keys(cachedTabContent).length > 0) {
+                return cachedTabContent; // Si ya está en caché, lo devuelve
+            }
 
-            const globalSuccessMessage = document.getElementById('globalSuccessMessage');
-            const globalErrorMessage = document.getElementById('globalErrorMessage');
-            const successText = document.getElementById('successText');
-            const errorText = document.getElementById('errorText');
-
-            // ** CAMBIO: Apuntamos al servidor Node.js local **
-            const nodeJsServerUrl = 'http://localhost:3000'; 
-
-            // Función para mostrar mensajes
-            function showMessage(type, message) {
-                hideMessages();
-                if (type === 'success') {
-                    successText.textContent = message;
-                    globalSuccessMessage.style.display = 'block';
-                } else if (type === 'error') {
-                    errorText.textContent = message;
-                    globalErrorMessage.style.display = 'block';
+            try {
+                const response = await fetch(GAS_WEB_APP_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-            }
-
-            // Función para ocultar todos los mensajes
-            function hideMessages() {
-                globalSuccessMessage.style.display = 'none';
-                globalErrorMessage.style.display = 'none';
-            }
-
-            // Función para mostrar una sección específica y ocultar las demás
-            function showSection(sectionId) {
-                loginSection.classList.add('hidden');
-                registerSection.classList.add('hidden');
-                profileSection.classList.add('hidden');
-                loadingSection.classList.add('hidden');
-                hideMessages(); // Oculta mensajes al cambiar de sección
-
-                if (sectionId === 'loginSection') {
-                    loginSection.classList.remove('hidden');
-                    document.getElementById('mainTitle').textContent = 'Gestión de Clientes';
-                    document.getElementById('mainSubtitle').textContent = 'Bienvenido';
-                } else if (sectionId === 'registerSection') {
-                    registerSection.classList.remove('hidden');
-                    document.getElementById('mainTitle').textContent = 'Registro de Clientes';
-                    document.getElementById('mainSubtitle').textContent = 'Por favor, introduce los datos del cliente.';
-                } else if (sectionId === 'profileSection') {
-                    profileSection.classList.remove('hidden');
-                    document.getElementById('mainTitle').textContent = 'Perfil del Cliente';
-                    document.getElementById('mainSubtitle').textContent = 'Aquí están tus datos.';
-                } else if (sectionId === 'loadingSection') {
-                    loadingSection.classList.remove('hidden');
-                }
-            }
-
-            // Función para cargar los datos del perfil
-            async function loadProfileData(clienteId) {
-                showSection('loadingSection'); // Muestra el spinner de carga
-                try {
-                    const response = await fetch(nodeJsServerUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            action: 'getData',
-                            Cliente_ID: clienteId
-                        }),
-                    });
-
-                    const result = await response.json();
-
-                    if (response.ok && result.success) { // Verifica response.ok y result.success
-                        const data = result.data;
-                        document.getElementById('profileClienteId').textContent = data.Cliente_ID;
-                        document.getElementById('profileClienteNombre').textContent = data.Cliente_Nombre;
-                        document.getElementById('profileClienteCorreo').textContent = data.Cliente_Correo;
-                        document.getElementById('profileClienteTelefono').textContent = data.Cliente_Telefono;
-                        document.getElementById('profileClienteIdx').textContent = data.Cliente_IDX;
-                        showSection('profileSection'); // Muestra la sección de perfil
-                    } else {
-                        showMessage('error', result.message || 'Error al cargar los datos del perfil.');
-                        showSection('loginSection'); // Vuelve al login si hay un error
-                        sessionStorage.removeItem('loggedInClientId'); // Limpia la sesión
-                    }
-                } catch (error) {
-                    console.error('Error al cargar datos del perfil:', error);
-                    showMessage('error', 'Error de red al cargar los datos del perfil.');
-                    showSection('loginSection'); // Vuelve al login si hay un error de red
-                    sessionStorage.removeItem('loggedInClientId'); // Limpia la sesión
-                }
-            }
-
-            // Verificar sesión al cargar la página
-            const storedClienteId = sessionStorage.getItem('loggedInClientId');
-            if (storedClienteId) {
-                loadProfileData(storedClienteId);
-            } else {
-                showSection('loginSection'); // Muestra la sección de login por defecto
-            }
-
-            // Event listener para el formulario de inicio de sesión
-            loginForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
-                hideMessages();
-                showSection('loadingSection'); // Muestra el spinner de carga
-
-                const formData = new FormData(loginForm);
-                const data = {
-                    action: 'login',
-                    Cliente_ID: formData.get('Cliente_ID'),
-                    Cliente_Clave: formData.get('Cliente_Clave')
+                const data = await response.json();
+                cachedTabContent = data; // Almacena en caché
+                return data;
+            } catch (error) {
+                console.error("Error fetching tab content from GAS:", error);
+                // Retorna un objeto con errores para que el renderizado pueda manejarlos
+                return {
+                    tab1: { rawHtml: '<p class="text-red-500">Error al cargar el contenido de Información General.</p>' },
+                    tab2: { rawHtml: '<p class="text-red-500">Error al cargar el contenido de Detalles del Producto.</p>' },
+                    tab3: { rawHtml: '<p class="text-red-500">Error al cargar el contenido de Preguntas Frecuentes.</p>' },
+                    tab4: { rawHtml: '<p class="text-red-500">Error al cargar el contenido de Contacto.</p>' },
+                    tab5: { rawHtml: '<p class="text-red-500">Error al cargar el contenido de Novedades.</p>' },
+                    tab6: { rawHtml: '<p class="text-red-500">Error al cargar el contenido de Testimonios.</p>' }
                 };
+            }
+        }
 
-                try {
-                    const response = await fetch(nodeJsServerUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data),
+        // Función para renderizar el contenido de una pestaña
+        async function renderTabContent(tabId, tabPaneElement) {
+            tabPaneElement.innerHTML = '<p class="text-gray-600">Cargando contenido...</p>'; // Mostrar mensaje de carga
+
+            const allContent = await fetchTabContentFromGAS();
+            const content = allContent[tabId];
+
+            if (content && content.rawHtml) {
+                tabPaneElement.innerHTML = content.rawHtml; // Inyectar el HTML directamente
+            } else if (content && content.error) {
+                tabPaneElement.innerHTML = `<p class="text-red-500">${content.error}</p>`;
+            } else {
+                tabPaneElement.innerHTML = '<p class="text-red-500">Contenido no disponible.</p>';
+            }
+        }
+
+        // Espera a que el DOM esté completamente cargado antes de ejecutar el script
+        document.addEventListener('DOMContentLoaded', () => {
+            // Selecciona todos los botones de las pestañas
+            const tabButtons = document.querySelectorAll('.tab-button');
+            // Selecciona todos los paneles de contenido de las pestañas
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            // Selecciona el área de desplazamiento de las pestañas
+            const tabsNavScrollArea = document.getElementById('tabs-nav-scroll-area');
+            // Selecciona el elemento path dentro del SVG del indicador de desplazamiento
+            const scrollIndicatorPath = document.getElementById('scroll-indicator-path');
+            // Selecciona el contenedor del indicador de desplazamiento
+            const scrollIndicator = document.querySelector('.scroll-indicator');
+
+            // Rutas SVG para las flechas izquierda y derecha
+            const rightArrowPath = "M9 5l7 7-7 7";
+            const leftArrowPath = "M15 19l-7-7 7-7";
+
+            // Función para actualizar el icono de desplazamiento
+            function updateScrollIndicator() {
+                // Comprueba si el área de desplazamiento existe
+                if (!tabsNavScrollArea || !scrollIndicatorPath || !scrollIndicator) return;
+
+                const { scrollLeft, scrollWidth, clientWidth } = tabsNavScrollArea;
+                const scrollThreshold = 20; // Un pequeño margen para considerar que se ha llegado al final
+
+                // Si no hay necesidad de desplazamiento (todo el contenido cabe), oculta el indicador
+                if (scrollWidth <= clientWidth) {
+                    scrollIndicator.style.display = 'none';
+                    return;
+                } else {
+                    scrollIndicator.style.display = 'block'; // Asegura que el indicador sea visible si hay desplazamiento
+                }
+
+                // Si el usuario ha llegado al final del desplazamiento horizontal
+                if (scrollLeft + clientWidth >= scrollWidth - scrollThreshold) {
+                    scrollIndicatorPath.setAttribute('d', leftArrowPath); // Cambia a flecha izquierda
+                } else {
+                    scrollIndicatorPath.setAttribute('d', rightArrowPath); // Vuelve a flecha derecha
+                }
+            }
+
+            // Itera sobre cada botón de pestaña para añadir un 'event listener' de clic
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remueve la clase 'active' de todos los botones y paneles
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.setAttribute('aria-selected', 'false'); // Actualiza el atributo ARIA
+                    });
+                    tabPanes.forEach(pane => {
+                        pane.classList.remove('active');
                     });
 
-                    const result = await response.json();
+                    // Añade la clase 'active' al botón que fue clickeado
+                    button.classList.add('active');
+                    button.setAttribute('aria-selected', 'true'); // Actualiza el atributo ARIA
 
-                    if (response.ok && result.success) { // Verifica response.ok y result.success
-                        sessionStorage.setItem('loggedInClientId', result.clienteId); // Guarda el ID del cliente en la sesión
-                        showMessage('success', '¡Inicio de sesión exitoso!');
-                        loadProfileData(result.clienteId); // Carga los datos del perfil
-                    } else {
-                        showMessage('error', result.message || 'Credenciales inválidas. Inténtalo de nuevo.');
-                        showSection('loginSection'); // Permanece en la sección de login
+                    // Obtiene el ID del panel de contenido asociado al botón clickeado
+                    const targetTabId = button.dataset.tab; // 'data-tab' contiene el panel ID
+                    const targetTabPane = document.getElementById(targetTabId);
+
+                    targetTabPane.classList.add('active'); // Muestra el panel
+                    renderTabContent(targetTabId, targetTabPane); // Renderiza el contenido dinámicamente
+
+                    // Después de un clic, actualiza el indicador de desplazamiento
+                    updateScrollIndicator();
+                });
+            });
+
+            // Lógica para la navegación con teclado (flechas izquierda/derecha, Home, End)
+            tabButtons.forEach((button, index) => {
+                button.addEventListener('keydown', (e) => {
+                    let nextIndex;
+                    if (e.key === 'ArrowRight') {
+                        // Mueve a la siguiente pestaña, si es la última, vuelve a la primera
+                        nextIndex = (index + 1) % tabButtons.length;
+                        tabButtons[nextIndex].focus(); // Mueve el foco al siguiente botón
+                        tabButtons[nextIndex].click(); // Simula un clic para activar la pestaña
+                        // Desplaza el contenedor para que la pestaña activa sea visible
+                        tabsNavScrollArea.scrollLeft = tabButtons[nextIndex].offsetLeft - (tabsNavScrollArea.clientWidth / 2) + (tabButtons[nextIndex].clientWidth / 2);
+                    } else if (e.key === 'ArrowLeft') {
+                        // Mueve a la pestaña anterior, si es la primera, va a la última
+                        nextIndex = (index - 1 + tabButtons.length) % tabButtons.length;
+                        tabButtons[nextIndex].focus(); // Mueve el foco al botón anterior
+                        tabButtons[nextIndex].click(); // Simula un clic para activar la pestaña
+                        // Desplaza el contenedor para que la pestaña activa sea visible
+                        tabsNavScrollArea.scrollLeft = tabButtons[nextIndex].offsetLeft - (tabsNavScrollArea.clientWidth / 2) + (tabButtons[nextIndex].clientWidth / 2);
+                    } else if (e.key === 'Home') {
+                        // Mueve a la primera pestaña
+                        e.preventDefault(); // Previene el comportamiento por defecto del navegador
+                        tabButtons[0].focus();
+                        tabButtons[0].click();
+                        tabsNavScrollArea.scrollLeft = 0; // Desplaza al inicio
+                    } else if (e.key === 'End') {
+                        // Mueve a la última pestaña
+                        e.preventDefault(); // Previene el comportamiento por defecto del navegador
+                        const lastTabIndex = tabButtons.length - 1;
+                        tabButtons[lastTabIndex].focus();
+                        tabButtons[lastTabIndex].click();
+                        tabsNavScrollArea.scrollLeft = tabsNavScrollArea.scrollWidth; // Desplaza al final
                     }
-                } catch (error) {
-                    console.error('Error al iniciar sesión:', error);
-                    showMessage('error', 'Error de red al intentar iniciar sesión.');
-                    showSection('loginSection'); // Permanece en la sección de login
-                }
+                    // Después de un evento de teclado, actualiza el indicador de desplazamiento
+                    updateScrollIndicator();
+                });
             });
 
-            // Event listener para el formulario de registro (existente)
-            customerForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
-                hideMessages();
-                showSection('loadingSection'); // Muestra el spinner de carga
+            // Añade un listener para el evento 'scroll' en el área de navegación de pestañas
+            tabsNavScrollArea.addEventListener('scroll', updateScrollIndicator);
 
-                const formData = new FormData(customerForm);
-                const data = {};
-                for (let [key, value] of formData.entries()) {
-                    data[key] = value;
-                }
-                data.action = 'register';
+            // Añade un listener para el evento 'resize' de la ventana
+            window.addEventListener('resize', updateScrollIndicator);
 
-                try {
-                    const response = await fetch(nodeJsServerUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data),
-                    });
+            // Asegura que la primera pestaña esté activa y visible al cargar la página
+            // Esto simula un clic en el primer botón de pestaña
+            if (tabButtons.length > 0) {
+                tabButtons[0].click();
+            }
 
-                    const result = await response.json();
-
-                    if (response.ok && result.success) { // Verifica response.ok y result.success
-                        showMessage('success', '¡Cliente registrado correctamente!');
-                        customerForm.reset(); // Limpia el formulario
-                        showSection('loginSection'); // Vuelve al login después del registro
-                    } else {
-                        showMessage('error', result.message || 'Hubo un problema al registrar el cliente.');
-                        showSection('registerSection'); // Permanece en la sección de registro
-                    }
-
-                } catch (error) {
-                    console.error('Error al enviar los datos de registro:', error);
-                    showMessage('error', 'Error de red al registrar el cliente.');
-                    showSection('registerSection'); // Permanece en la sección de registro
-                }
-            });
-
-            // Event listener para el botón de cerrar sesión
-            logoutButton.addEventListener('click', () => {
-                sessionStorage.removeItem('loggedInClientId'); // Elimina el ID de la sesión
-                showMessage('success', '¡Sesión cerrada correctamente!');
-                showSection('loginSection'); // Vuelve a la sección de inicio de sesión
-                loginForm.reset(); // Limpia el formulario de login
-            });
-
-            // Event listeners para cambiar entre secciones
-            showRegisterLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                showSection('registerSection');
-            });
-
-            showLoginLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                showSection('loginSection');
-            });
+            // Llama a updateScrollIndicator al cargar para establecer el estado inicial
+            updateScrollIndicator();
         });
     </script>
 </body>
