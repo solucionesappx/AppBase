@@ -149,10 +149,12 @@
                 <p class="text-gray-600">Cargando contenido...</p>
             </div>
 
+            <!-- Panel de la Pestaña 5 (Nueva) -->
             <div id="tab5" class="tab-pane" role="tabpanel" aria-labelledby="tab5-button">
                 <p class="text-gray-600">Cargando contenido...</p>
             </div>
 
+            <!-- Panel de la Pestaña 6 (Nueva) -->
             <div id="tab6" class="tab-pane" role="tabpanel" aria-labelledby="tab6-button">
                 <p class="text-gray-600">Cargando contenido...</p>
             </div>
@@ -203,6 +205,22 @@
 
             if (content && content.rawHtml) {
                 tabPaneElement.innerHTML = content.rawHtml; // Inyectar el HTML directamente
+
+                // --- NUEVA LÓGICA: Inyectar estilos CSS extraídos de Google Docs ---
+                let gasStylesTag = document.getElementById('gas-injected-styles');
+                if (!gasStylesTag) {
+                    gasStylesTag = document.createElement('style');
+                    gasStylesTag.id = 'gas-injected-styles';
+                    document.head.appendChild(gasStylesTag);
+                }
+                // Asegúrate de que los estilos se inyecten solo si existen para la pestaña actual
+                if (content.extractedCss) {
+                    gasStylesTag.innerHTML = content.extractedCss;
+                } else {
+                    gasStylesTag.innerHTML = ''; // Limpiar si no hay estilos para esta pestaña
+                }
+                // --- FIN DE LA NUEVA LÓGICA ---
+
             } else if (content && content.error) {
                 tabPaneElement.innerHTML = `<p class="text-red-500">${content.error}</p>`;
             } else {
