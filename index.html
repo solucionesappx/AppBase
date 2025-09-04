@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Formulario de inicio de sesión y registro</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -24,7 +27,7 @@
         .container {
             position: relative;
             width: 650px;
-            height: 480px;
+            height: 490px;
             background: #fff;
             border-radius: 30px;
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
@@ -230,7 +233,6 @@
             border-radius: 8px;
             /* Sombra más pronunciada para mayor contraste */
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), inset 0 0 5px rgba(0, 0, 0, 0.15);
-            cursor: pointer;
         }
 
         .password-sidebar-container .header {
@@ -242,6 +244,7 @@
             height: 40px;
             padding: 0 10px;
             white-space: nowrap;
+            cursor: pointer; /* Solo el header ahora tiene el cursor de puntero */
         }
 
         .password-sidebar-container .header .label {
@@ -292,7 +295,7 @@
             display: flex;
             flex-direction: column; 
             align-items: center;
-            cursor: pointer;
+            /* Eliminamos el cursor del puntero para que no sea clickable */
         }
         
         /* Estilo del icono */
@@ -610,6 +613,7 @@
         const registerForm = document.querySelector('.form-box.register form');
         const passwordToggleIcons = document.querySelectorAll('.password-toggle-icon');
         const sidebarContainer = document.querySelector('.password-sidebar-container');
+        const sidebarHeader = document.querySelector('.password-sidebar-container .header');
 
         // Función para simular una llamada a un servidor y devolver una promesa
         // En tu proyecto real, reemplazarías esto con una llamada fetch a tu script de Google Apps
@@ -660,10 +664,14 @@
         // Lógica para alternar entre formularios
         registerBtn.addEventListener('click', () => {
             container.classList.add('active');
+            // Colapsa la barra de gestión de contraseñas al cambiar de formulario
+            sidebarContainer.classList.remove('expanded');
         });
 
         loginBtn.addEventListener('click', () => {
             container.classList.remove('active');
+            // Colapsa la barra de gestión de contraseñas al cambiar de formulario
+            sidebarContainer.classList.remove('expanded');
         });
 
         // Lógica para mostrar/ocultar contraseña
@@ -685,7 +693,8 @@
         });
 
         // Lógica para la barra lateral colapsable
-        sidebarContainer.addEventListener('click', () => {
+        // Ahora solo el encabezado es clickeable
+        sidebarHeader.addEventListener('click', () => {
             sidebarContainer.classList.toggle('expanded');
         });
     </script>
