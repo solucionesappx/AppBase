@@ -27,7 +27,7 @@
         .container {
             position: relative;
             width: 650px;
-            height: 500px;
+            height: 550px;
             background: #fff;
             border-radius: 30px;
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
@@ -42,6 +42,8 @@
             height: 100%;
             background: #fff;
             display: flex;
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
             color: #333;
             text-align: center;
@@ -148,13 +150,13 @@
 
         .container h1 {
             font-size: 36px;
-            margin: 10px 0;
+            margin-bottom: 25px;
         }
 
         .input-box {
             position: relative;
             width: 100%;
-            margin: 30px 0;
+            margin-bottom: 25px;
         }
         
         /* Estilos del input */
@@ -221,116 +223,8 @@
             color: #333;
             cursor: pointer;
         }
-        
-        /* === Estilos para la nueva barra lateral de contraseña colapsable === */
-        .password-sidebar-container {
-            width: 250px;
-            height: 40px; /* Altura fija para el estado colapsado */
-            margin-top: 15px;
-            position: relative;
-            padding: 0 10px;
-            background-color: #f8f8f8;
-            border-radius: 8px;
-            /* Sombra más pronunciada para mayor contraste */
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), inset 0 0 5px rgba(0, 0, 0, 0.15);
-        }
 
-        .password-sidebar-container .header {
-            display: flex;
-            align-items: center;
-            justify-content: center; /* Centrado */
-            gap: 10px; /* Espacio uniforme */
-            width: 100%;
-            height: 40px;
-            padding: 0 10px;
-            white-space: nowrap;
-            cursor: pointer; /* Solo el header ahora tiene el cursor de puntero */
-        }
-
-        .password-sidebar-container .header .label {
-            color: #555;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .password-sidebar-container .header .menu-icon {
-            font-size: 20px;
-            color: #7494ec;
-        }
-        
-        /* El contenedor de botones de la barra lateral ahora es un elemento posicionado de forma absoluta */
-        .password-buttons {
-            position: absolute;
-            top: 100%; /* Inicia justo debajo del header */
-            left: 0;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-            padding: 10px 0;
-            background-color: #f8f8f8;
-            border-radius: 0 0 8px 8px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-            z-index: 10;
-            
-            /* Transiciones para que la aparición sea suave */
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            visibility: hidden;
-            opacity: 0;
-            transform: translateY(-10px);
-            pointer-events: none;
-        }
-        
-        /* Clases para mostrar el contenido expandido */
-        .password-sidebar-container.expanded .password-buttons {
-            visibility: visible;
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-        }
-        
-        /* Estilos para cada acción (icono + etiqueta) */
-        .password-action {
-            position: relative;
-            display: flex;
-            flex-direction: column; 
-            align-items: center;
-            /* Eliminamos el cursor del puntero para que no sea clickable */
-        }
-        
-        /* Estilo del icono */
-        .password-action i {
-            font-size: 20px;
-            color: #7494ec;
-            transition: all 0.3s ease;
-        }
-        
-        .password-action:hover i {
-            color: #7494ec;
-        }
-        
-        /* Estilos para la etiqueta que aparece al pasar el cursor (tooltip) */
-        .password-action .action-label {
-            position: absolute;
-            top: -25px; /* Ajusta la posición para que aparezca arriba del ícono */
-            background-color: rgba(51, 51, 51, 0.9);
-            color: #fff;
-            padding: 5px 8px;
-            border-radius: 5px;
-            font-size: 12px;
-            white-space: nowrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
-            transform: translateY(10px);
-        }
-
-        .password-action:hover .action-label {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
+        /* Estilos para el botón de login */
         .btn {
             width: 100%;
             height: 48px;
@@ -343,10 +237,40 @@
             color: #fff;
             font-weight: 600;
             transition: 0.4s;
+            position: relative; /* Agregado para el efecto de brillo */
+            overflow: hidden; /* Agregado para el efecto de brillo */
+        }
+        
+        /* Estilos para el nuevo botón de gestión de contraseña */
+        .forgot-btn {
+            width: 100%;
+            height: 48px;
+            background-color: #7494ec;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #fff;
+            font-weight: 600;
+            transition: background-color 0.4s, color 0.4s, transform 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
         }
 
+        .forgot-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 5px #7494ec, 0 0 15px #7494ec, 0 0 30px #7494ec;
+        }
+        
         /* Efecto de barrido constante para los botones del formulario */
-        .form-box .btn::before {
+        .form-box .btn::before, .forgot-btn::before {
             content: '';
             position: absolute;
             top: 0;
@@ -357,7 +281,18 @@
             transform: skewX(-30deg);
             animation: shine 2s infinite linear;
         }
-
+        
+        /* Aumentamos el tamaño del icono de recuperación de contraseña */
+        .forgot-btn i {
+            font-size: 24px;
+            transition: color 0.3s ease;
+        }
+        
+        /* Cambiamos el color del icono en el hover */
+        .forgot-btn:hover i {
+            color: #fff;
+        }
+        
         .container p {
             font-size: 14.5px;
             margin: 15px 0;
@@ -441,6 +376,96 @@
                         0 0 30px #fff;
         }
 
+        /* --- Estilos de la ventana modal --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            position: relative;
+            text-align: center;
+            transform: translateY(-50px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.visible .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-content h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close-btn:hover {
+            color: #7494ec;
+        }
+
+        .modal-options {
+            display: flex;
+            justify-content: space-between; /* Distribuye el espacio entre los elementos */
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .modal-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex-grow: 1; /* Permite que cada opción crezca para ocupar el espacio disponible */
+            padding: 0 10px; /* Agregamos un padding horizontal para el espacio */
+            gap: 10px;
+            color: #7494ec;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .modal-option:hover {
+            transform: translateY(-5px);
+        }
+
+        .modal-option i {
+            font-size: 30px;
+        }
+
         @media screen and (max-width: 650px) {
             .container {
                 height: calc(100vh - 40px);
@@ -515,35 +540,20 @@
                     <i class='bx bxs-user input-icon'></i>
                 </div>
                 <div class="input-box">
-                    <input type="password" required>
+                    <input id="login-password" type="password" required>
                     <label>Password</label>
                     <i class='bx bxs-lock-alt input-icon'></i>
-                    <i class='bx bxs-hide password-toggle-icon'></i>
+                    <i id="toggle-login-password" class='bx bxs-hide password-toggle-icon'></i>
                 </div>
+                
+                <!-- Botón para abrir la ventana modal -->
+                <a href="#" class="forgot-btn" id="forgot-password-btn">
+                    <i class='bx bx-refresh bx-flip-horizontal'></i>
+                    ¿Olvidaste tu contraseña?
+                </a>
+
                 <button type="submit" class="btn">login</button>
                 
-                <!-- Sidebar para la gestión de la contraseña -->
-                <div class="password-sidebar-container">
-                    <div class="header">
-                        <i class='bx bx-menu menu-icon'></i>
-                        <span class="label">Gestión Contraseñas</span>
-                    </div>
-                    <div class="password-buttons">
-                        <div class="password-action">
-                            <i class='bx bx-plus'></i>
-                            <span class="action-label">Nueva</span>
-                        </div>
-                        <div class="password-action">
-                            <i class='bx bx-reset'></i>
-                            <span class="action-label">Recuperar</span>
-                        </div>
-                        <div class="password-action">
-                            <i class='bx bx-book-reader'></i>
-                            <span class="action-label">Manual</span>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Animación de onda de carga -->
                 <div class="wave-container">
                     <div class="wave">
@@ -572,10 +582,10 @@
                     <i class='bx bxs-envelope input-icon'></i>
                 </div>
                 <div class="input-box">
-                    <input type="password" required>
+                    <input id="register-password" type="password" required>
                     <label>Password</label>
                     <i class='bx bxs-lock-alt input-icon'></i>
-                    <i class='bx bxs-hide password-toggle-icon'></i>
+                    <i id="toggle-register-password" class='bx bxs-hide password-toggle-icon'></i>
                 </div>
                 <button type="submit" class="btn">Register</button>
                 <!-- Animación de onda de carga -->
@@ -605,25 +615,52 @@
             </div>
         </div>
     </div>
+
+    <!-- Ventana Modal de Gestión de Contraseñas -->
+    <div id="password-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close-btn">&times;</span>
+            <h2>Gestión de Contraseñas</h2>
+            <form id="modal-form">
+                <div class="input-box">
+                    <input type="text" required>
+                    <label>Username</label>
+                    <i class='bx bxs-user input-icon'></i>
+                </div>
+                <div class="modal-options">
+                    <div class="modal-option">
+                        <i class='bx bx-plus'></i>
+                        <span>Nueva</span>
+                    </div>
+                    <div class="modal-option">
+                        <i class='bx bx-key'></i>
+                        <span>Recuperar</span>
+                    </div>
+                    <div class="modal-option">
+                        <i class='bx bx-book-reader'></i>
+                        <span>Manual</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const container = document.querySelector('.container');
         const registerBtn = document.querySelector('.register-btn');
         const loginBtn = document.querySelector('.login-btn');
         const loginForm = document.querySelector('.form-box.login form');
         const registerForm = document.querySelector('.form-box.register form');
-        const passwordToggleIcons = document.querySelectorAll('.password-toggle-icon');
-        const sidebarContainer = document.querySelector('.password-sidebar-container');
-        const sidebarHeader = document.querySelector('.password-sidebar-container .header');
+        const forgotPasswordBtn = document.getElementById('forgot-password-btn');
+        const modal = document.getElementById('password-modal');
+        const modalCloseBtn = document.querySelector('.modal-close-btn');
 
         // Función para simular una llamada a un servidor y devolver una promesa
-        // En tu proyecto real, reemplazarías esto con una llamada fetch a tu script de Google Apps
         function fetchData() {
             return new Promise(resolve => {
-                // Simula un tiempo de respuesta de red aleatorio entre 1s y 6s
                 const delay = Math.random() * (6000 - 1000) + 1000;
                 
                 setTimeout(() => {
-                    // Simula una respuesta exitosa del servidor
                     resolve({ status: 'success', message: 'User data received!' });
                 }, delay);
             });
@@ -631,71 +668,90 @@
 
         // Función asíncrona para manejar la carga y la respuesta del servidor
         async function handleFormSubmission(form) {
-            // Muestra la animación de carga
             form.classList.add('is-loading');
 
             try {
-                // Espera a que el "servidor" responda
                 const response = await fetchData();
                 console.log('Server response:', response);
-
-                // Oculta la animación de carga
                 form.classList.remove('is-loading');
-
             } catch (error) {
                 console.error('Error fetching data:', error);
-                // Oculta la animación de carga incluso si hay un error
                 form.classList.remove('is-loading');
             }
         }
 
         // Event listener para el botón de "Login"
         loginForm.addEventListener('submit', (e) => {
-            e.preventDefault(); // Previene el envío del formulario
+            e.preventDefault();
             handleFormSubmission(loginForm);
         });
 
         // Event listener para el botón de "Register"
         registerForm.addEventListener('submit', (e) => {
-            e.preventDefault(); // Previene el envío del formulario
+            e.preventDefault();
             handleFormSubmission(registerForm);
         });
 
         // Lógica para alternar entre formularios
         registerBtn.addEventListener('click', () => {
             container.classList.add('active');
-            // Colapsa la barra de gestión de contraseñas al cambiar de formulario
-            sidebarContainer.classList.remove('expanded');
         });
 
         loginBtn.addEventListener('click', () => {
             container.classList.remove('active');
-            // Colapsa la barra de gestión de contraseñas al cambiar de formulario
-            sidebarContainer.classList.remove('expanded');
         });
 
         // Lógica para mostrar/ocultar contraseña
-        passwordToggleIcons.forEach(toggleIcon => {
-            toggleIcon.addEventListener('click', () => {
-                const passwordInput = toggleIcon.previousElementSibling;
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-                
-                // Cambia el icono basado en el tipo de campo
+        const loginPasswordInput = document.getElementById('login-password');
+        const toggleLoginPassword = document.getElementById('toggle-login-password');
+        const registerPasswordInput = document.getElementById('register-password');
+        const toggleRegisterPassword = document.getElementById('toggle-register-password');
+
+        if (toggleLoginPassword && loginPasswordInput) {
+            toggleLoginPassword.addEventListener('click', () => {
+                const type = loginPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                loginPasswordInput.setAttribute('type', type);
+
                 if (type === 'password') {
-                    toggleIcon.classList.remove('bxs-show');
-                    toggleIcon.classList.add('bxs-hide');
+                    toggleLoginPassword.classList.remove('bxs-show');
+                    toggleLoginPassword.classList.add('bxs-hide');
                 } else {
-                    toggleIcon.classList.remove('bxs-hide');
-                    toggleIcon.classList.add('bxs-show');
+                    toggleLoginPassword.classList.remove('bxs-hide');
+                    toggleLoginPassword.classList.add('bxs-show');
                 }
             });
+        }
+        
+        if (toggleRegisterPassword && registerPasswordInput) {
+             toggleRegisterPassword.addEventListener('click', () => {
+                const type = registerPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                registerPasswordInput.setAttribute('type', type);
+
+                if (type === 'password') {
+                    toggleRegisterPassword.classList.remove('bxs-show');
+                    toggleRegisterPassword.classList.add('bxs-hide');
+                } else {
+                    toggleRegisterPassword.classList.remove('bxs-hide');
+                    toggleRegisterPassword.classList.add('bxs-show');
+                }
+            });
+        }
+        
+
+        // Lógica para mostrar y ocultar la ventana modal
+        forgotPasswordBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            modal.classList.add('visible');
         });
 
-        // Lógica para la barra lateral colapsable
-        // Ahora solo el encabezado es clickeable
-        sidebarHeader.addEventListener('click', () => {
-            sidebarContainer.classList.toggle('expanded');
+        modalCloseBtn.addEventListener('click', () => {
+            modal.classList.remove('visible');
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('visible');
+            }
         });
     </script>
 </body>
