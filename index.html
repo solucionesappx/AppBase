@@ -97,7 +97,7 @@
             height: 100%;
         }
         
-        /* Animación de onda con efecto de brillo */
+        /* Animación de onda con efecto de brillo para los puntos de carga */
         .wave {
             display: flex;
             gap: 8px;
@@ -139,7 +139,7 @@
                 transform: translateY(0);
             }
             20% {
-                transform: translateY(-15px);
+                transform: translateY(-40px);
             }
         }
         
@@ -152,6 +152,25 @@
             font-size: 36px;
             margin-bottom: 25px;
         }
+        
+        /* Estilos de la animación de onda para el texto del h1 <h1 id="login-heading" class="animated-heading">Hello, Welcome!</h1>*/
+        .animated-heading span {
+            display: inline-block;
+            animation: wave 1s infinite ease-in-out;
+        }
+        
+        /* Retraso de la animación para crear el efecto de onda en el texto */
+        .animated-heading span:nth-child(1) { animation-delay: 0.0s; }
+        .animated-heading span:nth-child(2) { animation-delay: 0.1s; }
+        .animated-heading span:nth-child(3) { animation-delay: 0.2s; }
+        .animated-heading span:nth-child(4) { animation-delay: 0.3s; }
+        .animated-heading span:nth-child(5) { animation-delay: 0.4s; }
+        .animated-heading span:nth-child(6) { animation-delay: 0.5s; }
+        .animated-heading span:nth-child(7) { animation-delay: 0.6s; }
+        .animated-heading span:nth-child(8) { animation-delay: 0.7s; }
+        .animated-heading span:nth-child(9) { animation-delay: 0.8s; }
+        .animated-heading span:nth-child(10) { animation-delay: 0.9s; }
+        .animated-heading span:nth-child(11) { animation-delay: 1.0s; }
 
         .input-box {
             position: relative;
@@ -183,7 +202,7 @@
             position: absolute;
             top: 50%;
             left: 50px; /* Alineado con el inicio del texto del input */
-            transform: translateY(-50%);
+            transform: translateY(-50%); /* no modificar */
             color: #888;
             pointer-events: none;
             transition: 0.3s ease;
@@ -533,7 +552,7 @@
         <!-- login form -->
         <div class="form-box login">
             <form action="">
-                <h1>login</h1>
+                <h1 id="login-heading">Login</h1>
                 <div class="input-box">
                     <input type="text" required>
                     <label>Username</label>
@@ -570,7 +589,7 @@
         <!--Registration-->
         <div class="form-box register">
             <form action="">
-                <h1>Registration</h1>
+                <h1 id="register-heading">Registration</h1>
                 <div class="input-box">
                     <input type="text" required>
                     <label>Username</label>
@@ -654,6 +673,22 @@
         const forgotPasswordBtn = document.getElementById('forgot-password-btn');
         const modal = document.getElementById('password-modal');
         const modalCloseBtn = document.querySelector('.modal-close-btn');
+
+        // Función para aplicar la animación de onda al texto de un encabezado
+        function animateHeadingText(headingElement) {
+            const text = headingElement.textContent;
+            headingElement.textContent = ''; // Limpiamos el texto original
+            
+            for (let i = 0; i < text.length; i++) {
+                const span = document.createElement('span');
+                span.textContent = text[i];
+                headingElement.appendChild(span);
+            }
+        }
+        
+        // Llamamos a la función para animar los encabezados
+        animateHeadingText(document.getElementById('login-heading'));
+        animateHeadingText(document.getElementById('register-heading'));
 
         // Función para simular una llamada a un servidor y devolver una promesa
         function fetchData() {
