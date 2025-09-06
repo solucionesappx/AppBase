@@ -104,10 +104,10 @@
         .timeline::before {
             content: '';
             position: absolute;
-            top: 31%; /* No mover. Ajuste para centrar la línea verticalmente */
+            top: 31%;
             left: 0;
             width: 100%;
-            height: 2px; /* Aumentado para mayor visibilidad */
+            height: 2px;
             background: #ccc;
             transform: translateY(-50%);
         }
@@ -117,19 +117,19 @@
             flex-direction: column;
             align-items: center;
             position: relative;
-            z-index: 3; /* Aumentado para que los puntos estén siempre por encima de la línea */
+            z-index: 3;
         }
 
         .timeline-dot {
             width: 25px;
             height: 25px;
-            background: #fff; 
-            border: 2px solid #ccc; 
+            background: #fff;
+            border: 2px solid #ccc;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #ccc; 
+            color: #ccc;
             font-weight: bold;
             transition: all 0.3s ease-in-out;
         }
@@ -530,7 +530,7 @@
             padding: 30px;
             border-radius: 15px;
             width: 90%;
-            max-width: 450px;
+            max-width: 260px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             position: relative;
             text-align: center;
@@ -592,6 +592,18 @@
         .modal-option i {
             font-size: 30px;
         }
+
+        /* --- Estilo del modal de alerta personalizado --- */
+        #custom-alert-modal .modal-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #custom-alert-message {
+            margin-bottom: 20px; /* Separación del texto al botón */
+        }
+        /* --- Fin de los estilos del modal de alerta personalizado --- */
 
         @media screen and (max-width: 650px) {
             .container {
@@ -660,9 +672,9 @@
         <!-- login form -->
         <div class="form-box login">
             <form action="">
-                <h1>Login</h1>
+                <h1>Iniciar sesión</h1>
                 <div class="input-box">
-                    <input type="text" required>
+                    <input type="text" id="login-username" required>
                     <label>Usuario</label>
                     <i class='bx bxs-user input-icon'></i>
                 </div>
@@ -678,7 +690,7 @@
                     ¿Olvidaste tu contraseña?
                 </a>
 
-                <button type="submit" class="btn">login</button>
+                <button type="submit" class="btn">Iniciar</button>
 
                 <div class="wave-container">
                     <div class="wave">
@@ -724,7 +736,7 @@
                         <i class='bx bxs-user input-icon'></i>
                     </div>
                     <div class="input-box">
-                        <input type="text" id="user-email" required oninput="handleInputValidation(this)">
+                        <input type="text" id="user-email" required>
                         <label>Correo</label>
                         <i class='bx bxs-envelope input-icon'></i>
                     </div>
@@ -831,7 +843,7 @@
 
     <div id="custom-alert-modal" class="modal-overlay">
         <div class="modal-content">
-            <span class="modal-close-btn" onclick="closeCustomModal()">&times;</span>
+            <!-- El botón de cierre 'x' ha sido eliminado -->
             <p id="custom-alert-message"></p>
             <button class="btn" onclick="closeCustomModal()">OK</button>
         </div>
@@ -865,11 +877,19 @@
         let currentStep = 1;
         const totalSteps = 3;
 
-        function showCustomModal(message) {
+        /**
+         * Muestra un modal de alerta personalizado con un mensaje y opcionalmente borra el campo de entrada que causó el error.
+         * @param {string} message - El mensaje a mostrar en el modal.
+         * @param {HTMLInputElement} [inputToClear=null] - El campo de entrada que se debe borrar.
+         */
+        function showCustomModal(message, inputToClear = null) {
             const modalElement = document.getElementById('custom-alert-modal');
             const messageElement = document.getElementById('custom-alert-message');
             messageElement.textContent = message;
             modalElement.classList.add('visible');
+            if (inputToClear) {
+                inputToClear.value = '';
+            }
         }
 
         function closeCustomModal() {
@@ -897,6 +917,23 @@
         }
         
         /**
+         * Reinicia completamente los formularios, incluyendo los datos en caché y el estado de la aplicación.
+         */
+        function resetForms() {
+            // Reinicia los campos del formulario
+            loginForm.reset();
+            registerForm.reset();
+            
+            // Elimina la clase 'is-loading' si está presente
+            loginForm.classList.remove('is-loading');
+            registerForm.classList.remove('is-loading');
+
+            // Reinicia el estado del formulario de registro en pasos
+            currentStep = 1;
+            showStep(currentStep);
+        }
+
+        /**
          * Realiza una validación en tiempo real para un campo de entrada específico.
          * @param {HTMLInputElement} input - El elemento de entrada a validar.
          */
@@ -906,18 +943,11 @@
                 return;
             }
 
-            if (input.id === 'user-email') {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(input.value)) {
-                    showCustomModal("Por favor, introduce un correo electrónico válido (ej: usuario@dominio.com).");
-                    return;
-                }
-            }
-
+            // Validación en tiempo real solo para el campo de teléfono
             if (input.id === 'user-phone') {
                 const phoneRegex = /^\d+$/;
                 if (!phoneRegex.test(input.value)) {
-                    showCustomModal("El campo de teléfono solo debe contener números.");
+                    showCustomModal("El campo de teléfono solo debe contener números.", input);
                     return;
                 }
             }
@@ -941,7 +971,7 @@
                 if (input.id === 'user-email') {
                     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                     if (!emailRegex.test(input.value)) {
-                        showCustomModal("Por favor, introduce un correo electrónico válido (ej: usuario@dominio.com).");
+                        showCustomModal("Por favor, introduce un correo electrónico válido (ej: usuario@dominio.com).", input);
                         return false;
                     }
                 }
@@ -949,7 +979,7 @@
                 if (input.id === 'user-phone') {
                     const phoneRegex = /^\d+$/;
                     if (!phoneRegex.test(input.value)) {
-                        showCustomModal("El campo de teléfono solo debe contener números.");
+                        showCustomModal("El campo de teléfono solo debe contener números.", input);
                         return false;
                     }
                 }
@@ -989,18 +1019,30 @@
         }
 
         registerBtn.addEventListener('click', () => {
+            resetForms();
             container.classList.add('active');
             document.getElementById('user-password').value = generateShortUUID();
-            showStep(1);
-            currentStep = 1;
         });
 
         loginBtn.addEventListener('click', () => {
+            resetForms();
             container.classList.remove('active');
         });
 
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            
+            // --- Log de datos del formulario de inicio de sesión ---
+            const loginUsername = document.getElementById('login-username').value;
+            const loginPassword = document.getElementById('login-password').value;
+
+            const loginData = {
+                usuario: loginUsername,
+                contrasena: loginPassword
+            };
+            console.log("Datos del formulario de inicio de sesión:", loginData);
+            // --------------------------------------------------------
+
             loginForm.classList.add('is-loading');
             setTimeout(() => {
                  loginForm.classList.remove('is-loading');
@@ -1010,6 +1052,29 @@
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
             if (validateStep(currentStep)) {
+                // --- Log de datos del formulario de registro ---
+                const userName = document.getElementById('user-name').value;
+                const userLastName = document.getElementById('user-last-name').value;
+                const userEmail = document.getElementById('user-email').value;
+                const userPhone = document.getElementById('user-phone').value;
+                const userPassword = document.getElementById('user-password').value;
+                const securityQuestion = document.getElementById('security-question').value;
+                const securityAnswer = document.getElementById('security-answer').value;
+
+                const registrationData = {
+                    Usuario_Nombre: `${userName} ${userLastName}`,
+                    Usuario_Tienda: "XZC",
+                    Nombre: userName,
+                    Apellido: userLastName,
+                    Correo: userEmail,
+                    Telefono: userPhone,
+                    Contrasena: userPassword,
+                    Pregunta_Seguridad: securityQuestion,
+                    Respuesta_Seguridad: securityAnswer
+                };
+                console.log("Datos del formulario de registro:", registrationData);
+                // -------------------------------------------------
+
                 registerForm.classList.add('is-loading');
                 setTimeout(() => {
                     registerForm.classList.remove('is-loading');
