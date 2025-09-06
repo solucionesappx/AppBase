@@ -871,6 +871,9 @@
     </div>
 
     <script>
+     /* Define App tienda */
+        const appTienda = "ZXC"
+    
         const container = document.querySelector('.container');
         const registerBtn = document.querySelector('.register-btn');
         const loginBtn = document.querySelector('.login-btn');
@@ -1082,16 +1085,24 @@
                 const securityQuestion = document.getElementById('security-question').value;
                 const securityAnswer = document.getElementById('security-answer').value;
 
+// Usuario_ID
+// Usuario_Idx
+// Usuario_RespuestaSeg
+// Usuario_Estado
+// Usuario_Perfil
+// Usuario_RegDate
+// Usuario_RegName
+
                 const registrationData = {
+                    Usuario_Tienda: appTienda,
                     Usuario_Nombre: `${userName} ${userLastName}`,
-                    Usuario_Tienda: "XZC",
-                    Nombre: userName,
-                    Apellido: userLastName,
-                    Correo: userEmail,
-                    Telefono: userPhone,
-                    Contrasena: userPassword,
-                    Pregunta_Seguridad: securityQuestion,
-                    Respuesta_Seguridad: securityAnswer
+                    // Nombre: userName,
+                    // Apellido: userLastName,
+                    Usuario_Correo: userEmail,
+                    Usuario_Telefono: userPhone,
+                    Usuario_Clave: userPassword,
+                    Pregunta_ID: securityQuestion,
+                    Usuario_RespuestaSeg: securityAnswer
                 };
                 console.log("Datos del formulario de registro:", registrationData);
                 // -------------------------------------------------
