@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Formulario de inicio de sesión y registro</title>
+    <title>Formulario de registro en pasos</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -63,46 +63,177 @@
         .container.active .form-box.register {
             visibility: visible;
         }
-        
+
         form {
             width: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             height: 100%;
-        }
-        
-        /* Estilos para ocultar el contenido del formulario durante la carga */
-        form > *:not(.wave-container) {
-            transition: opacity 0.3s ease;
+            position: relative;
+            padding-top: 50px;
         }
 
-        form.is-loading > *:not(.wave-container) {
-            opacity: 0;
-            height: 0;
-            overflow: hidden;
-            margin: 0;
-            padding: 0;
+        .form-box.register form {
+            padding-top: 20px;
+            padding-bottom: 20px;
         }
-        
+
+        .step {
+            display: none;
+            width: 100%;
+            padding: 0 20px;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .step.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .timeline {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 31%; /* No mover. Ajuste para centrar la línea verticalmente */
+            left: 0;
+            width: 100%;
+            height: 2px; /* Aumentado para mayor visibilidad */
+            background: #ccc;
+            transform: translateY(-50%);
+        }
+
+        .timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 3; /* Aumentado para que los puntos estén siempre por encima de la línea */
+        }
+
+        .timeline-dot {
+            width: 25px;
+            height: 25px;
+            background: #fff; 
+            border: 2px solid #ccc; 
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ccc; 
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .timeline-label {
+            margin-top: 5px;
+            font-size: 12px;
+            text-align: center;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .timeline-step.active .timeline-dot {
+            background: #fff;
+            border-color: #7494ec;
+            color: #7494ec;
+        }
+
+        .form-navigation {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .form-navigation .btn {
+            flex-grow: 1;
+            margin: 0 5px;
+        }
+
+        .form-navigation .btn.prev {
+            background-color: #888;
+        }
+
+        .select-box {
+            position: relative;
+            width: 100%;
+            margin-bottom: 25px;
+        }
+
+        .select-box select {
+            width: 100%;
+            padding: 13px 50px 13px 20px;
+            background: #eee;
+            border-radius: 8px;
+            border: 2px solid #ccc;
+            outline: none;
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+            appearance: none;
+        }
+
+        .select-box::after {
+            content: '\25BC';
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            font-size: 14px;
+            color: #333;
+            pointer-events: none;
+        }
+
+        .select-box select:focus {
+            border-color: #7494ec;
+        }
+
+        .copy-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #7494ec;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .copy-icon:hover {
+            color: #5d75bc;
+        }
+
         .wave-container {
-            display: none; /* Se oculta por defecto */
+            display: none;
         }
-        
+
         form.is-loading .wave-container {
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-end;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 2;
+            padding-bottom: 50px;
         }
-        
-        /* Animación de onda con efecto de brillo para los puntos de carga */
+
         .wave {
             display: flex;
             gap: 8px;
-            margin-top: auto;
-            margin-bottom: 50px;
         }
 
         .dot {
@@ -142,7 +273,7 @@
                 transform: translateY(-40px);
             }
         }
-        
+
         @keyframes shine {
             0% { left: -100%; }
             100% { left: 100%; }
@@ -152,36 +283,16 @@
             font-size: 36px;
             margin-bottom: 25px;
         }
-        
-        /* Estilos de la animación de onda para el texto del h1 <h1 id="login-heading" class="animated-heading">Hello, Welcome!</h1>*/
-        .animated-heading span {
-            display: inline-block;
-            animation: wave 1s infinite ease-in-out;
-        }
-        
-        /* Retraso de la animación para crear el efecto de onda en el texto */
-        .animated-heading span:nth-child(1) { animation-delay: 0.0s; }
-        .animated-heading span:nth-child(2) { animation-delay: 0.1s; }
-        .animated-heading span:nth-child(3) { animation-delay: 0.2s; }
-        .animated-heading span:nth-child(4) { animation-delay: 0.3s; }
-        .animated-heading span:nth-child(5) { animation-delay: 0.4s; }
-        .animated-heading span:nth-child(6) { animation-delay: 0.5s; }
-        .animated-heading span:nth-child(7) { animation-delay: 0.6s; }
-        .animated-heading span:nth-child(8) { animation-delay: 0.7s; }
-        .animated-heading span:nth-child(9) { animation-delay: 0.8s; }
-        .animated-heading span:nth-child(10) { animation-delay: 0.9s; }
-        .animated-heading span:nth-child(11) { animation-delay: 1.0s; }
 
         .input-box {
             position: relative;
             width: 100%;
             margin-bottom: 25px;
         }
-        
-        /* Estilos del input */
+
         .input-box input {
             width: 100%;
-            padding: 13px 50px 13px 50px; /* Aumentamos el padding para el icono de la izquierda y dejamos el espacio para el de la derecha */
+            padding: 13px 50px 13px 50px;
             background: #eee;
             border-radius: 8px;
             border: 2px solid #ccc;
@@ -190,49 +301,43 @@
             color: #333;
             font-weight: 500;
         }
-        
-        /* Animación del borde al enfocar o escribir (Original) */
+
         .input-box input:focus,
         .input-box input:valid {
             border-color: #7494ec;
         }
 
-        /* Estilos de la etiqueta de entrada */
         .input-box label {
             position: absolute;
             top: 50%;
-            left: 50px; /* Alineado con el inicio del texto del input */
-            transform: translateY(-50%); /* no modificar */
+            left: 50px;
+            transform: translateY(-50%);
             color: #888;
             pointer-events: none;
             transition: 0.3s ease;
             font-size: 16px;
             font-weight: 400;
         }
-        
-        /* Animación de la etiqueta al enfocar o escribir */
+
         .input-box input:focus ~ label,
         .input-box input:valid ~ label {
             top: -10px;
-            /* La etiqueta se alinea con la misma sangría que los iconos a la izquierda */
             left: 20px;
             font-size: 14px;
             color: #7494ec;
             background: #fff;
             padding: 0 5px;
         }
-        
-        /* Estilos de los iconos de los inputs */
+
         .input-box .input-icon {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
             font-size: 20px;
             color: #333;
-            left: 20px; /* Posición del icono de la izquierda */
+            left: 20px;
         }
-        
-        /* Estilos del icono para ver/ocultar contraseña */
+
         .input-box .password-toggle-icon {
             position: absolute;
             top: 50%;
@@ -243,7 +348,6 @@
             cursor: pointer;
         }
 
-        /* Estilos para el botón de login */
         .btn {
             width: 100%;
             height: 48px;
@@ -256,11 +360,15 @@
             color: #fff;
             font-weight: 600;
             transition: 0.4s;
-            position: relative; /* Agregado para el efecto de brillo */
-            overflow: hidden; /* Agregado para el efecto de brillo */
+            position: relative;
+            overflow: hidden;
         }
-        
-        /* Estilos para el nuevo botón de gestión de contraseña */
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 5px #7494ec, 0 0 15px #7494ec, 0 0 30px #7494ec;
+        }
+
         .forgot-btn {
             width: 100%;
             height: 48px;
@@ -287,8 +395,7 @@
             transform: translateY(-2px);
             box-shadow: 0 0 5px #7494ec, 0 0 15px #7494ec, 0 0 30px #7494ec;
         }
-        
-        /* Efecto de barrido constante para los botones del formulario */
+
         .form-box .btn::before, .forgot-btn::before {
             content: '';
             position: absolute;
@@ -300,18 +407,16 @@
             transform: skewX(-30deg);
             animation: shine 2s infinite linear;
         }
-        
-        /* Aumentamos el tamaño del icono de recuperación de contraseña */
+
         .forgot-btn i {
             font-size: 24px;
             transition: color 0.3s ease;
         }
-        
-        /* Cambiamos el color del icono en el hover */
+
         .forgot-btn:hover i {
             color: #fff;
         }
-        
+
         .container p {
             font-size: 14.5px;
             margin: 15px 0;
@@ -350,6 +455,11 @@
             align-items: center;
             z-index: 2;
         }
+        
+        .toggle-panel h1,
+        .toggle-panel p {
+            text-align: center;
+        }
 
         .toggle-panel.toggle-left {
             left: 0;
@@ -384,7 +494,6 @@
             transition: all 0.3s ease;
         }
 
-        /* Efecto neón para los botones del panel lateral */
         .toggle-panel .btn:hover {
             background-color: transparent;
             color: #fff;
@@ -395,7 +504,6 @@
                         0 0 30px #fff;
         }
 
-        /* --- Estilos de la ventana modal --- */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -439,7 +547,7 @@
             color: #333;
             margin-bottom: 20px;
         }
-        
+
         .modal-close-btn {
             position: absolute;
             top: 15px;
@@ -456,7 +564,7 @@
 
         .modal-options {
             display: flex;
-            justify-content: space-between; /* Distribuye el espacio entre los elementos */
+            justify-content: space-between;
             align-items: center;
             margin-top: 20px;
         }
@@ -466,8 +574,8 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            flex-grow: 1; /* Permite que cada opción crezca para ocupar el espacio disponible */
-            padding: 0 10px; /* Agregamos un padding horizontal para el espacio */
+            flex-grow: 1;
+            padding: 0 10px;
             gap: 10px;
             color: #7494ec;
             font-size: 14px;
@@ -552,28 +660,26 @@
         <!-- login form -->
         <div class="form-box login">
             <form action="">
-                <h1 id="login-heading">Login</h1>
+                <h1>Login</h1>
                 <div class="input-box">
                     <input type="text" required>
-                    <label>Username</label>
+                    <label>Usuario</label>
                     <i class='bx bxs-user input-icon'></i>
                 </div>
                 <div class="input-box">
                     <input id="login-password" type="password" required>
-                    <label>Password</label>
+                    <label>Contraseña</label>
                     <i class='bx bxs-lock-alt input-icon'></i>
                     <i id="toggle-login-password" class='bx bxs-hide password-toggle-icon'></i>
                 </div>
-                
-                <!-- Botón para abrir la ventana modal -->
+
                 <a href="#" class="forgot-btn" id="forgot-password-btn">
                     <i class='bx bx-refresh bx-flip-horizontal'></i>
                     ¿Olvidaste tu contraseña?
                 </a>
 
                 <button type="submit" class="btn">login</button>
-                
-                <!-- Animación de onda de carga -->
+
                 <div class="wave-container">
                     <div class="wave">
                         <div class="dot"></div>
@@ -589,25 +695,85 @@
         <!--Registration-->
         <div class="form-box register">
             <form action="">
-                <h1 id="register-heading">Registration</h1>
-                <div class="input-box">
-                    <input type="text" required>
-                    <label>Username</label>
-                    <i class='bx bxs-user input-icon'></i>
+                <h1>Registro</h1>
+                <div class="timeline">
+                    <div class="timeline-step" id="step-1-timeline">
+                        <div class="timeline-dot">1</div>
+                        <div class="timeline-label">Datos Básicos</div>
+                    </div>
+                    <div class="timeline-step" id="step-2-timeline">
+                        <div class="timeline-dot">2</div>
+                        <div class="timeline-label">Contraseña</div>
+                    </div>
+                    <div class="timeline-step" id="step-3-timeline">
+                        <div class="timeline-dot">3</div>
+                        <div class="timeline-label">Seguridad</div>
+                    </div>
                 </div>
-                <div class="input-box">
-                    <input type="text" required>
-                    <label>Email</label>
-                    <i class='bx bxs-envelope input-icon'></i>
+
+                <!-- Paso 1: Datos Básicos -->
+                <div class="step active" id="step-1">
+                    <div class="input-box">
+                        <input type="text" id="user-name" required oninput="handleInputValidation(this)">
+                        <label>Nombre</label>
+                        <i class='bx bxs-user input-icon'></i>
+                    </div>
+                    <div class="input-box">
+                        <input type="text" id="user-last-name" required oninput="handleInputValidation(this)">
+                        <label>Apellido</label>
+                        <i class='bx bxs-user input-icon'></i>
+                    </div>
+                    <div class="input-box">
+                        <input type="text" id="user-email" required oninput="handleInputValidation(this)">
+                        <label>Correo</label>
+                        <i class='bx bxs-envelope input-icon'></i>
+                    </div>
+                    <div class="input-box">
+                        <input type="tel" id="user-phone" required oninput="handleInputValidation(this)">
+                        <label>Teléfono</label>
+                        <i class='bx bxs-phone input-icon'></i>
+                    </div>
+                    <div class="form-navigation">
+                        <button type="button" class="btn next" onclick="nextStep()">Siguiente</button>
+                    </div>
                 </div>
-                <div class="input-box">
-                    <input id="register-password" type="password" required>
-                    <label>Password</label>
-                    <i class='bx bxs-lock-alt input-icon'></i>
-                    <i id="toggle-register-password" class='bx bxs-hide password-toggle-icon'></i>
+
+                <!-- Paso 2: Contraseña -->
+                <div class="step" id="step-2">
+                    <div class="input-box">
+                        <input type="text" id="user-password" required>
+                        <label>Contraseña</label>
+                        <i class='bx bxs-key input-icon'></i>
+                        <i class='bx bxs-copy-alt copy-icon' onclick="copyPassword()"></i>
+                    </div>
+                    <div class="form-navigation">
+                        <button type="button" class="btn prev" onclick="prevStep()">Anterior</button>
+                        <button type="button" class="btn next" onclick="nextStep()">Siguiente</button>
+                    </div>
                 </div>
-                <button type="submit" class="btn">Register</button>
-                <!-- Animación de onda de carga -->
+
+                <!-- Paso 3: Seguridad -->
+                <div class="step" id="step-3">
+                    <div class="input-box select-box">
+                        <select id="security-question" required>
+                            <option value="" disabled selected>Selecciona una pregunta de seguridad</option>
+                            <option value="pet">¿Cuál es el nombre de tu primera mascota?</option>
+                            <option value="mother">¿Cuál es el apellido de soltera de tu madre?</option>
+                            <option value="city">¿En qué ciudad naciste?</option>
+                            <option value="car">¿Cuál fue tu primer coche?</option>
+                        </select>
+                    </div>
+                    <div class="input-box">
+                        <input type="text" id="security-answer" required>
+                        <label>Tu respuesta</label>
+                        <i class='bx bxs-shield-alt-2 input-icon'></i>
+                    </div>
+                    <div class="form-navigation">
+                        <button type="button" class="btn prev" onclick="prevStep()">Anterior</button>
+                        <button type="submit" class="btn">Registrar</button>
+                    </div>
+                </div>
+
                 <div class="wave-container">
                     <div class="wave">
                         <div class="dot"></div>
@@ -623,19 +789,18 @@
         <!--toggle-->
         <div class="toggle-box">
             <div class="toggle-panel toggle-left">
-                <h1>Hello, Welcome!</h1>
-                <p>Don't have an account?</p>
-                <button class="btn register-btn">Register</button>
+                <h1>¡Hola, bienvenido!</h1>
+                <p>¿No tienes una cuenta?</p>
+                <button class="btn register-btn">Registrarse</button>
             </div>
             <div class="toggle-panel toggle-right">
-                <h1>Welcome Back!</h1>
-                <p>Already have an account?</p>
-                <button class="btn login-btn">Login</button>
+                <h1>¡Bienvenido de nuevo!</h1>
+                <p>¿Ya tienes una cuenta?</p>
+                <button class="btn login-btn">Iniciar sesión</button>
             </div>
         </div>
     </div>
 
-    <!-- Ventana Modal de Gestión de Contraseñas -->
     <div id="password-modal" class="modal-overlay">
         <div class="modal-content">
             <span class="modal-close-btn">&times;</span>
@@ -643,7 +808,7 @@
             <form id="modal-form">
                 <div class="input-box">
                     <input type="text" required>
-                    <label>Username</label>
+                    <label>Usuario</label>
                     <i class='bx bxs-user input-icon'></i>
                 </div>
                 <div class="modal-options">
@@ -664,6 +829,14 @@
         </div>
     </div>
 
+    <div id="custom-alert-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close-btn" onclick="closeCustomModal()">&times;</span>
+            <p id="custom-alert-message"></p>
+            <button class="btn" onclick="closeCustomModal()">OK</button>
+        </div>
+    </div>
+
     <script>
         const container = document.querySelector('.container');
         const registerBtn = document.querySelector('.register-btn');
@@ -672,75 +845,181 @@
         const registerForm = document.querySelector('.form-box.register form');
         const forgotPasswordBtn = document.getElementById('forgot-password-btn');
         const modal = document.getElementById('password-modal');
-        const modalCloseBtn = document.querySelector('.modal-close-btn');
+        const modalCloseBtn = document.querySelector('#password-modal .modal-close-btn');
 
-        // Función para aplicar la animación de onda al texto de un encabezado
-        function animateHeadingText(headingElement) {
-            const text = headingElement.textContent;
-            headingElement.textContent = ''; // Limpiamos el texto original
-            
-            for (let i = 0; i < text.length; i++) {
-                const span = document.createElement('span');
-                span.textContent = text[i];
-                headingElement.appendChild(span);
+        forgotPasswordBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            modal.classList.add('visible');
+        });
+
+        modalCloseBtn.addEventListener('click', () => {
+            modal.classList.remove('visible');
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('visible');
             }
-        }
-        
-        // Llamamos a la función para animar los encabezados
-        animateHeadingText(document.getElementById('login-heading'));
-        animateHeadingText(document.getElementById('register-heading'));
+        });
 
-        // Función para simular una llamada a un servidor y devolver una promesa
-        function fetchData() {
-            return new Promise(resolve => {
-                const delay = Math.random() * (6000 - 1000) + 1000;
-                
-                setTimeout(() => {
-                    resolve({ status: 'success', message: 'User data received!' });
-                }, delay);
+        let currentStep = 1;
+        const totalSteps = 3;
+
+        function showCustomModal(message) {
+            const modalElement = document.getElementById('custom-alert-modal');
+            const messageElement = document.getElementById('custom-alert-message');
+            messageElement.textContent = message;
+            modalElement.classList.add('visible');
+        }
+
+        function closeCustomModal() {
+            const modalElement = document.getElementById('custom-alert-modal');
+            modalElement.classList.remove('visible');
+        }
+
+        /**
+         * Muestra el paso actual del formulario y actualiza la línea de tiempo.
+         * @param {number} stepNumber - El número del paso a mostrar.
+         */
+        function showStep(stepNumber) {
+            const steps = document.querySelectorAll('.step');
+            steps.forEach(step => step.classList.remove('active'));
+            document.getElementById(`step-${stepNumber}`).classList.add('active');
+
+            const timelineDots = document.querySelectorAll('.timeline-step');
+            timelineDots.forEach((dot, index) => {
+                if (index < stepNumber) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
             });
         }
+        
+        /**
+         * Realiza una validación en tiempo real para un campo de entrada específico.
+         * @param {HTMLInputElement} input - El elemento de entrada a validar.
+         */
+        function handleInputValidation(input) {
+            if (input.value.trim() === '') {
+                // No mostrar modal si el campo está vacío, solo dejar que la validación final se encargue.
+                return;
+            }
 
-        // Función asíncrona para manejar la carga y la respuesta del servidor
-        async function handleFormSubmission(form) {
-            form.classList.add('is-loading');
+            if (input.id === 'user-email') {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(input.value)) {
+                    showCustomModal("Por favor, introduce un correo electrónico válido (ej: usuario@dominio.com).");
+                    return;
+                }
+            }
 
-            try {
-                const response = await fetchData();
-                console.log('Server response:', response);
-                form.classList.remove('is-loading');
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                form.classList.remove('is-loading');
+            if (input.id === 'user-phone') {
+                const phoneRegex = /^\d+$/;
+                if (!phoneRegex.test(input.value)) {
+                    showCustomModal("El campo de teléfono solo debe contener números.");
+                    return;
+                }
             }
         }
 
-        // Event listener para el botón de "Login"
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            handleFormSubmission(loginForm);
-        });
+        /**
+         * Valida todos los campos requeridos en el paso actual.
+         * @param {number} stepNumber - El número del paso a validar.
+         * @returns {boolean} - true si todos los campos son válidos, de lo contrario false.
+         */
+        function validateStep(stepNumber) {
+            const stepElement = document.getElementById(`step-${stepNumber}`);
+            const inputs = stepElement.querySelectorAll('input[required], select[required]');
 
-        // Event listener para el botón de "Register"
-        registerForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            handleFormSubmission(registerForm);
-        });
+            for (const input of inputs) {
+                if (input.value.trim() === '') {
+                    showCustomModal("Por favor, completa todos los campos.");
+                    return false;
+                }
 
-        // Lógica para alternar entre formularios
+                if (input.id === 'user-email') {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(input.value)) {
+                        showCustomModal("Por favor, introduce un correo electrónico válido (ej: usuario@dominio.com).");
+                        return false;
+                    }
+                }
+
+                if (input.id === 'user-phone') {
+                    const phoneRegex = /^\d+$/;
+                    if (!phoneRegex.test(input.value)) {
+                        showCustomModal("El campo de teléfono solo debe contener números.");
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function nextStep() {
+            if (validateStep(currentStep)) {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    showStep(currentStep);
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+
+        function generateShortUUID() {
+            const chars = 'ABCDEFGHIJKLMNPQRSTUVWXYZ23456789';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function copyPassword() {
+            const passwordInput = document.getElementById('user-password');
+            passwordInput.select();
+            document.execCommand('copy');
+        }
+
         registerBtn.addEventListener('click', () => {
             container.classList.add('active');
+            document.getElementById('user-password').value = generateShortUUID();
+            showStep(1);
+            currentStep = 1;
         });
 
         loginBtn.addEventListener('click', () => {
             container.classList.remove('active');
         });
 
-        // Lógica para mostrar/ocultar contraseña
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            loginForm.classList.add('is-loading');
+            setTimeout(() => {
+                 loginForm.classList.remove('is-loading');
+            }, 2000);
+        });
+
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (validateStep(currentStep)) {
+                registerForm.classList.add('is-loading');
+                setTimeout(() => {
+                    registerForm.classList.remove('is-loading');
+                    showCustomModal("¡Registro exitoso!");
+                }, 2000);
+            }
+        });
+
         const loginPasswordInput = document.getElementById('login-password');
         const toggleLoginPassword = document.getElementById('toggle-login-password');
-        const registerPasswordInput = document.getElementById('register-password');
-        const toggleRegisterPassword = document.getElementById('toggle-register-password');
 
         if (toggleLoginPassword && loginPasswordInput) {
             toggleLoginPassword.addEventListener('click', () => {
@@ -756,38 +1035,6 @@
                 }
             });
         }
-        
-        if (toggleRegisterPassword && registerPasswordInput) {
-             toggleRegisterPassword.addEventListener('click', () => {
-                const type = registerPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                registerPasswordInput.setAttribute('type', type);
-
-                if (type === 'password') {
-                    toggleRegisterPassword.classList.remove('bxs-show');
-                    toggleRegisterPassword.classList.add('bxs-hide');
-                } else {
-                    toggleRegisterPassword.classList.remove('bxs-hide');
-                    toggleRegisterPassword.classList.add('bxs-show');
-                }
-            });
-        }
-        
-
-        // Lógica para mostrar y ocultar la ventana modal
-        forgotPasswordBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            modal.classList.add('visible');
-        });
-
-        modalCloseBtn.addEventListener('click', () => {
-            modal.classList.remove('visible');
-        });
-
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('visible');
-            }
-        });
     </script>
 </body>
 </html>
