@@ -983,6 +983,9 @@
                         <div class="color-box" style="background-color: #7f8c8d;"></div>
                     </div>
                 </div>
+                <button type="button" class="btn mt-8" id="okBtn">
+                    OK
+                </button>
             </div>
         </div>
     </div>
@@ -1011,6 +1014,7 @@
         const appearanceBtn = document.getElementById('appearance-btn');
         const appearanceModal = document.getElementById('appearance-modal');
         const appearanceModalCloseBtn = document.getElementById('appearance-modal-close');
+        const okBtn = document.getElementById('okBtn'); // Nuevo: Referencia al botón OK
         
         const accentColorButtons = document.querySelectorAll('#appearance-modal .color-palette-container.accent .color-button');
         const backgroundColorButtons = document.querySelectorAll('#appearance-modal .color-palette-container.background .color-button');
@@ -1025,6 +1029,11 @@
 
         // Event listener for closing the appearance modal
         appearanceModalCloseBtn.addEventListener('click', () => {
+            appearanceModal.classList.remove('visible');
+        });
+
+        // Nuevo: Event listener para el botón OK
+        okBtn.addEventListener('click', () => {
             appearanceModal.classList.remove('visible');
         });
 
