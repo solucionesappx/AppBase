@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Modern Animated Login Form - V3</title>
+  <title>Formulario de Inicio de Sesi\u00f3n Moderno y Animado - V5</title>
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
   <style>
     @import url("https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap");
@@ -129,7 +129,7 @@
       inset: 60px;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: center; /* Se mantiene para centrar los elementos horizontalmente */
       flex-direction: column;
       border-radius: 10px;
       background: var(--box-color);
@@ -171,8 +171,8 @@
       width: 100%; /* Ancho reducido y alineado al centro */
       margin-bottom: 20px;
     }
-
-    input {
+    
+    .input-group input {
       width: 100%;
       padding: 10px 0px; /* Ajuste para reducir la sangría lateral */
       text-align: center; /* Centra el texto en los campos de entrada */
@@ -185,6 +185,10 @@
       transition: border-color 0.3s ease;
       color: var(--text-color);
     }
+    
+    .input-group input#userPassword {
+        text-align: left; /* Alineación del texto a la izquierda para la contraseña */
+    }
 
     input:focus {
       border-color: var(--accent-color-2);
@@ -193,11 +197,14 @@
     /* El botón también debe tener un ancho fijo para alinearse con los inputs */
     input[type="submit"] {
         width: 120%;
+        height: 40px;
         background: var(--accent-color-2);
         border: none;
+        font-size: 1.5em;
         font-weight: 500;
-        color: #fff;
+        color: #2f7ea1;
         cursor: pointer;
+        border-radius: 10px;
         transition: 0.5s;
     }
     input[type="submit"]:hover {
@@ -213,20 +220,21 @@
       pointer-events: none;
       transition: 0.3s ease;
     }
-
-    body.dark-mode .input-group label {
-      color: #aaa; /* Para el modo oscuro, el color debe ser claro para contrastar. */
-    }
-  
+    
+    .input-group.has-value label,
     input:focus + label,
     input:valid + label {
-      top: -12px;
+      top: -1px;
       left: 10px;
       font-size: 0.8em;
       color: var(--accent-color-2);
       background: var(--box-color);
       padding: 0 5px;
       border-radius: 5px;
+    }
+
+    body.dark-mode .input-group label {
+      color: #aaa; /* Para el modo oscuro, el color debe ser claro para contrastar. */
     }
 
     /* Estilos por defecto para el contenedor de enlaces (para pantallas grandes) */
@@ -309,6 +317,190 @@
         background: var(--accent-color-2);
         color: var(--box-color);
     }
+    
+    /* === Estilos para las ventanas modales === */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .modal-overlay.custom-alert-centered {
+        /*
+        * Posicionamiento fijo dentro del contenedor .box,
+        * lo que permite centrar la modal respecto al formulario
+        * ampliado al hacer hover.
+        */
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        /*
+        * La transformación se aplica desde el centro del elemento
+        * para centrarlo perfectamente.
+        */
+        transform: translate(-40%, -50%);
+        /*
+        * Ajustar el ancho y alto para que la modal se muestre
+        * correctamente dentro del contenedor expandido.
+        */
+        width: 100%; 
+        height: 100%; 
+        background: transparent; /* Fondo transparente para ver el formulario detrás */
+        z-index: 2000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.5s ease;
+        pointer-events: none; /* Permite que los clics pasen a los elementos debajo */
+    }
+
+    .modal-overlay.custom-alert-centered.visible {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto; /* Habilita los clics en la modal cuando está visible */
+    }
+
+    .modal-content {
+      background: var(--box-color);
+      padding: 30px;
+      border-radius: 15px;
+      color: var(--text-color);
+      width: 90%;
+      max-width: 400px;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+      position: relative;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1);
+    }
+    
+    .modal-content .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 1.5em;
+      cursor: pointer;
+      color: var(--text-color);
+      background: none;
+      border: none;
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
+    }
+    
+    .modal-content .close-btn:hover {
+        opacity: 1;
+    }
+    
+    .modal-content h3 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 1.5em;
+        font-weight: 600;
+    }
+    /* Estilos para los input del modal, ajustando el ancho */
+    .modal-content .input-group input {
+        width: 100%;
+        padding: 10px 0px; /* Ajuste para reducir la sangría lateral */
+        text-align: center; /* Centra el texto en los campos de entrada */
+    }
+    
+    .modal-content .input-group #userPassword {
+      text-align: left; /* Alineación del texto a la izquierda para la contraseña */
+    }
+
+    .modal-content .input-group label {
+        left: 20px;
+    }
+    .modal-content .input-group input:focus + label,
+    .modal-content .input-group input:valid + label {
+        left: 10px;
+    }
+    .modal-content .modal-btn {
+      display: block;
+      width: 80%;
+      margin: 20px auto 0;
+      padding: 10px 0;
+      background: var(--accent-color-2);
+      border: none;
+      font-weight: 500;
+      color: #2f7ea1
+      cursor: pointer;
+      border-radius: 10px;
+      transition: 0.5s;
+    }
+    .modal-content .modal-btn:hover {
+      box-shadow: 0 0 10px var(--accent-color-2), 0 0 60px var(--accent-color-2);
+    }
+
+    /* === Estilos para el modal de alerta personalizada === */
+    #custom-alert-modal {
+        /*
+        * Se elimina la posición fixed y la alineación flex
+        * para que el nuevo estilo custom-alert-centered
+        * tome el control.
+        */
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 3000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    #custom-alert-modal.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    #custom-alert-modal .modal-content {
+        padding: 10px; /* Reducido de 30px */
+        text-align: center;
+        max-width: 300px; /* Reducido de 400px */
+    }
+
+    #custom-alert-modal .modal-content h3 {
+        margin: 0 0 5px 0;
+    }
+    
+    .password-display {
+        font-size: 1.1em;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        padding: 1px;
+        background: var(--border-color);
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        user-select: text;
+    }
+
+    .password-display i {
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.3s ease;
+    }
+
+    .password-display i:hover {
+        opacity: 1;
+    }
+
   </style>
 </head>
 <body>
@@ -327,26 +519,106 @@
       <div class="loginBx">
         <h2>
           <i class="fa-solid fa-right-to-bracket"></i>
-          Login
+          Inicio
           <i class="fa-solid fa-heart"></i>
         </h2>
         <div class="input-group">
           <input type="text" id="username" required>
-          <label for="username">Username</label>
+          <label for="username">Nombre de usuario</label>
         </div>
         <div class="input-group">
           <input type="password" id="password" required>
-          <label for="password">Password</label>
+          <label for="password">Contraseña</label>
         </div>
-        <input type="submit" value="Sign in" />
+        <input type="submit" value="Iniciar sesión" />
         <div class="group">
-          <a href="#">Forgot Password</a>
-          <a href="#">Sign up</a>
+          <a href="#" id="forgotPasswordLink">¿Olvidaste tu contraseña?</a>
+          <a href="#" id="signupLink">Regístrate</a>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Modal para "Forgot Password" -->
+  <div class="modal-overlay" id="forgotPasswordModal">
+    <div class="modal-content">
+      <button class="close-btn">&times;</button>
+      <h3>Recuperar Contraseña</h3>
+        <form id="forgotPasswordForm" autocomplete="off">
+          <div class="input-group">
+            <input type="text" id="usernameRecuperar" required>
+            <label for="usernameRecuperar">Nombre de usuario</label>
+          </div>
+          <div class="input-group">
+            <input type="text" id="securityAnswer" required>
+            <label for="securityAnswer">Respuesta de Seguridad</label>
+          </div>
+          <button type="submit" class="modal-btn">Enviar</button>
+        </form>
+    </div>
+  </div>
+
+  <!-- Modal para "Sign up" -->
+  <div class="modal-overlay" id="signupModal">
+    <div class="modal-content">
+      <button class="close-btn">&times;</button>
+      <h3>Registro</h3>
+        <form id="signupForm" autocomplete="off">
+          <div class="input-group">
+            <input type="text" id="firstName" required>
+            <label for="firstName">Nombre</label>
+          </div>
+          <div class="input-group">
+            <input type="text" id="lastName" required>
+            <label for="lastName">Apellido</label>
+          </div>
+          <div class="input-group">
+            <!-- Este ID ha sido modificado intencionalmente. -->
+            <input type="text" id="userEmail" required>
+            <label for="userEmail">Correo electrónico</label>
+          </div>
+          <div class="input-group">
+            <input type="tel" id="user-phone" required>
+            <label for="user-phone">Teléfono</label>
+          </div>
+          <div class="input-group">
+            <input type="text" id="securityQuestion" required>
+            <label for="securityQuestion">Pregunta de Seguridad</label>
+          </div>
+          <div class="input-group">
+            <input type="text" id="securityAnswerRegistro" required>
+            <label for="securityAnswerRegistro">Respuesta de Seguridad</label>
+          </div>
+          <button type="submit" class="modal-btn">Registrar</button>
+        </form>
+    </div>
+  </div>
+  
+  <!-- Modal de Alerta Personalizada -->
+  <div class="modal-overlay" id="custom-alert-modal">
+    <div class="modal-content">
+      <p id="custom-alert-message"></p>
+      <button class="modal-btn" onclick="closeCustomAlertModal()">Aceptar</button>
+    </div>
+  </div>
+
+
   <script>
+    // URL de tu script de Google Apps
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/exec';
+
+    // Variable global para almacenar la contraseña generada durante el registro.
+    let generatedPassword = '';
+
+    function generateShortUUID() {
+        const chars = 'ABCDEFGHIJKLMNPQRSTUVWXYZ234562589';
+        let result = '';
+        for (let i = 0; i < 6; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
     function toggleTheme() {
       const body = document.body;
       const icon = document.querySelector('.theme-toggle-btn i');
@@ -360,19 +632,272 @@
         icon.classList.add('fa-sun');
       }
     }
-    // No usamos el evento 'mouseleave' para evitar el problema de las ventanas emergentes.
-    // La solución está ahora en el CSS con :focus-within.
-    // El formulario se mantendrá abierto mientras haya un campo con foco.
 
-    // Escuchar el evento cuando el mouse sale del box, y el focus ya no esta en un elemento dentro del box
+    // Funciones para manejar los modales
+    function openModal(modalId) {
+      const modal = document.getElementById(modalId);
+      modal.classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      modal.classList.remove('active');
+    }
+
+    function copyToClipboard(textToCopy) {
+      // Método recomendado para entornos de iframe
+      const tempInput = document.createElement('textarea');
+      tempInput.value = textToCopy;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      
+      try {
+        const successful = document.execCommand('copy');
+        const msg = successful ? '¡Copiado!' : 'Error al copiar';
+        console.log('Comando de copia ejecutado:', msg);
+        showTemporaryAlert('¡Contraseña copiada!');
+      } catch (err) {
+        console.error('Error al intentar copiar:', err);
+        showTemporaryAlert('Error al copiar la contraseña.');
+      } finally {
+        document.body.removeChild(tempInput);
+      }
+    }
+
+    function showTemporaryAlert(message) {
+      const alertDiv = document.createElement('div');
+      alertDiv.innerText = message;
+      alertDiv.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: var(--accent-color-2);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+        z-index: 4000;
+        font-size: 0.9em;
+      `;
+      document.body.appendChild(alertDiv);
+
+      setTimeout(() => {
+        alertDiv.style.opacity = 1;
+      }, 10);
+
+      setTimeout(() => {
+        alertDiv.style.opacity = 0;
+        alertDiv.addEventListener('transitionend', () => alertDiv.remove());
+      }, 2000);
+    }
+
+    function closeCustomAlertModal() {
+        const modal = document.getElementById('custom-alert-modal');
+        modal.classList.remove('visible');
+
+        const errorInputId = modal.dataset.errorInputId;
+        const redirectUrl = modal.dataset.redirectUrl;
+
+        // Si se trata de un error de validación, se enfoca el campo.
+        if (errorInputId) {
+            const errorInput = document.getElementById(errorInputId);
+            if (errorInput) {
+                errorInput.focus();
+            }
+            delete modal.dataset.errorInputId;
+        }
+
+        // Si se trata de un mensaje de éxito, se redirige.
+        if (redirectUrl) {
+            window.location.href = redirectUrl;
+            delete modal.dataset.redirectUrl;
+        }
+    }
+
+    function showCustomModal(message, inputToFocus = null, redirectUrl = null, showPassword = null) {
+        const modalElement = document.getElementById('custom-alert-modal');
+        const messageElement = document.getElementById('custom-alert-message');
+        
+        let fullMessage = message;
+        if (showPassword) {
+            fullMessage += `<br><br>
+            <div class="password-display">
+                <span id="generatedPasswordSpan">${showPassword}</span>
+                <i class="fa-solid fa-copy" onclick="copyToClipboard('${showPassword}')"></i>
+            </div>
+            `;
+        }
+
+        messageElement.innerHTML = fullMessage;
+        modalElement.classList.add('visible');
+        
+        if (inputToFocus) {
+            modalElement.dataset.errorInputId = inputToFocus.id;
+        }
+
+        if (redirectUrl) {
+            modalElement.dataset.redirectUrl = redirectUrl;
+        }
+    }
+
+    // Manejo de eventos para abrir y cerrar modales
+    document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal('forgotPasswordModal');
+    });
+
+    document.getElementById('signupLink').addEventListener('click', (e) => {
+        e.preventDefault();
+        // Generar la contraseña y almacenarla en la variable global
+        generatedPassword = generateShortUUID();
+        openModal('signupModal');
+    });
+
+    document.querySelectorAll('.close-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            closeModal(e.target.closest('.modal-overlay').id);
+        });
+    });
+
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeModal(overlay.id);
+            }
+        });
+    });
+    
+    // Manejo del formulario principal de login
+    const loginForm = document.querySelector('.loginBx form');
+    if (loginForm) {
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        if (!username || !password) {
+            console.error('El nombre de usuario y la contraseña son obligatorios.');
+            showCustomModal("El nombre de usuario y la contraseña son obligatorios.");
+            return;
+        }
+        
+        // Simulación de validación de credenciales
+        const isValidUser = (username === "user" && password === "password");
+
+        if (isValidUser) {
+            console.log('Login exitoso. Redirigiendo a dashboard.html');
+            // Redirección directa sin modal de confirmación
+            window.location.href = 'dashboard.html';
+        } else {
+            console.error('Credenciales incorrectas.');
+            showCustomModal("Credenciales incorrectas. Por favor, inténtalo de nuevo.");
+        }
+        
+        // Simulación de una llamada fetch (código comentado)
+        // try {
+        //   const response = await fetch(APPS_SCRIPT_URL, {
+        //       method: 'POST',
+        //       headers: {
+        //           'Content-Type': 'application/json',
+        //       },
+        //       body: JSON.stringify({
+        //           action: 'login',
+        //           username: username,
+        //           password: password
+        //       }),
+        //   });
+        //   const result = await response.json();
+        //   console.log('Respuesta del servidor:', result);
+        // } catch (error) {
+        //   console.error('Error durante la solicitud de login:', error);
+        // }
+      });
+    }
+
+    // Manejo del formulario de "Forgot Password"
+    const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+    forgotPasswordForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = document.getElementById('usernameRecuperar').value;
+        const securityAnswer = document.getElementById('securityAnswer').value;
+        console.log('Datos enviados para recuperar contraseña:', {
+            username: username,
+            securityAnswer: securityAnswer
+        });
+        closeModal('forgotPasswordModal');
+    });
+
+    // Manejo del formulario de "Sign up"
+    const signupForm = document.getElementById('signupForm');
+    signupForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const inputs = e.target.querySelectorAll('input:required');
+
+        for (const input of inputs) {
+            if (input.value.trim() === '' && input.id !== 'userPassword') {
+                showCustomModal("Por favor, completa todos los campos.");
+                return false;
+            }
+
+            if (input.id === 'userEmail') {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(input.value)) {
+                    showCustomModal("Por favor, introduce un correo electrónico válido<br>(ej: usuario@dominio.com)", input);
+                    return false;
+                }
+            }
+
+            if (input.id === 'user-phone') {
+                const phoneRegex = /^\d+$/;
+                if (!phoneRegex.test(input.value)) {
+                    showCustomModal("El campo de teléfono solo debe contener números.", input);
+                    return false;
+                }
+            }
+        }
+
+        const userName = document.getElementById('firstName').value;
+        const userLastName = document.getElementById('lastName').value;
+        const userEmail = document.getElementById('userEmail').value;
+        const userPhone = document.getElementById('user-phone').value;
+        const securityQuestion = document.getElementById('securityQuestion').value;
+        const securityAnswer = document.getElementById('securityAnswerRegistro').value;
+
+        // Definir App tienda y Usuario_ID
+        const appTienda = "ZXC";
+        const userId = generateShortUUID().slice(-5);
+
+        const registrationData = {
+            Usuario_Tienda: appTienda,
+            Usuario_Nombre: `${userName} ${userLastName}`,
+            Usuario_Correo: userEmail,
+            Usuario_Telefono: userPhone,
+            Usuario_Clave: generatedPassword, // Usar la contrase\u00f1a generada
+            Usuario_ID: userId,
+            Pregunta_ID: securityQuestion,
+            Usuario_RespuestaSeg: securityAnswer
+        };
+        
+        console.log("Datos del formulario de registro:", registrationData);
+
+
+        // Simular la recepción de un JWT y mostrar el mensaje de éxito
+        const mockJWT = "mock_jwt_token_12345";
+        console.log("JWT recibido:", mockJWT);
+        
+        closeModal('signupModal');
+        // El método .reset() borra todos los valores del formulario, garantizando que no queden datos residuales en el DOM.
+        signupForm.reset();
+        showCustomModal("Registro completado con éxtio.<br>Contraseña:", null, 'index.html', generatedPassword);
+    });
+
     const box = document.querySelector('.box');
     const inputs = box.querySelectorAll('input');
 
-    // Manejar el reset del formulario de manera más controlada
     box.addEventListener('mouseleave', () => {
-      // Usar un pequeño retraso para permitir que la ventana emergente aparezca antes de reiniciar
       setTimeout(() => {
-        // Solo reiniciar si el foco no está dentro del formulario
         if (!box.contains(document.activeElement)) {
           inputs.forEach(input => {
             input.value = '';
@@ -382,9 +907,11 @@
     });
 
     const redirectBtn = document.getElementById('redirect-btn');
-    redirectBtn.addEventListener('click', () => {
+    if (redirectBtn) {
+      redirectBtn.addEventListener('click', () => {
         window.location.href = './index_blue.html';
-    });
+      });
+    }
   </script>
 </body>
 </html>
