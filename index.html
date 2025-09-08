@@ -145,7 +145,7 @@
       position: relative;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: center; /* Se mantiene para centrar los elementos horizontalmente */
       flex-direction: column;
       gap: 12px;
       width: 70%;
@@ -168,13 +168,13 @@
 
     .input-group {
       position: relative;
-      width: 100%;
+      width: 80%; /* Ancho reducido y alineado al centro */
       margin-bottom: 20px;
     }
 
     input {
       width: 100%;
-      padding: 10px 20px;
+      padding: 10px 5px; /* Ajuste para reducir la sangría lateral */
       outline: none;
       border: none;
       font-size: 1em;
@@ -188,6 +188,19 @@
     input:focus {
       border-color: var(--accent-color-2);
       color: #0a0303
+    }
+    /* El botón también debe tener un ancho fijo para alinearse con los inputs */
+    input[type="submit"] {
+        width: 120%;
+        background: var(--accent-color-2);
+        border: none;
+        font-weight: 500;
+        color: #fff;
+        cursor: pointer;
+        transition: 0.5s;
+    }
+    input[type="submit"]:hover {
+        box-shadow: 0 0 10px var(--accent-color-2), 0 0 60px var(--accent-color-2);
     }
 
     .input-group label {
@@ -216,9 +229,10 @@
     }
 
     .group {
-      width: 100%;
+      width: 80%; /* Ancho reducido para alinearse con los inputs y el botón */
       display: flex;
       justify-content: space-between;
+      padding: 20px
     }
 
     .group a {
@@ -358,7 +372,7 @@
 
     const redirectBtn = document.getElementById('redirect-btn');
     redirectBtn.addEventListener('click', () => {
-        window.location.href = './index_blue.html';
+        window.location.href = './index_blu.html';
     });
   </script>
 </body>
