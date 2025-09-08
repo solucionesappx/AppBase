@@ -1,964 +1,1354 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Formulario de Inicio de Sesión Moderno y Animado - V5</title>
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
-  <style>
-    @import url("https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap");
-
-    /* Definición de variables CSS para el tema claro */
-    :root {
-      --bg-color: #25252b;
-      --box-color: #2d2d39;
-      --border-color: #25252b;
-      --text-color: #fff;
-      --link-color: #ff2770;
-      --accent-color-1: #ff2770;
-      --accent-color-2: #dbeb7a;
-      --box-shadow-color: rgba(0,0,0,0.5);  
-    }
-
-    /* Variables para el tema oscuro */
-    body.dark-mode {
-      --bg-color: #f0f2f5;
-      --box-color: #e9ecef;
-      --border-color: #dcdcdc;
-      --text-color: #111;
-      --link-color: #ff6347;
-      --accent-color-1: #ff6347;
-      --accent-color-2: #7aebbc;
-      --box-shadow-color: rgba(0,0,0,0.2);
-    }
-
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background: var(--bg-color);
-    }
-
-    * {
-      font-family: "Poppins", sans-serif;
-    }
-
-    @property --a {
-      syntax: "<angle>";
-      inherits: false;
-      initial-value: 0deg;
-    }
-
-    .box {
-      position: relative;
-      width: 450px;
-      height: 200px;
-      background: repeating-conic-gradient(
-        from var(--a),
-        var(--accent-color-1) 0%,
-        var(--accent-color-1) 5%,
-        transparent 5%,
-        transparent 40%,
-        var(--accent-color-1) 50%
-      );
-      filter: drop-shadow(0 15px 50px var(--box-shadow-color));
-      border-radius: 20px;
-      animation: rotating 4s linear infinite;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transition: 0.5s;
-    }
-
-    @keyframes rotating {
-      0% {
-        --a: 0deg;
-      }
-      100% {
-        --a: 360deg;
-      }
-    }
-
-    .box::before {
-      content: "";
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: repeating-conic-gradient(
-        from var(--a),
-        var(--accent-color-2) 0%,
-        var(--accent-color-2) 5%,
-        transparent 5%,
-        transparent 40%,
-        var(--accent-color-2) 50%
-      );
-      filter: drop-shadow(0 15px 50px var(--box-shadow-color));
-      border-radius: 20px;
-      animation: rotating 4s linear infinite;
-      animation-delay: -1s;
-    }
-
-    .box::after {
-      content: "";
-      position: absolute;
-      inset: 4px;
-      background: var(--box-color);
-      border-radius: 15px;
-      border: 8px solid var(--border-color);
-    }
-    /* El formulario se expande al hacer hover y también al tener foco en cualquier campo */
-    .box:hover,
-    .box:focus-within {
-      width: 450px;
-      height: 500px;
-    }
-
-    .box:hover .login,
-    .box:focus-within .login {
-      inset: 40px;
-    }
-
-    .box:hover .loginBx,
-    .box:focus-within .loginBx {
-      transform: translateY(0px);
-    }
-
-    .login {
-      position: absolute;
-      inset: 60px;
-      display: flex;
-      justify-content: center;
-      align-items: center; /* Se mantiene para centrar los elementos horizontalmente */
-      flex-direction: column;
-      border-radius: 10px;
-      background: var(--box-color);
-      color: var(--text-color);
-      z-index: 1000;
-      box-shadow: inset 0 10px 20px var(--box-shadow-color);
-      border-bottom: 2px solid var(--border-color);
-      transition: 0.5s;
-      overflow: hidden;
-    }
-
-    .loginBx {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center; /* Se mantiene para centrar los elementos horizontalmente */
-      flex-direction: column;
-      gap: 12px;
-      width: 80%;
-      transform: translateY(145px);
-      transition: 0.5s;
-    }
-
-    h2 {
-      text-transform: uppercase;
-      font-weight: 600;
-      letter-spacing: 0.2em;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    h2 i {
-      color: var(--accent-color-1);
-      text-shadow: 0 0 5px var(--accent-color-1), 0 0 20px var(--accent-color-1);
-    }
-
-    .input-group {
-      position: relative;
-      width: 100%; /* Ancho reducido y alineado al centro */
-      margin-bottom: 20px;
-    }
-    
-    .input-group input {
-      width: 100%;
-      padding: 10px 0px; /* Ajuste para reducir la sangría lateral */
-      text-align: center; /* Centra el texto en los campos de entrada */
-      outline: none;
-      border: none;
-      font-size: 1em;
-      background: var(--box-color);
-      border: 2px solid var(--border-color);
-      border-radius: 10px;
-      transition: border-color 0.3s ease;
-      color: var(--text-color);
-    }
-
-    .input-group input#userPassword {
-      text-align: left; /* Alineación del texto a la izquierda para la contraseña */
-    }
-    /* Regla para los input de texto que no son el botón de submit */
-    input:not([type="submit"]):focus {
-      border-color: var(--accent-color-2);
-      color: var(--text-color);
-    }
-    
-    /* Estilos para el icono de mostrar/ocultar contraseña */
-    .password-toggle-icon {
-        position: absolute; /* Inscrusta el icono como flotante */
-        right: 15px; /* Ajusta la posición del icono */
-        top: 50%;
-        transform: translateY(-50%);
-        cursor: pointer;
-        color: var(--text-color);
-        opacity: 0.6;
-        transition: opacity 0.3s ease;
-    }
-
-    .password-toggle-icon:hover {
-        opacity: 1;
-    }
-    
-    /* El botón también debe tener un ancho fijo para alinearse con los inputs */
-    input[type="submit"] {
-        width: 100%;
-        height: 40px;
-        background: var(--accent-color-2);
-        border: none;
-        font-size: 1.5em;
-        font-weight: 500;
-        color: #2f7ea1;
-        cursor: pointer;
-        border-radius: 10px;
-        transition: 0.5s;
-    }
-    input[type="submit"]:hover {
-        box-shadow: 0 0 10px var(--accent-color-2), 0 0 60px var(--accent-color-2);
-        color: var(--box-color); /* Agregado para asegurar que el texto sea visible */
-    }
-
-    .input-group label {
-      position: absolute;
-      left: 20px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #777;  /* El color inicial de la etiqueta debe ser visible en el fondo. */
-      pointer-events: none;
-      transition: 0.3s ease;
-    }
-    
-    .input-group.has-value label,
-    input:focus + label,
-    input:valid + label {
-      top: -1px;
-      left: 10px;
-      font-size: 0.8em;
-      color: var(--accent-color-2);
-      background: var(--box-color);
-      padding: 0 5px;
-      border-radius: 5px;
-    }
-
-    body.dark-mode .input-group label {
-      color: #aaa; /* Para el modo oscuro, el color debe ser claro para contrastar. */
-    }
-
-    /* Estilos por defecto para el contenedor de enlaces (para pantallas grandes) */
-    .group {
-      width: 80%;
-      display: flex;
-      justify-content: space-between;
-      margin-top: 10px;
-    }
-    
-    /* Media query para ajustar los estilos en pantallas pequeñas (máximo 600px de ancho) */
-    @media (max-width: 600px) {
-        .group {
-            width: 100%;
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Formulario de registro en pasos</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent-color: #7494ec;
+            --background-color: #fff;
         }
-    }
 
-    .group a {
-      color: var(--text-color);
-      text-decoration: none;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Roboto", sans-serif;
+        }
 
-    .group a:nth-child(2) {
-      color: var(--link-color);
-      font-weight: 600;
-    }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(90deg, #e2e2e2, #c9d6ff);
+        }
 
-    .top-buttons {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        right: 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        z-index: 2000;
-    }
+        .container {
+            position: relative;
+            width: 650px;
+            height: 550px;
+            background: var(--background-color);
+            border-radius: 30px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+            margin: 20px;
+            overflow: hidden;
+        }
 
-    .theme-toggle-btn {
-      width: 40px;
-      height: 40px;
-      background: var(--box-color);
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 5px 15px var(--box-shadow-color);
-      transition: all 0.3s ease;
-    }
+        .form-box {
+            position: absolute;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            background: var(--background-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+            text-align: center;
+            padding: 40px;
+            z-index: 1;
+            transition: 0.4s ease-in-out 0.8s, visibility 0.s 1s;
+        }
 
-    .theme-toggle-btn i {
-      font-size: 1.2em;
-      color: var(--text-color);
-      transition: all 0.3s ease;
-    }
+        .container.active .form-box {
+            right: 50%;
+        }
 
-    /* Ocultar el marcador de posición (no lo borramos del HTML para evitar cambios bruscos) */
-    input::placeholder {
-      color: transparent;
-    }
+        .form-box.register {
+            visibility: hidden;
+        }
 
-    /* Estilo para el nuevo botón */
-    .redirect-btn {
-      width: 40px;
-      height: 40px;
-      background: var(--box-color);
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 5px 15px var(--box-shadow-color);
-      text-decoration: none;
-      color: var(--text-color);
-      transition: all 0.3s ease;
-    }
+        .container.active .form-box.register {
+            visibility: visible;
+        }
 
-    .redirect-btn:hover {
-        background: var(--accent-color-2);
-        color: var(--box-color);
-    }
-    
-    /* === Estilos para las ventanas modales === */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-    }
+        form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            height: 100%;
+            position: relative;
+            padding-top: 50px;
+        }
 
-    .modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-    
-    .modal-overlay.custom-alert-centered {
-        /*
-        * Posicionamiento fijo dentro del contenedor .box,
-        * lo que permite centrar la modal respecto al formulario
-        * ampliado al hacer hover.
-        */
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        /*
-        * La transformación se aplica desde el centro del elemento
-        * para centrarlo perfectamente.
-        */
-        transform: translate(-40%, -50%);
-        /*
-        * Ajustar el ancho y alto para que la modal se muestre
-        * correctamente dentro del contenedor expandido.
-        */
-        width: 100%; 
-        height: 100%; 
-        background: transparent; /* Fondo transparente para ver el formulario detrás */
-        z-index: 2000;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: all 0.5s ease;
-        pointer-events: none; /* Permite que los clics pasen a los elementos debajo */
-    }
+        .form-box.register form {
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
 
-    .modal-overlay.custom-alert-centered.visible {
-        opacity: 1;
-        visibility: visible;
-        pointer-events: auto; /* Habilita los clics en la modal cuando está visible */
-    }
+        .step {
+            display: none;
+            width: 100%;
+            padding: 0 20px;
+            transition: opacity 0.5s ease-in-out;
+        }
 
-    .modal-content {
-      background: var(--box-color);
-      padding: 30px;
-      border-radius: 15px;
-      color: var(--text-color);
-      width: 90%;
-      max-width: 400px;
-      transform: scale(0.9);
-      transition: transform 0.3s ease;
-      position: relative;
-    }
+        .step.active {
+            display: block;
+            opacity: 1;
+        }
 
-    .modal-overlay.active .modal-content {
-      transform: scale(1);
-    }
-    
-    .modal-content .close-btn {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      font-size: 1.5em;
-      cursor: pointer;
-      color: var(--text-color);
-      background: none;
-      border: none;
-      opacity: 0.7;
-      transition: opacity 0.3s ease;
-    }
-    
-    .modal-content .close-btn:hover {
-        opacity: 1;
-    }
-    
-    .modal-content h3 {
-        text-align: center;
-        margin-bottom: 20px;
-        font-size: 1.5em;
-        font-weight: 600;
-    }
-    /* Estilos para los input del modal, ajustando el ancho */
-    .modal-content .input-group input {
-        width: 100%;
-        padding: 10px 0px; /* Ajuste para reducir la sangría lateral */
-        text-align: center; /* Centra el texto en los campos de entrada */
-    }
-    
-    .modal-content .input-group #userPassword {
-      text-align: left; /* Alineación del texto a la izquierda para la contraseña */
-    }
+        .timeline {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
 
-    .modal-content .input-group label {
-        left: 20px;
-    }
-    .modal-content .input-group input:focus + label,
-    .modal-content .input-group input:valid + label {
-        left: 10px;
-    }
-    .modal-content .modal-btn {
-      display: block;
-      width: 80%;
-      margin: 20px auto 0;
-      padding: 10px 0;
-      background: var(--accent-color-2);
-      border: none;
-      font-weight: 500;
-      color: #2f7ea1
-      cursor: pointer;
-      border-radius: 10px;
-      transition: 0.5s;
-    }
-    .modal-content .modal-btn:hover {
-      box-shadow: 0 0 10px var(--accent-color-2), 0 0 60px var(--accent-color-2);
-    }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 31%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #ccc;
+            transform: translateY(-50%);
+        }
 
-    /* === Estilos para el modal de alerta personalizada === */
-    #custom-alert-modal {
-        /*
-        * Se elimina la posición fixed y la alineación flex
-        * para que el nuevo estilo custom-alert-centered
-        * tome el control.
-        */
-        background: rgba(0, 0, 0, 0.7);
-        z-index: 3000;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
-    }
+        .timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 3;
+        }
 
-    #custom-alert-modal.visible {
-        opacity: 1;
-        visibility: visible;
-    }
+        .timeline-dot {
+            width: 25px;
+            height: 25px;
+            background: #fff;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ccc;
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
+        }
 
-    #custom-alert-modal .modal-content {
-        padding: 10px; /* Reducido de 30px */
-        text-align: center;
-        max-width: 300px; /* Reducido de 400px */
-    }
+        .timeline-label {
+            margin-top: 5px;
+            font-size: 12px;
+            text-align: center;
+            color: #888;
+            font-weight: 500;
+        }
 
-    #custom-alert-modal .modal-content h3 {
-        margin: 0 0 5px 0;
-    }
-    
-    .password-display {
-        font-size: 1.1em;
-        font-weight: 600;
-        letter-spacing: 0.1em;
-        padding: 1px;
-        background: var(--border-color);
-        border-radius: 8px;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        user-select: text;
-    }
+        .timeline-step.active .timeline-dot {
+            background: #fff;
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
 
-    .password-display i {
-        cursor: pointer;
-        opacity: 0.8;
-        transition: opacity 0.3s ease;
-    }
+        .form-navigation {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            margin-top: 20px;
+            flex-wrap: wrap; /* Permite que los botones se envuelvan en pantallas más pequeñas */
+            gap: 10px; /* Espacio entre botones */
+        }
+        
+        .form-navigation .btn {
+            flex-grow: 1;
+            min-width: 120px; /* Asegura un ancho mínimo para los botones */
+        }
 
-    .password-display i:hover {
-        opacity: 1;
-    }
+        .form-navigation .btn.prev {
+            background-color: #888;
+        }
 
-  </style>
+        .select-box {
+            position: relative;
+            width: 100%;
+            margin-bottom: 25px;
+        }
+
+        .select-box select {
+            width: 100%;
+            padding: 13px 50px 13px 20px;
+            background: #eee;
+            border-radius: 8px;
+            border: 2px solid #ccc;
+            outline: none;
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+            appearance: none;
+        }
+
+        .select-box::after {
+            content: '\25BC';
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            font-size: 14px;
+            color: #333;
+            pointer-events: none;
+        }
+
+        .select-box select:focus {
+            border-color: var(--accent-color);
+        }
+
+        .copy-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: var(--accent-color);
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .copy-icon:hover {
+            color: #5d75bc;
+        }
+
+        .wave-container {
+            display: none;
+        }
+
+        form.is-loading .wave-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 115%;
+            background-color: rgba(255, 255, 255, 0.5);
+            z-index: 2;
+            padding-bottom: 50px;
+        }
+
+        .wave {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            position: relative;
+            width: 12px;
+            height: 12px;
+            background: #ff5100;
+            border-radius: 50%;
+            animation: wave 1s infinite ease-in-out;
+            overflow: hidden;
+        }
+
+        .dot::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(120deg,rgba(255, 255, 255, 0.4),rgba(255, 255, 255, 0));
+            transform: skewX(-30deg);
+            animation: shine 1s infinite ease-in-out;
+        }
+
+        .dot:nth-child(1) { animation-delay: 0.0s; }
+        .dot:nth-child(2) { animation-delay: 0.1s; }
+        .dot:nth-child(3) { animation-delay: 0.2s; }
+        .dot:nth-child(4) { animation-delay: 0.3s; }
+        .dot:nth-child(5) { animation-delay: 0.4s; }
+        .dot:nth-child(6) { animation-delay: 0.5s; }
+
+        @keyframes wave {
+            0%, 40%, 100% {
+                transform: translateY(0);
+            }
+            20% {
+                transform: translateY(-20px); /* Valor modificado */
+            }
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .container h1 {
+            font-size: 36px;
+            margin-bottom: 25px;
+        }
+
+        .input-box {
+            position: relative;
+            width: 100%;
+            margin-bottom: 20px; /* espaciado entre elementos del formulario */
+        }
+
+        .input-box input {
+            width: 100%;
+            padding: 13px 50px 13px 50px;
+            background: #eee;
+            border-radius: 8px;
+            border: 2px solid #ccc;
+            outline: none;
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .input-box input:focus,
+        .input-box input:valid {
+            border-color: var(--accent-color);
+        }
+
+        .input-box label {
+            position: absolute;
+            top: 50%;
+            left: 50px;
+            transform: translateY(-50%);
+            color: #888;
+            pointer-events: none;
+            transition: 0.3s ease;
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .input-box input:focus ~ label,
+        .input-box input:valid ~ label {
+            top: -10px;
+            left: 20px;
+            font-size: 14px;
+            color: var(--accent-color);
+            background: var(--background-color);
+            padding: 0 5px;
+        }
+
+        .input-box .input-icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: var(--accent-color);
+            left: 20px;
+        }
+
+        .input-box .password-toggle-icon {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .btn {
+            width: 100%;
+            height: 48px;
+            background-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #fff;
+            font-weight: 600;
+            transition: 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 5px var(--accent-color), 0 0 15px var(--accent-color), 0 0 30px var(--accent-color);
+        }
+
+        .forgot-btn {
+            width: 100%;
+            height: 48px;
+            background-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #fff;
+            font-weight: 600;
+            transition: background-color 0.4s, color 0.4s, transform 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .forgot-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 5px var(--accent-color), 0 0 15px var(--accent-color), 0 0 30px var(--accent-color);
+        }
+
+        .form-box .btn::before, .forgot-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0));
+            transform: skewX(-30deg);
+            animation: shine 2s infinite linear;
+        }
+
+        .forgot-btn i {
+            font-size: 24px;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-btn:hover i {
+            color: #fff;
+        }
+
+        .container p {
+            font-size: 14.5px;
+            margin: 15px 0;
+        }
+
+        .toggle-box {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .toggle-box::before {
+            content: "";
+            position: absolute;
+            left: -250%;
+            width: 300%;
+            height: 100%;
+            background: var(--accent-color);
+            border-radius: 360px;
+            z-index: 2;
+            transition: 0.8s ease-in-out;
+        }
+
+        .container.active .toggle-box::before {
+            left: 50%;
+        }
+
+        .toggle-panel {
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
+        
+        .toggle-panel h1,
+        .toggle-panel p {
+            text-align: center;
+        }
+
+        .toggle-panel.toggle-left {
+            left: 0;
+            transition-delay: 0.6s;
+            padding: 20px;
+        }
+        .container.active .toggle-panel.toggle-left {
+            left: -50%;
+            transition-delay: 0.6s;
+        }
+
+        .toggle-panel.toggle-right {
+            right: -50%;
+            transition-delay: 0.6s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0 40px;
+        }
+
+        .toggle-panel.toggle-right h1 {
+            margin-top: 40px;
+        }
+
+        .toggle-panel.toggle-right p {
+        /* Controla el espacio del párrafo */
+            margin-top: -10px;
+        }
+
+        .toggle-panel.toggle-right button {
+        /* Controla el espacio del botón */
+            margin-top: -5px;
+        }
+
+        .container.active .toggle-panel.toggle-right {
+            right: 0;
+            transition-delay: 0.8s;
+        }
+
+        .toggle-panel p {
+            margin-bottom: 20px;
+        }
+
+        .toggle-panel .btn {
+            position: relative;
+            overflow: hidden;
+            width: 160px;
+            height: 46px;
+            background: transparent;
+            border: 2px solid #fff;
+            box-shadow: none;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-panel .btn:hover {
+            background-color: transparent;
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            transform: translateY(-2px);
+            box-shadow: 0 0 5px #fff,
+                        0 0 15px #fff,
+                        0 0 30px #fff;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 80%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--background-color);
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 260px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            position: relative;
+            text-align: center;
+            transform: translateY(-50px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.visible .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-content h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close-btn:hover {
+            color: var(--accent-color);
+        }
+
+        .modal-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .modal-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex-grow: 1;
+            padding: 0 10px;
+            gap: 10px;
+            color: var(--accent-color);
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .modal-option:hover {
+            transform: translateY(-5px);
+        }
+
+        .modal-option i {
+            font-size: 30px;
+        }
+
+        /* --- Estilo del modal de alerta personalizado --- */
+        #custom-alert-modal .modal-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #custom-alert-message {
+            margin-bottom: 20px; /* Separación del texto al botón */
+        }
+        /* --- Fin de los estilos del modal de alerta personalizado --- */
+
+        /* Estilos para las paletas de colores */
+        .color-palette-container {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: center;
+            background-color: #fff;
+            border-radius: 1rem;
+            padding: 2rem;
+        }
+        .color-row {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .color-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            text-align: center;
+            position: relative;
+        }
+        .color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 9999px;
+            border: 2px solid #000;
+            transition: transform 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        .color-button:hover .color-box {
+            transform: scale(2);
+        }
+        .color-button.selected .color-box {
+            transform: scale(2);
+        }
+        .color-palette-container .color-button.selected .color-box {
+            border-color: #fff;
+        }
+        .color-palette-container.accent .color-button.selected .color-box {
+            border-color: #fff;
+        }
+        .color-palette-container.background .color-button.selected .color-box {
+            border-color: var(--accent-color);
+        }
+        /* Fin de estilos para paletas */
+
+        @media screen and (max-width: 650px) {
+            .container {
+                height: calc(100vh - 100px);
+            }
+
+            .form-box {
+                bottom: 0;
+                width: 100%;
+                height: 70%;
+            }
+
+            .container.active .form-box {
+                right: 0;
+                bottom: 30%;
+            }
+
+            .toggle-box::before {
+                left: 0;
+                top: -270%;
+                width: 100%;
+                height: 300%;
+            }
+
+            .container.active .toggle-box::before {
+                left: 0;
+                top: 70%;
+            }
+            .toggle-panel {
+                width: 100%;
+                height: 30%;
+            }
+
+            .toggle-panel.toggle-left {
+                top: 0;
+            }
+
+            .container.active .toggle-panel.toggle-left {
+                left: 0;
+                top: -30%;
+            }
+
+            .toggle-panel.toggle-right {
+                right: 0;
+                bottom: -30%;
+            }
+
+            .container.active .toggle-panel.toggle-right {
+                bottom: 0;
+            }
+        }
+
+        @media screen and (max-width: 450px) {
+            .form-box {
+                padding: 20px;
+            }
+
+            .toggle-panel h1 {
+                font-size: 30px;
+            }
+        }
+    </style>
 </head>
 <body>
- <header>
-   <div class="top-buttons">
-      <a href="#" id="redirect-btn" class="redirect-btn">
-        <i class="fas fa-arrow-left"></i>
-      </a>
-      <div class="theme-toggle-btn" onclick="toggleTheme()">
-        <i class="fa-solid fa-sun"></i>
-      </div>
-    </div>
-  </header>
-  <div class="box">
-    <div class="login">
-      <div class="loginBx">
-        <h2>
-          <i class="fa-solid fa-right-to-bracket"></i>
-          Inicio
-          <i class="fa-solid fa-heart"></i>
-        </h2>
-        <div class="input-group">
-          <input type="text" id="username" required autocomplete="off">
-          <label for="username">Nombre de usuario</label>
+    <div class="container">
+        <!-- login form -->
+        <div class="form-box login">
+            <form action="">
+                <h1>Iniciar sesión</h1>
+                <div class="input-box">
+                    <input type="text" id="login-username" required>
+                    <label>Usuario</label>
+                    <i class='bx bxs-user input-icon'></i>
+                </div>
+                <div class="input-box">
+                    <input id="login-password" type="password" required>
+                    <label>Contraseña</label>
+                    <i class='bx bxs-lock-alt input-icon'></i>
+                    <i id="toggle-login-password" class='bx bxs-hide password-toggle-icon'></i>
+                </div>
+
+                <a href="#" class="forgot-btn" id="forgot-password-btn">
+                    <i class='bx bx-refresh bx-flip-horizontal'></i>
+                    ¿Olvidaste tu contraseña?
+                </a>
+
+                <button type="submit" class="btn">Iniciar</button>
+
+                <div class="wave-container">
+                    <div class="wave">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            </form>
         </div>
-        <div class="input-group">
-          <input type="password" id="password" required autocomplete="off">
-          <label for="password">Contraseña</label>
-          <i class="fa-solid fa-eye password-toggle-icon" id="togglePassword"></i>
+        <!--Registration-->
+        <div class="form-box register">
+            <form action="">
+                <h1>Registro</h1>
+                <div class="timeline">
+                    <div class="timeline-step" id="step-1-timeline">
+                        <div class="timeline-dot">1</div>
+                        <div class="timeline-label">Datos Básicos</div>
+                    </div>
+                    <div class="timeline-step" id="step-2-timeline">
+                        <div class="timeline-dot">2</div>
+                        <div class="timeline-label">Contraseña</div>
+                    </div>
+                    <div class="timeline-step" id="step-3-timeline">
+                        <div class="timeline-dot">3</div>
+                        <div class="timeline-label">Seguridad</div>
+                    </div>
+                </div>
+
+                <!-- Paso 1: Datos Básicos -->
+                <div class="step active" id="step-1">
+                    <div class="input-box">
+                        <input type="text" id="user-name" required oninput="handleInputValidation(this)">
+                        <label>Nombre</label>
+                        <i class='bx bxs-user input-icon'></i>
+                    </div>
+                    <div class="input-box">
+                        <input type="text" id="user-last-name" required oninput="handleInputValidation(this)">
+                        <label>Apellido</label>
+                        <i class='bx bxs-user input-icon'></i>
+                    </div>
+                    <div class="input-box">
+                        <input type="text" id="user-email" required>
+                        <label>Correo</label>
+                        <i class='bx bxs-envelope input-icon'></i>
+                    </div>
+                    <div class="input-box">
+                        <input type="tel" id="user-phone" required oninput="handleInputValidation(this)">
+                        <label>Teléfono</label>
+                        <i class='bx bxs-phone input-icon'></i>
+                    </div>
+                    <div class="form-navigation">
+                        <button type="button" class="btn next" onclick="nextStep()">Siguiente</button>
+                    </div>
+                </div>
+
+                <!-- Paso 2: Contraseña -->
+                <div class="step" id="step-2">
+                    <div class="input-box">
+                        <input type="text" id="user-password" required>
+                        <label>Contraseña</label>
+                        <i class='bx bxs-key input-icon'></i>
+                        <i class='bx bxs-copy-alt copy-icon' onclick="copyPassword()"></i>
+                    </div>
+                    <div class="form-navigation">
+                        <button type="button" class="btn prev" onclick="prevStep()">Anterior</button>
+                        <button type="button" class="btn next" onclick="nextStep()">Siguiente</button>
+                    </div>
+                </div>
+
+                <!-- Paso 3: Seguridad -->
+                <div class="step" id="step-3">
+                    <div class="input-box select-box">
+                        <select id="security-question" required>
+                            <option value="" disabled selected>La pregunta es...</option>
+                            <option value="pet">¿Cuál es el nombre de tu primera mascota?</option>
+                            <option value="mother">¿Cuál es el apellido de soltera de tu madre?</option>
+                            <option value="city">¿En qué ciudad naciste?</option>
+                            <option value="car">¿Cuál fue tu primer coche?</option>
+                        </select>
+                    </div>
+                    <div class="input-box">
+                        <input type="text" id="security-answer" required>
+                        <label>Tu respuesta</label>
+                        <i class='bx bxs-shield-alt-2 input-icon'></i>
+                    </div>
+                    <div class="form-navigation">
+                        <button type="button" class="btn" id="appearance-btn">Apariencia 🎨</button>
+                        <button type="button" class="btn prev" onclick="prevStep()">Anterior</button>
+                        <button type="submit" class="btn">Registrar</button>
+                    </div>
+                </div>
+
+                <div class="wave-container">
+                    <div class="wave">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            </form>
         </div>
-        <input type="submit" value="Iniciar sesión" />
-        <div class="group">
-          <a href="#" id="forgotPasswordLink">¿Olvidaste tu contraseña?</a>
-          <a href="#" id="signupLink">Regístrate</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal para "Forgot Password" -->
-  <div class="modal-overlay" id="forgotPasswordModal">
-    <div class="modal-content">
-      <button class="close-btn">&times;</button>
-      <h3>Recuperar Contraseña</h3>
-        <form id="forgotPasswordForm" autocomplete="off">
-          <div class="input-group">
-            <input type="text" id="usernameRecuperar" required>
-            <label for="usernameRecuperar">Nombre de usuario</label>
-          </div>
-          <div class="input-group">
-            <input type="text" id="securityAnswer" required>
-            <label for="securityAnswer">Respuesta de Seguridad</label>
-          </div>
-          <button type="submit" class="modal-btn">Enviar</button>
-        </form>
-    </div>
-  </div>
-
-  <!-- Modal para "Sign up" -->
-  <div class="modal-overlay" id="signupModal">
-    <div class="modal-content">
-      <button class="close-btn">&times;</button>
-      <h3>Registro</h3>
-        <form id="signupForm" autocomplete="off">
-          <div class="input-group">
-            <input type="text" id="firstName" required>
-            <label for="firstName">Nombre</label>
-          </div>
-          <div class="input-group">
-            <input type="text" id="lastName" required>
-            <label for="lastName">Apellido</label>
-          </div>
-          <div class="input-group">
-            <!-- Este ID ha sido modificado intencionalmente. -->
-            <input type="text" id="userEmail" required>
-            <label for="userEmail">Correo electrónico</label>
-          </div>
-          <div class="input-group">
-            <input type="tel" id="user-phone" required>
-            <label for="user-phone">Teléfono</label>
-          </div>
-          <div class="input-group">
-            <input type="text" id="securityQuestion" required>
-            <label for="securityQuestion">Pregunta de Seguridad</label>
-          </div>
-          <div class="input-group">
-            <input type="text" id="securityAnswerRegistro" required>
-            <label for="securityAnswerRegistro">Respuesta de Seguridad</label>
-          </div>
-          <button type="submit" class="modal-btn">Registrar</button>
-        </form>
-    </div>
-  </div>
-  
-  <!-- Modal de Alerta Personalizada -->
-  <div class="modal-overlay" id="custom-alert-modal">
-    <div class="modal-content">
-      <p id="custom-alert-message"></p>
-      <button class="modal-btn" onclick="closeCustomAlertModal()">Aceptar</button>
-    </div>
-  </div>
-
-
-  <script>
-    // URL de tu script de Google Apps
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/exec';
-
-    // Variable global para almacenar la contraseña generada durante el registro.
-    let generatedPassword = '';
-
-    function generateShortUUID() {
-        const chars = 'ABCDEFGHIJKLMNPQRSTUVWXYZ234562589';
-        let result = '';
-        for (let i = 0; i < 6; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return result;
-    }
-
-    function toggleTheme() {
-      const body = document.body;
-      const icon = document.querySelector('.theme-toggle-btn i');
-      body.classList.toggle('dark-mode');
-
-      if (body.classList.contains('dark-mode')) {
-        icon.classList.remove('fa-sun');
-        icon.classList.add('fa-moon');
-      } else {
-        icon.classList.remove('fa-moon');
-        icon.classList.add('fa-sun');
-      }
-    }
-
-    // Funciones para manejar los modales
-    function openModal(modalId) {
-      const modal = document.getElementById(modalId);
-      modal.classList.add('active');
-    }
-
-    function closeModal(modalId) {
-      const modal = document.getElementById(modalId);
-      modal.classList.remove('active');
-    }
-
-    function copyToClipboard(textToCopy) {
-      // Método recomendado para entornos de iframe
-      const tempInput = document.createElement('textarea');
-      tempInput.value = textToCopy;
-      document.body.appendChild(tempInput);
-      tempInput.select();
-      
-      try {
-        const successful = document.execCommand('copy');
-        const msg = successful ? '¡Copiado!' : 'Error al copiar';
-        console.log('Comando de copia ejecutado:', msg);
-        showTemporaryAlert('¡Contraseña copiada!');
-      } catch (err) {
-        console.error('Error al intentar copiar:', err);
-        showTemporaryAlert('Error al copiar la contraseña.');
-      } finally {
-        document.body.removeChild(tempInput);
-      }
-    }
-
-    function showTemporaryAlert(message) {
-      const alertDiv = document.createElement('div');
-      alertDiv.innerText = message;
-      alertDiv.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        width: 50%;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: #356e39;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 5px;
-        opacity: 0;
-        transition: opacity 0.5s ease-in-out;
-        z-index: 4000;
-        font-size: 0.9em;
-        text-align: center;
-      `;
-      document.body.appendChild(alertDiv);
-
-      setTimeout(() => {
-        alertDiv.style.opacity = 1;
-      }, 10);
-
-      setTimeout(() => {
-        alertDiv.style.opacity = 0;
-        alertDiv.addEventListener('transitionend', () => alertDiv.remove());
-      }, 2000);
-    }
-
-    function closeCustomAlertModal() {
-        const modal = document.getElementById('custom-alert-modal');
-        modal.classList.remove('visible');
-
-        const errorInputId = modal.dataset.errorInputId;
-        const redirectUrl = modal.dataset.redirectUrl;
-
-        // Si se trata de un error de validación, se enfoca el campo.
-        if (errorInputId) {
-            const errorInput = document.getElementById(errorInputId);
-            if (errorInput) {
-                errorInput.focus();
-            }
-            delete modal.dataset.errorInputId;
-        }
-
-        // Si se trata de un mensaje de éxito, se redirige.
-        if (redirectUrl) {
-            window.location.href = redirectUrl;
-            delete modal.dataset.redirectUrl;
-        }
-    }
-
-    function showCustomModal(message, inputToFocus = null, redirectUrl = null, showPassword = null) {
-        const modalElement = document.getElementById('custom-alert-modal');
-        const messageElement = document.getElementById('custom-alert-message');
-        
-        let fullMessage = message;
-        if (showPassword) {
-            fullMessage += `<br><br>
-            <div class="password-display">
-                <span id="generatedPasswordSpan">${showPassword}</span>
-                <i class="fa-solid fa-copy" onclick="copyToClipboard('${showPassword}')"></i>
+        <!--toggle-->
+        <div class="toggle-box">
+            <div class="toggle-panel toggle-left">
+                <h1>¡Hola, bienvenido!</h1>
+                <p>¿No tienes una cuenta?</p>
+                <button class="btn register-btn">Registrarse</button>
             </div>
-            `;
-        }
+            <div class="toggle-panel toggle-right">
+                <h1>¡Bienvenido de nuevo!</h1>
+                <p>¿Ya tienes una cuenta?</p>
+                <button class="btn login-btn">Iniciar sesión</button>
+            </div>
+        </div>
+    </div>
 
-        messageElement.innerHTML = fullMessage;
-        modalElement.classList.add('visible');
+    <div id="password-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close-btn">&times;</span>
+            <h2>Gestión de Contraseñas</h2>
+            <form id="modal-form">
+                <div class="input-box">
+                    <input type="text" required>
+                    <label>Usuario</label>
+                    <i class='bx bxs-user input-icon'></i>
+                </div>
+                <div class="modal-options">
+                    <div class="modal-option">
+                        <i class='bx bx-plus'></i>
+                        <span>Nueva</span>
+                    </div>
+                    <div class="modal-option">
+                        <i class='bx bx-key'></i>
+                        <span>Recuperar</span>
+                    </div>
+                    <div class="modal-option">
+                        <i class='bx bx-book-reader'></i>
+                        <span>Manual</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="appearance-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close-btn" id="appearance-modal-close">&times;</span>
+            <h2>Paletas de colores</h2>
+            <div class="color-palette-container accent">
+                <h3>Color de acento</h3>
+                <div class="color-row">
+                    <div class="color-button selected" data-color="#7494ec">
+                        <div class="color-box" style="background-color: #7494ec; border-color: #fff;"></div>
+                    </div>
+                    <div class="color-button" data-color="#4169e1">
+                        <div class="color-box" style="background-color: #4169e1;"></div>
+                    </div>
+                    <div class="color-button" data-color="#374151">
+                        <div class="color-box" style="background-color: #374151;"></div>
+                    </div>
+                    <div class="color-button" data-color="#34a853">
+                        <div class="color-box" style="background-color: #34a853;"></div>
+                    </div>
+                    <div class="color-button" data-color="#9c27b0">
+                        <div class="color-box" style="background-color: #9c27b0;"></div>
+                    </div>
+                    <div class="color-button" data-color="#f2994a">
+                        <div class="color-box" style="background-color: #f2994a;"></div>
+                    </div>
+                    <div class="color-button" data-color="#008080">
+                        <div class="color-box" style="background-color: #008080;"></div>
+                    </div>
+                    <div class="color-button" data-color="#dc143c">
+                        <div class="color-box" style="background-color: #dc143c;"></div>
+                    </div>
+                    <div class="color-button" data-color="#228b22">
+                        <div class="color-box" style="background-color: #228b22;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="color-palette-container background">
+                <h3>Color de fondo</h3>
+                <div class="color-row">
+                    <div class="color-button selected" data-color="#fff">
+                        <div class="color-box" style="background-color: #fff; border-color: #7494ec;"></div>
+                    </div>
+                    <div class="color-button" data-color="#b8c2cc">
+                        <div class="color-box" style="background-color: #b8c2cc;"></div>
+                    </div>
+                    <div class="color-button" data-color="#2980b9">
+                        <div class="color-box" style="background-color: #2980b9;"></div>
+                    </div>
+                    <div class="color-button" data-color="#a0aec0">
+                        <div class="color-box" style="background-color: #a0aec0;"></div>
+                    </div>
+                    <div class="color-button" data-color="#e74c3c">
+                        <div class="color-box" style="background-color: #e74c3c;"></div>
+                    </div>
+                    <div class="color-button" data-color="#cbd5e0">
+                        <div class="color-box" style="background-color: #cbd5e0;"></div>
+                        </div>
+                    <div class="color-button" data-color="#f39c12">
+                        <div class="color-box" style="background-color: #f39c12;"></div>
+                    </div>
+                    <div class="color-button" data-color="#7f8c8d">
+                        <div class="color-box" style="background-color: #7f8c8d;"></div>
+                    </div>
+                </div>
+                <button type="button" class="btn mt-8" id="okBtn">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-alert-modal" class="modal-overlay">
+        <div class="modal-content">
+            <!-- El botón de cierre 'x' ha sido eliminado -->
+            <p id="custom-alert-message"></p>
+            <button class="btn" onclick="closeCustomModal()">OK</button>
+        </div>
+    </div>
+
+    <script>
+     /* Define App tienda */
+        const appTienda = "ZXC"
+    
+        const container = document.querySelector('.container');
+        const registerBtn = document.querySelector('.register-btn');
+        const loginBtn = document.querySelector('.login-btn');
+        const loginForm = document.querySelector('.form-box.login form');
+        const registerForm = document.querySelector('.form-box.register form');
+        const forgotPasswordBtn = document.getElementById('forgot-password-btn');
+        const modal = document.getElementById('password-modal');
+        const modalCloseBtn = document.querySelector('#password-modal .modal-close-btn');
         
-        if (inputToFocus) {
-            modalElement.dataset.errorInputId = inputToFocus.id;
-        }
+        const appearanceBtn = document.getElementById('appearance-btn');
+        const appearanceModal = document.getElementById('appearance-modal');
+        const appearanceModalCloseBtn = document.getElementById('appearance-modal-close');
+        const okBtn = document.getElementById('okBtn');
+        
+        const accentColorButtons = document.querySelectorAll('#appearance-modal .color-palette-container.accent .color-button');
+        const backgroundColorButtons = document.querySelectorAll('#appearance-modal .color-palette-container.background .color-button');
+        
+        let currentAccentColor = '#7494ec';
+        let currentBackgroundColor = '#fff';
 
-        if (redirectUrl) {
-            modalElement.dataset.redirectUrl = redirectUrl;
-        }
-    }
+        // Variables temporales para guardar los colores seleccionados antes de aplicar
+        let pendingAccentColor = '#7494ec';
+        let pendingBackgroundColor = '#fff';
 
-    // Manejo de eventos para abrir y cerrar modales
-    document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
-        e.preventDefault();
-        openModal('forgotPasswordModal');
-    });
-
-    document.getElementById('signupLink').addEventListener('click', (e) => {
-        e.preventDefault();
-        // Generar la contraseña y almacenarla en la variable global
-        generatedPassword = generateShortUUID();
-        openModal('signupModal');
-    });
-
-    document.querySelectorAll('.close-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            closeModal(e.target.closest('.modal-overlay').id);
+        // Event listener for opening the appearance modal
+        appearanceBtn.addEventListener('click', () => {
+            appearanceModal.classList.add('visible');
         });
-    });
 
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
-                closeModal(overlay.id);
+        // Event listener for closing the appearance modal
+        appearanceModalCloseBtn.addEventListener('click', () => {
+            appearanceModal.classList.remove('visible');
+            // Restablece los colores del modal a los colores aplicados actualmente
+            document.querySelector(`.accent .color-button[data-color="${currentAccentColor}"]`).click();
+            document.querySelector(`.background .color-button[data-color="${currentBackgroundColor}"]`).click();
+        });
+
+        // Nuevo: Event listener para el botón OK
+        okBtn.addEventListener('click', () => {
+            // Aplica los colores guardados
+            document.documentElement.style.setProperty('--accent-color', pendingAccentColor);
+            document.documentElement.style.setProperty('--background-color', pendingBackgroundColor);
+            currentAccentColor = pendingAccentColor;
+            currentBackgroundColor = pendingBackgroundColor;
+            appearanceModal.classList.remove('visible');
+        });
+
+        // Close modal on outside click
+        appearanceModal.addEventListener('click', (e) => {
+            if (e.target === appearanceModal) {
+                appearanceModal.classList.remove('visible');
+                // Restablece los colores del modal a los colores aplicados actualmente
+                document.querySelector(`.accent .color-button[data-color="${currentAccentColor}"]`).click();
+                document.querySelector(`.background .color-button[data-color="${currentBackgroundColor}"]`).click();
             }
         });
-    });
 
-    // Lógica para mostrar/ocultar la contraseña
-    const togglePassword = document.querySelector('#togglePassword');
-    const passwordInput = document.querySelector('#password');
+        // Handle accent color selection
+        accentColorButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const newColor = button.dataset.color;
+                pendingAccentColor = newColor; // Guarda el color temporalmente
 
-    if (togglePassword && passwordInput) {
-      togglePassword.addEventListener('click', function (e) {
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
-        this.classList.toggle('fa-eye');
-        this.classList.toggle('fa-eye-slash');
-      });
-    }
+                // Update selected class
+                accentColorButtons.forEach(btn => {
+                    btn.classList.remove('selected');
+                    btn.querySelector('.color-box').style.borderColor = '#000';
+                });
+                button.classList.add('selected');
+                button.querySelector('.color-box').style.borderColor = '#fff';
 
-    // Manejo del formulario principal de login
-    const loginForm = document.querySelector('.loginBx form');
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-
-        if (!username || !password) {
-            console.error('El nombre de usuario y la contraseña son obligatorios.');
-            showCustomModal("El nombre de usuario y la contraseña son obligatorios.");
-            return;
-        }
-        
-        // Simulación de validación de credenciales
-        const isValidUser = (username === "user" && password === "password");
-
-        if (isValidUser) {
-            console.log('Login exitoso. Redirigiendo a dashboard.html');
-            // Limpiamos los campos del formulario de inicio de sesión
-            loginForm.reset();
-            // Redirección directa sin modal de confirmación
-            window.location.href = 'dashboard.html';
-        } else {
-            console.error('Credenciales incorrectas.');
-            showCustomModal("Credenciales incorrectas. Por favor, inténtalo de nuevo.");
-        }
-        // Simulación de una llamada fetch (código comentado)
-        // try {
-        //   const response = await fetch(APPS_SCRIPT_URL, {
-        //       method: 'POST',
-        //       headers: {
-        //           'Content-Type': 'application/json',
-        //       },
-        //       body: JSON.stringify({
-        //           action: 'login',
-        //           username: username,
-        //           password: password
-        //       }),
-        //   });
-        //   const result = await response.json();
-        //   console.log('Respuesta del servidor:', result);
-        // } catch (error) {
-        //   console.error('Error durante la solicitud de login:', error);
-        // }
-      });
-    }
-
-    // Manejo del formulario de "Forgot Password"
-    const forgotPasswordForm = document.getElementById('forgotPasswordForm');
-    forgotPasswordForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const username = document.getElementById('usernameRecuperar').value;
-        const securityAnswer = document.getElementById('securityAnswer').value;
-        
-        if (!username || !securityAnswer) {
-            showCustomModal("Por favor, completa todos los campos.");
-            return;
-        }
-
-        console.log('Datos enviados para recuperar contraseña:', {
-            username: username,
-            securityAnswer: securityAnswer
-        });
-
-        // Simulación de la respuesta del backend
-        const mockNewPassword = generateShortUUID();
-
-        closeModal('forgotPasswordModal');
-        showCustomModal("Tu nueva contraseña es:", null, null, mockNewPassword);
-        forgotPasswordForm.reset();
-    });
-
-    // Manejo del formulario de "Sign up"
-    const signupForm = document.getElementById('signupForm');
-    signupForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const inputs = e.target.querySelectorAll('input:required');
-
-        for (const input of inputs) {
-            if (input.value.trim() === '' && input.id !== 'userPassword') {
-                showCustomModal("Por favor, completa todos los campos.");
-                return false;
-            }
-
-            if (input.id === 'userEmail') {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(input.value)) {
-                    showCustomModal("Por favor, introduce un correo electrónico válido<br>(ej: usuario@dominio.com)", input);
-                    return false;
+                // Update the border color of the selected background color button
+                const selectedBgBtn = document.querySelector('.background .color-button.selected');
+                if (selectedBgBtn) {
+                    selectedBgBtn.querySelector('.color-box').style.borderColor = pendingAccentColor;
                 }
+            });
+        });
+
+        // Handle background color selection
+        backgroundColorButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const newColor = button.dataset.color;
+                pendingBackgroundColor = newColor; // Guarda el color temporalmente
+
+                // Update selected class
+                backgroundColorButtons.forEach(btn => {
+                    btn.classList.remove('selected');
+                    btn.querySelector('.color-box').style.borderColor = '#000';
+                });
+                button.classList.add('selected');
+                button.querySelector('.color-box').style.borderColor = pendingAccentColor;
+            });
+        });
+
+        forgotPasswordBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            modal.classList.add('visible');
+        });
+
+        modalCloseBtn.addEventListener('click', () => {
+            modal.classList.remove('visible');
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('visible');
+            }
+        });
+
+        let currentStep = 1;
+        const totalSteps = 3;
+
+        /**
+         * Muestra un modal de alerta personalizado con un mensaje.
+         * @param {string} message - El mensaje a mostrar en el modal.
+         * @param {string} [mode='alert'] - El modo del modal ('alert' o 'success').
+         * @param {HTMLInputElement} [inputToClear=null] - El campo de entrada a limpiar.
+         */
+        function showCustomModal(message, mode = 'alert', inputToClear = null) {
+            const modalElement = document.getElementById('custom-alert-modal');
+            const messageElement = document.getElementById('custom-alert-message');
+            messageElement.textContent = message;
+            modalElement.classList.add('visible');
+            modalElement.dataset.mode = mode; // Almacena el modo en el dataset
+            if (inputToClear) {
+                inputToClear.value = '';
+            }
+        }
+
+        /**
+         * Cierra el modal de alerta personalizado y, si es el modal de éxito, reinicia la app.
+         */
+        function closeCustomModal() {
+            const modalElement = document.getElementById('custom-alert-modal');
+            const mode = modalElement.dataset.mode;
+            modalElement.classList.remove('visible');
+
+            // Si el modo es 'success', reinicia la app
+            if (mode === 'success') {
+                resetForms();
+                container.classList.remove('active');
+            }
+        }
+
+        /**
+         * Muestra el paso actual del formulario y actualiza la línea de tiempo.
+         * @param {number} stepNumber - El número del paso a mostrar.
+         */
+        function showStep(stepNumber) {
+            const steps = document.querySelectorAll('.step');
+            steps.forEach(step => step.classList.remove('active'));
+            document.getElementById(`step-${stepNumber}`).classList.add('active');
+
+            const timelineDots = document.querySelectorAll('.timeline-step');
+            timelineDots.forEach((dot, index) => {
+                if (index < stepNumber) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+        
+        /**
+         * Reinicia completamente los formularios, incluyendo los datos en caché y el estado de la aplicación.
+         */
+        function resetForms() {
+            // Reinicia los campos del formulario
+            loginForm.reset();
+            registerForm.reset();
+            
+            // Elimina la clase 'is-loading' si está presente
+            loginForm.classList.remove('is-loading');
+            registerForm.classList.remove('is-loading');
+
+            // Reinicia el estado del formulario de registro en pasos
+            currentStep = 1;
+            showStep(currentStep);
+        }
+
+        /**
+         * Realiza una validación en tiempo real para un campo de entrada específico.
+         * @param {HTMLInputElement} input - El elemento de entrada a validar.
+         */
+        function handleInputValidation(input) {
+            if (input.value.trim() === '') {
+                // No mostrar modal si el campo está vacío, solo dejar que la validación final se encargue.
+                return;
             }
 
+            // Validación en tiempo real solo para el campo de teléfono
             if (input.id === 'user-phone') {
                 const phoneRegex = /^\d+$/;
                 if (!phoneRegex.test(input.value)) {
-                    showCustomModal("El campo de teléfono solo debe contener números.", input);
-                    return false;
+                    showCustomModal("El campo de teléfono solo debe contener números.", 'alert', input);
+                    return;
                 }
             }
         }
 
-        const userName = document.getElementById('firstName').value;
-        const userLastName = document.getElementById('lastName').value;
-        const userEmail = document.getElementById('userEmail').value;
-        const userPhone = document.getElementById('user-phone').value;
-        const securityQuestion = document.getElementById('securityQuestion').value;
-        const securityAnswer = document.getElementById('securityAnswerRegistro').value;
+        /**
+         * Valida todos los campos requeridos en el paso actual.
+         * @param {number} stepNumber - El número del paso a validar.
+         * @returns {boolean} - true si todos los campos son válidos, de lo contrario false.
+         */
+        function validateStep(stepNumber) {
+            const stepElement = document.getElementById(`step-${stepNumber}`);
+            const inputs = stepElement.querySelectorAll('input[required], select[required]');
 
-        // Definir App tienda y Usuario_ID
-        const appTienda = "ZXC";
-        const userId = generateShortUUID().slice(-5);
+            for (const input of inputs) {
+                if (input.value.trim() === '') {
+                    showCustomModal("Por favor, completa todos los campos.");
+                    return false;
+                }
 
-        const registrationData = {
-            Usuario_Tienda: appTienda,
-            Usuario_Nombre: `${userName} ${userLastName}`,
-            Usuario_Correo: userEmail,
-            Usuario_Telefono: userPhone,
-            Usuario_Clave: generatedPassword, // Usar la contraseña generada
-            Usuario_ID: userId,
-            Pregunta_ID: securityQuestion,
-            Usuario_RespuestaSeg: securityAnswer
-        };
-        
-        console.log("Datos del formulario de registro:", registrationData);
+                if (input.id === 'user-email') {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(input.value)) {
+                        showCustomModal("Por favor, introduce un correo electrónico válido (ej: usuario@dominio.com).", 'alert', input);
+                        return false;
+                    }
+                }
 
-
-        // Simular la recepción de un JWT y mostrar el mensaje de éxito
-        const mockJWT = "mock_jwt_token_12345";
-        console.log("JWT recibido:", mockJWT);
-        
-        closeModal('signupModal');
-        // El método .reset() borra todos los valores del formulario, garantizando que no queden datos residuales en el DOM.
-        signupForm.reset();
-        showCustomModal("Registro completado con éxito.<br>Contraseña:", null, 'index.html', generatedPassword);
-    });
-
-    const box = document.querySelector('.box');
-    const inputs = box.querySelectorAll('input');
-
-    box.addEventListener('mouseleave', () => {
-      setTimeout(() => {
-        if (!box.contains(document.activeElement)) {
-          inputs.forEach(input => {
-            input.value = '';
-          });
+                if (input.id === 'user-phone') {
+                    const phoneRegex = /^\d+$/;
+                    if (!phoneRegex.test(input.value)) {
+                        showCustomModal("El campo de teléfono solo debe contener números.", 'alert', input);
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
-      }, 100);
-    });
 
-    const redirectBtn = document.getElementById('redirect-btn');
-    if (redirectBtn) {
-      redirectBtn.addEventListener('click', () => {
-        window.location.href = './index_blue.html';
-      });
-    }
-  </script>
+        function nextStep() {
+            if (validateStep(currentStep)) {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    showStep(currentStep);
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+
+        function generateShortUUID() {
+            const chars = 'ABCDEFGHIJKLMNPQRSTUVWXYZ23456789';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function copyPassword() {
+            const passwordInput = document.getElementById('user-password');
+            passwordInput.select();
+            document.execCommand('copy');
+        }
+
+        registerBtn.addEventListener('click', () => {
+            resetForms();
+            container.classList.add('active');
+            document.getElementById('user-password').value = generateShortUUID();
+        });
+
+        loginBtn.addEventListener('click', () => {
+            resetForms();
+            container.classList.remove('active');
+        });
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // --- Log de datos del formulario de inicio de sesión ---
+            const loginUsername = document.getElementById('login-username').value;
+            const loginPassword = document.getElementById('login-password').value;
+
+            const loginData = {
+                usuario: loginUsername,
+                contrasena: loginPassword
+            };
+            console.log("Datos del formulario de inicio de sesión:", loginData);
+            // --------------------------------------------------------
+
+            loginForm.classList.add('is-loading');
+            setTimeout(() => {
+                 loginForm.classList.remove('is-loading');
+            }, 2000);
+        });
+
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (validateStep(currentStep)) {
+                // --- Log de datos del formulario de registro ---
+                const userName = document.getElementById('user-name').value;
+                const userLastName = document.getElementById('user-last-name').value;
+                const userEmail = document.getElementById('user-email').value;
+                const userPhone = document.getElementById('user-phone').value;
+                const userPassword = document.getElementById('user-password').value;
+                const securityQuestion = document.getElementById('security-question').value;
+                const securityAnswer = document.getElementById('security-answer').value;
+
+                const registrationData = {
+                    Usuario_Tienda: appTienda,
+                    Usuario_Nombre: `${userName} ${userLastName}`,
+                    Usuario_Correo: userEmail,
+                    Usuario_Telefono: userPhone,
+                    Usuario_Clave: userPassword,
+                    Pregunta_ID: securityQuestion,
+                    Usuario_RespuestaSeg: securityAnswer
+                };
+                console.log("Datos del formulario de registro:", registrationData);
+                // -------------------------------------------------
+
+                registerForm.classList.add('is-loading');
+                setTimeout(() => {
+                    registerForm.classList.remove('is-loading');
+                    // Muestra el modal de éxito y pasa el modo 'success'
+                    showCustomModal("¡Registro exitoso!", 'success');
+                }, 2000);
+            }
+        });
+
+        const loginPasswordInput = document.getElementById('login-password');
+        const toggleLoginPassword = document.getElementById('toggle-login-password');
+
+        if (toggleLoginPassword && loginPasswordInput) {
+            toggleLoginPassword.addEventListener('click', () => {
+                const type = loginPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                loginPasswordInput.setAttribute('type', type);
+
+                if (type === 'password') {
+                    toggleLoginPassword.classList.remove('bxs-show');
+                    toggleLoginPassword.classList.add('bxs-hide');
+                } else {
+                    toggleLoginPassword.classList.remove('bxs-hide');
+                    toggleLoginPassword.classList.add('bxs-show');
+                }
+            });
+        }
+    </script>
 </body>
 </html>
