@@ -534,7 +534,7 @@
   </header>
   <div class="box">
     <div class="login">
-      <div class="loginBx">
+      <form class="loginBx">
         <h2>
           <i class="fa-solid fa-right-to-bracket"></i>
           Inicio
@@ -554,7 +554,7 @@
           <a href="#" id="forgotPasswordLink">¿Olvidaste tu contraseña?</a>
           <a href="#" id="signupLink">Regístrate</a>
         </div>
-      </div>
+      </form>
     </div>
   </div>
 
@@ -624,10 +624,15 @@
 
   <script>
     // URL de tu script de Google Apps
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/exec';
+    const GAS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz29nU5Ra_k_RZ9BpXUp5D6YAQx3cScf_WDVHjPcJo-gOYtUQ-leW7GU6qSOM85Mbq_/exec';
+    
+    // URL del proxy CORS para resolver problemas en entornos de desarrollo
+    const CORS_PROXY_URL = 'https://cors-anywhere.herokuapp.com/';
 
     // Variable global para almacenar la contraseña generada durante el registro.
     let generatedPassword = '';
+    // Variable global para identificar la tienda.
+    const appTienda = "ZXC";
 
     function generateShortUUID() {
         const chars = 'ABCDEFGHIJKLMNPQRSTUVWXYZ234562589';
@@ -804,7 +809,7 @@
     }
 
     // Manejo del formulario principal de login
-    const loginForm = document.querySelector('.loginBx form');
+    const loginForm = document.querySelector('.loginBx');
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -816,44 +821,39 @@
             showCustomModal("El nombre de usuario y la contraseña son obligatorios.");
             return;
         }
-        
-        // Simulación de validación de credenciales
-        const isValidUser = (username === "user" && password === "password");
 
-        if (isValidUser) {
-            console.log('Login exitoso. Redirigiendo a dashboard.html');
-            // Limpiamos los campos del formulario de inicio de sesión
-            loginForm.reset();
-            // Redirección directa sin modal de confirmación
-            window.location.href = 'dashboard.html';
-        } else {
-            console.error('Credenciales incorrectas.');
-            showCustomModal("Credenciales incorrectas. Por favor, inténtalo de nuevo.");
+        try {
+          // Usamos un proxy CORS para evitar el error "Failed to fetch" en entornos restringidos.
+          const response = await fetch(`${CORS_PROXY_URL}${GAS_SCRIPT_URL}`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                  action: 'login',
+                  Usuario_Tienda: appTienda,
+                  username: username,
+                  password: password
+              }),
+          });
+          const result = await response.json();
+          console.log('Respuesta del servidor:', result);
+
+          if (result.success) {
+            showCustomModal("¡Inicio de sesión exitoso!", null, 'dashboard.html');
+          } else {
+            showCustomModal(result.message || "Credenciales incorrectas. Por favor, inténtalo de nuevo.");
+          }
+        } catch (error) {
+          console.error('Error durante la solicitud de login:', error);
+          showCustomModal("Ocurrió un error al intentar iniciar sesión. Por favor, inténtalo de nuevo. CORS_ANYWHERE_PROXY");
         }
-        // Simulación de una llamada fetch (código comentado)
-        // try {
-        //   const response = await fetch(APPS_SCRIPT_URL, {
-        //       method: 'POST',
-        //       headers: {
-        //           'Content-Type': 'application/json',
-        //       },
-        //       body: JSON.stringify({
-        //           action: 'login',
-        //           username: username,
-        //           password: password
-        //       }),
-        //   });
-        //   const result = await response.json();
-        //   console.log('Respuesta del servidor:', result);
-        // } catch (error) {
-        //   console.error('Error durante la solicitud de login:', error);
-        // }
       });
     }
 
     // Manejo del formulario de "Forgot Password"
     const forgotPasswordForm = document.getElementById('forgotPasswordForm');
-    forgotPasswordForm.addEventListener('submit', (e) => {
+    forgotPasswordForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('usernameRecuperar').value;
         const securityAnswer = document.getElementById('securityAnswer').value;
@@ -863,22 +863,41 @@
             return;
         }
 
-        console.log('Datos enviados para recuperar contraseña:', {
+        // Se ha agregado Usuario_Tienda al objeto de log
+        const requestData = {
+            action: 'forgotPassword',
+            Usuario_Tienda: appTienda,
             username: username,
             securityAnswer: securityAnswer
-        });
+        };
+        console.log('Datos enviados para recuperar contraseña:', requestData);
 
-        // Simulación de la respuesta del backend
-        const mockNewPassword = generateShortUUID();
+        try {
+          const response = await fetch(`${CORS_PROXY_URL}${GAS_SCRIPT_URL}`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(requestData),
+          });
+          const result = await response.json();
+          console.log('Respuesta del servidor:', result);
 
-        closeModal('forgotPasswordModal');
-        showCustomModal("Tu nueva contraseña es:", null, null, mockNewPassword);
+          if (result.success) {
+            showCustomModal("Tu nueva contraseña es:", null, null, result.newPassword);
+          } else {
+            showCustomModal(result.message || "No se pudo recuperar la contraseña. Verifica los datos.");
+          }
+        } catch (error) {
+          console.error('Error durante la solicitud de recuperación:', error);
+          showCustomModal("Ocurrió un error al intentar recuperar la contraseña. Por favor, inténtalo de nuevo. CORS_ANYWHERE_PROXY");
+        }
         forgotPasswordForm.reset();
     });
 
     // Manejo del formulario de "Sign up"
     const signupForm = document.getElementById('signupForm');
-    signupForm.addEventListener('submit', (e) => {
+    signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const inputs = e.target.querySelectorAll('input:required');
 
@@ -913,15 +932,16 @@
         const securityAnswer = document.getElementById('securityAnswerRegistro').value;
 
         // Definir App tienda y Usuario_ID
-        const appTienda = "ZXC";
         const userId = generateShortUUID().slice(-5);
 
+        // Se ha agregado Usuario_Tienda al objeto de log
         const registrationData = {
+            action: 'signup',
             Usuario_Tienda: appTienda,
             Usuario_Nombre: `${userName} ${userLastName}`,
             Usuario_Correo: userEmail,
             Usuario_Telefono: userPhone,
-            Usuario_Clave: generatedPassword, // Usar la contraseña generada
+            Usuario_Clave: generatedPassword,
             Usuario_ID: userId,
             Pregunta_ID: securityQuestion,
             Usuario_RespuestaSeg: securityAnswer
@@ -929,15 +949,28 @@
         
         console.log("Datos del formulario de registro:", registrationData);
 
+        try {
+          const response = await fetch(`${CORS_PROXY_URL}${GAS_SCRIPT_URL}`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(registrationData),
+          });
+          const result = await response.json();
+          console.log('Respuesta del servidor:', result);
 
-        // Simular la recepción de un JWT y mostrar el mensaje de éxito
-        const mockJWT = "mock_jwt_token_12345";
-        console.log("JWT recibido:", mockJWT);
-        
-        closeModal('signupModal');
-        // El método .reset() borra todos los valores del formulario, garantizando que no queden datos residuales en el DOM.
-        signupForm.reset();
-        showCustomModal("Registro completado con éxito.<br>Contraseña:", null, 'index.html', generatedPassword);
+          if (result.success) {
+            closeModal('signupModal');
+            signupForm.reset();
+            showCustomModal("Registro completado con éxito.<br>Contraseña:", null, 'index.html', generatedPassword);
+          } else {
+            showCustomModal(result.message || "Ocurrió un error al intentar registrarte. Por favor, inténtalo de nuevo.");
+          }
+        } catch (error) {
+          console.error('Error durante la solicitud de registro:', error);
+          showCustomModal("Ocurrió un error al intentar registrarte. Por favor, inténtalo de nuevo. CORS_ANYWHERE_PROXY");
+        }
     });
 
     const box = document.querySelector('.box');
