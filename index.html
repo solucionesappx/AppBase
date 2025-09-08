@@ -229,11 +229,19 @@
       border-radius: 5px;
     }
 
+    /* Estilos por defecto para el contenedor de enlaces (para pantallas grandes) */
     .group {
-      width: 100%; /* Se usa el ancho completo del contenedor. */
+      width: 80%;
       display: flex;
       justify-content: space-between;
-      margin-top: 10px; /* Se agrega un margen superior para separación. */
+      margin-top: 10px;
+    }
+    
+    /* Media query para ajustar los estilos en pantallas pequeñas (máximo 600px de ancho) */
+    @media (max-width: 600px) {
+        .group {
+            width: 100%;
+        }
     }
 
     .group a {
