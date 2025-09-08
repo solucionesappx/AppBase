@@ -189,12 +189,12 @@
     .input-group input#userPassword {
       text-align: left; /* Alineación del texto a la izquierda para la contraseña */
     }
-
-    input:focus {
+    /* Regla para los input de texto que no son el botón de submit */
+    input:not([type="submit"]):focus {
       border-color: var(--accent-color-2);
-      color: #0a0303
+      color: var(--text-color);
     }
-
+    
     /* Estilos para el icono de mostrar/ocultar contraseña */
     .password-toggle-icon {
         position: absolute; /* Inscrusta el icono como flotante */
@@ -213,7 +213,7 @@
     
     /* El botón también debe tener un ancho fijo para alinearse con los inputs */
     input[type="submit"] {
-        width: 120%;
+        width: 100%;
         height: 40px;
         background: var(--accent-color-2);
         border: none;
@@ -226,6 +226,7 @@
     }
     input[type="submit"]:hover {
         box-shadow: 0 0 10px var(--accent-color-2), 0 0 60px var(--accent-color-2);
+        color: var(--box-color); /* Agregado para asegurar que el texto sea visible */
     }
 
     .input-group label {
@@ -688,7 +689,7 @@
       alertDiv.style.cssText = `
         position: fixed;
         bottom: 20px;
-        width: 100%;
+        width: 50%;
         left: 50%;
         transform: translateX(-50%);
         background-color: #356e39;
