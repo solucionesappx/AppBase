@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Formulario de Inicio de Sesi\u00f3n Moderno y Animado - V5</title>
+  <title>Formulario de Inicio de Sesión Moderno y Animado - V5</title>
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
   <style>
     @import url("https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap");
@@ -670,9 +670,10 @@
       alertDiv.style.cssText = `
         position: fixed;
         bottom: 20px;
+        width: 30%;
         left: 50%;
         transform: translateX(-50%);
-        background-color: var(--accent-color-2);
+        background-color: #356e39;
         color: white;
         padding: 10px 20px;
         border-radius: 5px;
@@ -680,6 +681,7 @@
         transition: opacity 0.5s ease-in-out;
         z-index: 4000;
         font-size: 0.9em;
+        text-align: center;
       `;
       document.body.appendChild(alertDiv);
 
@@ -822,11 +824,23 @@
         e.preventDefault();
         const username = document.getElementById('usernameRecuperar').value;
         const securityAnswer = document.getElementById('securityAnswer').value;
+        
+        if (!username || !securityAnswer) {
+            showCustomModal("Por favor, completa todos los campos.");
+            return;
+        }
+
         console.log('Datos enviados para recuperar contraseña:', {
             username: username,
             securityAnswer: securityAnswer
         });
+
+        // Simulación de la respuesta del backend
+        const mockNewPassword = generateShortUUID();
+
         closeModal('forgotPasswordModal');
+        showCustomModal("Tu nueva contraseña es:", null, null, mockNewPassword);
+        signupForm.reset();
     });
 
     // Manejo del formulario de "Sign up"
@@ -874,7 +888,7 @@
             Usuario_Nombre: `${userName} ${userLastName}`,
             Usuario_Correo: userEmail,
             Usuario_Telefono: userPhone,
-            Usuario_Clave: generatedPassword, // Usar la contrase\u00f1a generada
+            Usuario_Clave: generatedPassword, // Usar la contraseña generada
             Usuario_ID: userId,
             Pregunta_ID: securityQuestion,
             Usuario_RespuestaSeg: securityAnswer
@@ -890,7 +904,7 @@
         closeModal('signupModal');
         // El método .reset() borra todos los valores del formulario, garantizando que no queden datos residuales en el DOM.
         signupForm.reset();
-        showCustomModal("Registro completado con éxtio.<br>Contraseña:", null, 'index.html', generatedPassword);
+        showCustomModal("Registro completado con éxito.<br>Contraseña:", null, 'index.html', generatedPassword);
     });
 
     const box = document.querySelector('.box');
