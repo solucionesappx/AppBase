@@ -626,9 +626,6 @@
     // URL de tu script de Google Apps
     const GAS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz29nU5Ra_k_RZ9BpXUp5D6YAQx3cScf_WDVHjPcJo-gOYtUQ-leW7GU6qSOM85Mbq_/exec';
     
-    // URL del proxy CORS para resolver problemas en entornos de desarrollo
-    const CORS_PROXY_URL = 'https://cors-anywhere.herokuapp.com/';
-
     // Variable global para almacenar la contraseña generada durante el registro.
     let generatedPassword = '';
     // Variable global para identificar la tienda.
@@ -823,8 +820,8 @@
         }
 
         try {
-          // Usamos un proxy CORS para evitar el error "Failed to fetch" en entornos restringidos.
-          const response = await fetch(`${CORS_PROXY_URL}${GAS_SCRIPT_URL}`, {
+          // Se elimina el proxy, se usa la URL directa del script de Google Apps
+          const response = await fetch(GAS_SCRIPT_URL, {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json',
@@ -846,7 +843,7 @@
           }
         } catch (error) {
           console.error('Error durante la solicitud de login:', error);
-          showCustomModal("Ocurrió un error al intentar iniciar sesión. Por favor, inténtalo de nuevo. CORS_ANYWHERE_PROXY");
+          showCustomModal("Ocurrió un error al intentar iniciar sesión. Por favor, inténtalo de nuevo.");
         }
       });
     }
@@ -873,7 +870,7 @@
         console.log('Datos enviados para recuperar contraseña:', requestData);
 
         try {
-          const response = await fetch(`${CORS_PROXY_URL}${GAS_SCRIPT_URL}`, {
+          const response = await fetch(GAS_SCRIPT_URL, {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json',
@@ -890,7 +887,7 @@
           }
         } catch (error) {
           console.error('Error durante la solicitud de recuperación:', error);
-          showCustomModal("Ocurrió un error al intentar recuperar la contraseña. Por favor, inténtalo de nuevo. CORS_ANYWHERE_PROXY");
+          showCustomModal("Ocurrió un error al intentar recuperar la contraseña. Por favor, inténtalo de nuevo.");
         }
         forgotPasswordForm.reset();
     });
@@ -950,7 +947,7 @@
         console.log("Datos del formulario de registro:", registrationData);
 
         try {
-          const response = await fetch(`${CORS_PROXY_URL}${GAS_SCRIPT_URL}`, {
+          const response = await fetch(GAS_SCRIPT_URL, {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json',
@@ -969,7 +966,7 @@
           }
         } catch (error) {
           console.error('Error durante la solicitud de registro:', error);
-          showCustomModal("Ocurrió un error al intentar registrarte. Por favor, inténtalo de nuevo. CORS_ANYWHERE_PROXY");
+          showCustomModal("Ocurrió un error al intentar registrarte. Por favor, inténtalo de nuevo.");
         }
     });
 
