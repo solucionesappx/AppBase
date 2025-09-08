@@ -174,13 +174,14 @@
 
     input {
       width: 100%;
-      padding: 5px 5px; /* Ajuste para reducir la sangría lateral */
+      padding: 10px 0px; /* Ajuste para reducir la sangría lateral */
+      text-align: center; /* Centra el texto en los campos de entrada */
       outline: none;
       border: none;
       font-size: 1em;
       background: var(--box-color);
       border: 2px solid var(--border-color);
-      border-radius: 30px;
+      border-radius: 10px;
       transition: border-color 0.3s ease;
       color: var(--text-color);
     }
@@ -229,7 +230,7 @@
     }
 
     .group {
-      width: 100%; /* Ancho reducido para alinearse con los inputs y el botón */
+      width: 80%; /* Ancho reducido para alinearse con los inputs y el botón */
       display: flex;
       justify-content: space-between;
       padding: 20px
@@ -303,14 +304,16 @@
   </style>
 </head>
 <body>
-  <div class="top-buttons">
-    <a href="#" id="redirect-btn" class="redirect-btn">
-      <i class="fas fa-arrow-left"></i>
-    </a>
-    <div class="theme-toggle-btn" onclick="toggleTheme()">
-      <i class="fa-solid fa-sun"></i>
+ <header>
+   <div class="top-buttons">
+      <a href="#" id="redirect-btn" class="redirect-btn">
+        <i class="fas fa-arrow-left"></i>
+      </a>
+      <div class="theme-toggle-btn" onclick="toggleTheme()">
+        <i class="fa-solid fa-sun"></i>
+      </div>
     </div>
-  </div>
+  </header>
   <div class="box">
     <div class="login">
       <div class="loginBx">
@@ -372,7 +375,7 @@
 
     const redirectBtn = document.getElementById('redirect-btn');
     redirectBtn.addEventListener('click', () => {
-        window.location.href = './index_blu.html';
+        window.location.href = './index_blue.html';
     });
   </script>
 </body>
