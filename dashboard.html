@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard de Usuario</title>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
+  <style>
+    @import url("https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap");
+
+    /* Definición de variables CSS para el tema claro */
+    :root {
+      --bg-color: #25252b;
+      --box-color: #2d2d39;
+      --border-color: #25252b;
+      --text-color: #fff;
+      --link-color: #ff2770;
+      --accent-color-1: #ff2770;
+      --accent-color-2: #dbeb7a;
+      --box-shadow-color: rgba(0,0,0,0.5);  
+    }
+
+    /* Variables para el tema oscuro */
+    body.dark-mode {
+      --bg-color: #f0f2f5;
+      --box-color: #e9ecef;
+      --border-color: #dcdcdc;
+      --text-color: #111;
+      --link-color: #ff6347;
+      --accent-color-1: #ff6347;
+      --accent-color-2: #7aebbc;
+      --box-shadow-color: rgba(0,0,0,0.2);
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: "Poppins", sans-serif;
+    }
+
+    /* Estilos del encabezado y el botón de cambio de tema */
+    header {
+      position: fixed;
+      top: 0;
+      right: 0;
+      padding: 20px;
+      z-index: 2000;
+    }
+
+    .theme-toggle-btn {
+      width: 40px;
+      height: 40px;
+      background: var(--box-color);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 5px 15px var(--box-shadow-color);
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle-btn i {
+      font-size: 1.2em;
+      color: var(--text-color);
+      transition: all 0.3s ease;
+    }
+
+    /* Contenedor principal del dashboard */
+    .dashboard-container {
+        position: relative;
+        width: 90%;
+        max-width: 800px;
+        margin-top: 70px;      /* Contenedor principal del dashboard */
+        background: var(--box-color);
+        border-radius: 20px;
+        filter: drop-shadow(0 15px 50px var(--box-shadow-color));
+    }
+
+    /* Wrapper para el contenido con padding */
+    .content-wrapper {
+        padding: 30px;
+        text-align: center;
+    }
+
+    /* Estilos para el contenido dentro del contenedor */
+    .dashboard-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .dashboard-content h1 {
+        font-size: 2.5em;
+        margin-bottom: 20px;
+        color: var(--accent-color-2);
+    }
+    
+    .dashboard-content p {
+        font-size: 1.2em;
+        max-width: 600px;
+        line-height: 1.6;
+
+    }
+    
+    /* Media query para ajustar los estilos en pantallas pequeñas (máximo 500px de ancho) */
+    @media (max-width: 500px) {
+        .dashboard-container {
+            width: 100%;
+            margin-top: 20px;
+            border-radius: 0;
+            box-shadow: none;
+        }
+    }
+
+    /* Estilos para la barra lateral estatica y los menus hover */
+    #sidebar-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background-color: transparent;
+      padding-top: 20px;  /* Ubicación 1er icono */
+      z-index: 1000;
+      box-shadow: transparent;  
+    }
+    
+    #sidebar-menu a {
+      display: flex;
+      align-items: center;
+      color: var(--text-color);
+      text-decoration: none;
+      font-size: 1.2em;
+      padding: 10px 10px;
+      margin-bottom: 5px;
+      border-radius: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      min-width: 35px; 
+      transition: width 0.3s ease;
+      flex-grow: 0;
+    }
+
+    #sidebar-menu a:hover {
+        /* Con un ancho de 'auto', el contenedor se ajustará automáticamente al largo del texto */
+        width: auto;
+        background-color: transparent;
+    }
+
+    #sidebar-menu a i {
+      min-width: 40px;
+      text-align: center;
+      transition: text-shadow 0.3s ease;
+    }
+    
+    #sidebar-menu a span {
+      margin-left: 15px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    #sidebar-menu a:hover i {
+      text-shadow: 0 0 5px var(--accent-color-2), 0 0 10px var(--accent-color-2), 0 0 20px var(--accent-color-2);
+    }
+
+    #sidebar-menu a:hover span {
+        opacity: 1;
+    }
+    
+    /* Media query para pantallas pequeñas (menos de 768px) */
+    @media (max-width: 768px) {
+        #sidebar-menu {
+            width: 50px;
+        }
+        
+        #sidebar-menu a:hover {
+            width: 150px;
+        }
+
+        #sidebar-menu a i {
+            min-width: 30px;
+        }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Encabezado para contener el botón de cambio de tema -->
+  <header>
+    <div class="theme-toggle-btn" onclick="toggleTheme()">
+      <i class="fa-solid fa-sun"></i>
+    </div>
+  </header>
+
+  <div id="sidebar-menu">
+    <a href="#"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="#"><i class="fa-solid fa-user-pen"></i><span>Registrar</span></a>
+    <a href="#"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></a>
+    <a href="#"><i class="fa-solid fa-gear"></i><span>Perfil</span></a>
+    <a href="#"><i class="fa-solid fa-right-from-bracket"></i><span>Salir</span></a>
+  </div>
+
+  <div class="dashboard-container">
+    <div class="content-wrapper">
+        <main class="dashboard-content">
+            <h1>¡Bienvenido a tu Dashboard!</h1>
+            <p>Has iniciado sesión con éxito. Desde aquí podrás acceder a todas las funcionalidades de la aplicación.</p>
+        </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const icon = document.querySelector('.theme-toggle-btn i');
+      body.classList.toggle('dark-mode');
+
+      if (body.classList.contains('dark-mode')) {
+        icon.classList.remove('fa-sun');
+        icon.classList.add('fa-moon');
+      } else {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+      }
+    }
+  </script>
+</body>
+</html>
