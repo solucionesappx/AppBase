@@ -108,16 +108,6 @@
 
     }
     
-    /* Media query para ajustar los estilos en pantallas pequeñas (máximo 500px de ancho) */
-    @media (max-width: 500px) {
-        .dashboard-container {
-            width: 100%;
-            margin-top: 20px;
-            border-radius: 0;
-            box-shadow: none;
-        }
-    }
-
     /* Estilos para la barra lateral estatica y los menus hover */
     #sidebar-menu {
       position: fixed;
@@ -171,6 +161,16 @@
     #sidebar-menu a:hover span {
         opacity: 1;
     }
+
+    /* Media query para ajustar los estilos en pantallas pequeñas (máximo 500px de ancho) */
+    @media (max-width: 500px) {
+        .dashboard-container {
+            width: 100%;
+            margin-top: 70px;
+            border-radius: 0;
+            box-shadow: none;
+        }
+    }    
     
     /* Media query para pantallas pequeñas (menos de 768px) */
     @media (max-width: 768px) {
