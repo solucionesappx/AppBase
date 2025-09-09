@@ -162,6 +162,25 @@
         opacity: 1;
     }
 
+    /* Regla unificada para el hover y la clase activa */
+    #sidebar-menu a:hover,
+    #sidebar-menu a.active {
+        width: auto;
+        background-color: transparent;
+    }
+
+    /* Regla unificada para el hover y la clase activa */
+    #sidebar-menu a:hover i,
+    #sidebar-menu a.active i {
+      text-shadow: 0 0 5px var(--accent-color-2), 0 0 10px var(--accent-color-2), 0 0 20px var(--accent-color-2);
+    }
+
+    /* Regla unificada para el hover y la clase activa */
+    #sidebar-menu a:hover span,
+    #sidebar-menu a.active span {
+        opacity: 1;
+    }
+    
     /* Media query para ajustar los estilos en pantallas pequeñas (máximo 500px de ancho) */
     @media (max-width: 500px) {
         .dashboard-container {
