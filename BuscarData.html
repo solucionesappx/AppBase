@@ -36,7 +36,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: top;
+      margin-top: 70px; /* Añadido para reducir el espacio superior */
       min-height: 100vh;
       background: var(--bg-color);
       color: var(--text-color);
@@ -266,9 +267,8 @@
       width: 45px;
       height: 45px;
       border-radius: 50%;
-      background: var(--accent-color-1);
-      color: #fff;
-      border: none;
+      background: none;
+      border: 2px solid var(--border-color);
       cursor: pointer;
       font-size: 1em;
       transition: all 0.3s ease;
@@ -278,12 +278,12 @@
     }
 
     .search-button i {
-      color: #fff;
+      color: var(--text-color);
     }
 
     .search-button:hover {
         background: var(--accent-color-2);
-        color: var(--box-color);
+        border: 2px solid var(--accent-color-2);
     }
 
     .search-button:hover i {
@@ -401,24 +401,37 @@
     }
 
     .close-btn {
-        position: absolute;
-        top: 15px;
-        right: 25px;
-        font-size: 2em;
-        font-weight: bold;
-        color: var(--text-color);
-        background: none;
-        border: none;
-        cursor: pointer;
+      width: 45px;
+      height: 45px;
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      border-radius: 50%;
+      background: var(--accent-color-1);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2em;
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .close-btn:hover {
+        background: var(--accent-color-2);
+        color: var(--box-color);
     }
     
     /* Estilos de los iconos del botón de cierre */
     .close-btn .close-icon-x {
         display: inline;
+        color: #fff;
     }
 
     .close-btn .close-icon-check {
         display: none;
+        color: #fff;
     }
 
     .close-btn.confirm-mode .close-icon-x {
@@ -427,6 +440,11 @@
 
     .close-btn.confirm-mode .close-icon-check {
         display: inline;
+    }
+    
+    .close-btn:hover .close-icon-x,
+    .close-btn:hover .close-icon-check {
+        color: var(--box-color);
     }
 
 
@@ -543,7 +561,7 @@
     <!-- El enlace "Buscar" ahora tiene la clase 'active' -->
     <a href="#"><i class="fa-solid fa-house"></i><span>Home</span></a>
     <a href="#"><i class="fa-solid fa-user-pen"></i><span>Registrar</span></a>
-    <a href="#" class="active"><i class="fa-solid fa-magnifying-glass"></i>
+    <a href="#" class="active"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></a>
     <a href="#"><i class="fa-solid fa-gear"></i><span>Perfil</span></a>
     <a href="#"><i class="fa-solid fa-right-from-bracket"></i><span>Salir</span></a>
   </div>
@@ -714,6 +732,7 @@
       <button class="form-btn" onclick="toggleEditMode()">
         <span class="btn-text-update">Actualizar</span>
         <span class="btn-text-accept">Aceptar</span>
+        <i class="fa-solid fa-check btn-icon-accept"></i>
       </button>
     </div>
   </div>
@@ -774,9 +793,6 @@
 
     <script>
   <!-- // Funcionabilidad de la app según Menú -->
-      // Variable global para almacenar el ID del temporizador
-      let closeFormTimeoutId;
-
       // Función para manejar la búsqueda de datos
       function searchData() {
         // Obtener el valor del campo de búsqueda y convertirlo a minúsculas
@@ -886,12 +902,6 @@
           const inputs = formContainer.querySelectorAll('input');
           const closeBtn = document.querySelector('.close-btn');
           
-          // Si hay un temporizador de cierre pendiente, lo cancelamos
-          if (closeFormTimeoutId) {
-            clearTimeout(closeFormTimeoutId);
-            closeFormTimeoutId = null; // Reiniciar el ID del temporizador
-          }
-
           // Remover la clase 'has-content' de todos los inputs para resetear el formulario
           inputs.forEach(input => {
               input.classList.remove('has-content');
