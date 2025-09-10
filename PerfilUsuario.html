@@ -275,11 +275,11 @@
 
   <div id="sidebar-menu">
     <!-- El enlace "Perfil" ahora tiene la clase 'active' -->
-    <a href="#"><i class="fa-solid fa-house"></i></a>
-    <a href="#"><i class="fa-solid fa-user-pen"></i></a>
-    <a href="#"><i class="fa-solid fa-magnifying-glass"></i></a>
-    <a href="#" class="active"><i class="fa-solid fa-gear"></i></a>
-    <a href="#"><i class="fa-solid fa-right-from-bracket"></i></a>
+    <a href="#" data-page="Home"><i class="fa-solid fa-house"></i></a>
+    <a href="#" data-page="Registrar"><i class="fa-solid fa-user-pen"></i></a>
+    <a href="#" data-page="Buscar"><i class="fa-solid fa-magnifying-glass"></i></a>
+    <a href="#" data-page="Perfil" class="active"><i class="fa-solid fa-gear"></i></a>
+    <a href="#" data-page="Salir"><i class="fa-solid fa-right-from-bracket"></i></a>
   </div>
 
   <div class="dashboard-container">
@@ -325,7 +325,8 @@
                 event.preventDefault();
                   
                 // Obtiene el texto del span dentro del enlace para saber qué página cargar.
-                const linkText = event.currentTarget.querySelector('span').textContent;
+                // Se ha cambiado 'querySelector('span').textContent' por 'dataset.page' para arreglar el error.
+                const linkText = event.currentTarget.dataset.page;
 
                 switch (linkText) {
                     case 'Home':
