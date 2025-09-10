@@ -218,18 +218,23 @@
     }
 
     /* Media query para ajustar los estilos en pantallas pequeñas (máximo 500px de ancho) */
-    @media (max-width: 500px) {
-        .dashboard-container,
-        .card-container {
-          width: 80%;
-          max-width: 500px;            
-          border-radius: 10px;
-          box-shadow: none;
-          margin-top: 20px;
-        }  
+@media (max-width: 500px) {
+    .dashboard-container {
+        width: 80%;
+        max-width: 500px;
+        border-radius: 10px;
+        box-shadow: none;
+        margin-top: 20px;
+    }  
+
+    .card-container {
+        width: 80%;
+        max-width: 300px;
+        border-radius: 10px;
+        box-shadow: none;
+        margin-top: 20px;
     }
-    }
-      
+}
   </style>
 </head>
 
