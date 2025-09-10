@@ -538,7 +538,42 @@
         icon.classList.add('fa-sun');
       }
     }
-  </script>
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        const navLinks = document.querySelectorAll('#sidebar-menu a');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (event) => {
+                // Previene el comportamiento predeterminado del enlace para que la lógica de JS se ejecute.
+                event.preventDefault();
+                  
+                // Obtiene el texto del span dentro del enlace para saber qué página cargar.
+                const linkText = event.currentTarget.querySelector('span').textContent;
+
+                switch (linkText) {
+                    case 'Home':
+                        window.location.href = 'dashboard.html';
+                        break;
+                    case 'Registrar':
+                        window.location.href = 'RegistroData.html';
+                        break;
+                    case 'Buscar':
+                        window.location.href = 'BuscarData.html';
+                        break;
+                    case 'Perfil':
+                        window.location.href = 'PerfilUsuario.html';
+                        break;
+                    case 'Salir':
+                        window.location.href = 'index.html';
+                        break;
+                    default:
+                        console.log('Enlace de navegación no reconocido.');
+                        break;
+                }
+            });
+        });
+    });
+ </script>
 <!-- // Fin Funcionabilidades comunes para la app -->  
 
     <script>
