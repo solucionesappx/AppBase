@@ -320,13 +320,29 @@
                     <li>... y mucho más!</li>
                 </ul>
             </div>
+            
+            <!-- Motor de Búsqueda Dinámica -->
+            <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                <!-- Campo de búsqueda con estilo minimalista (sin fondo y sin sombra) -->
+                <input type="text" id="search-input" placeholder="Buscar en la tabla..."
+                    class="w-full sm:w-1/2 p-2 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-accent-color-1 transition-all"
+                    style="background-color: transparent; box-shadow: none; border: 1px solid var(--border-color); color: var(--text-color);">
+                
+                <!-- Botón de cancelar con ícono, sin fondo ni sombra -->
+                <button id="clear-search"
+                    class="p-2 w-full sm:w-auto rounded-full transition-all"
+                    style="background-color: transparent; box-shadow: none;">
+                    <i class="fa-solid fa-xmark text-lg" style="color: var(--link-color);"></i>
+                </button>
+            </div>
+
 
             <div class="flex flex-col items-center justify-center mt-8">
                 <h3 class="text-2xl font-bold mb-4 text-center">Datos de Ejemplo</h3>
                 <div class="table-wrapper">
                     <div class="data-grid">
                         <!-- Header Row -->
-                        <div class="grid-row">
+                        <div class="grid-row header-row">
                             <div class="grid-header">ID</div>
                             <div class="grid-header">Nombre</div>
                             <div class="grid-header">País</div>
@@ -340,94 +356,94 @@
                         </div>
 
                         <!-- Data Rows -->
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">1</div><div class="grid-cell">Sofía Gómez</div><div class="grid-cell">México</div><div class="grid-cell">Ciudad de México</div><div class="grid-cell">28</div><div class="grid-cell">Diseñadora Gráfica</div><div class="grid-cell">Innovar Soluciones</div><div class="grid-cell">+52 55 1234 5678</div><div class="grid-cell">www.innovar.com</div><div class="grid-cell">Interesada en proyectos de branding.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">2</div><div class="grid-cell">Ricardo Pérez</div><div class="grid-cell">Colombia</div><div class="grid-cell">Medellín</div><div class="grid-cell">35</div><div class="grid-cell">Ingeniero Civil</div><div class="grid-cell">Constructora del Sur</div><div class="grid-cell">+57 4 9876 5432</div><div class="grid-cell">www.constructora.co</div><div class="grid-cell">Contactar para proyectos de infraestructura.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">3</div><div class="grid-cell">Ana López</div><div class="grid-cell">España</div><div class="grid-cell">Madrid</div><div class="grid-cell">22</div><div class="grid-cell">Estudiante</div><div class="grid-cell">Universidad Complutense</div><div class="grid-cell">+34 91 123 4567</div><div class="grid-cell">www.ucm.es</div><div class="grid-cell">Busca prácticas profesionales.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">4</div><div class="grid-cell">Juan Torres</div><div class="grid-cell">Argentina</div><div class="grid-cell">Buenos Aires</div><div class="grid-cell">41</div><div class="grid-cell">Analista de Datos</div><div class="grid-cell">Global Tech</div><div class="grid-cell">+54 11 1234 5678</div><div class="grid-cell">www.globaltech.com.ar</div><div class="grid-cell">Experto en big data y análisis predictivo.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">5</div><div class="grid-cell">María Ruiz</div><div class="grid-cell">Chile</div><div class="grid-cell">Santiago</div><div class="grid-cell">30</div><div class="grid-cell">Marketing Digital</div><div class="grid-cell">Creative Solutions</div><div class="grid-cell">+56 2 9876 5432</div><div class="grid-cell">www.creativesol.cl</div><div class="grid-cell">Especialista en SEO y campañas en redes.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">6</div><div class="grid-cell">Carlos Castro</div><div class="grid-cell">Perú</div><div class="grid-cell">Lima</div><div class="grid-cell">55</div><div class="grid-cell">Arquitecto</div><div class="grid-cell">Estudio Castro</div><div class="grid-cell">+51 1 123 4567</div><div class="grid-cell">www.castroarquitectos.pe</div><div class="grid-cell">Diseño de edificios eco-amigables.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">7</div><div class="grid-cell">Laura Vargas</div><div class="grid-cell">Venezuela</div><div class="grid-cell">Caracas</div><div class="grid-cell">29</div><div class="grid-cell">Periodista</div><div class="grid-cell">Noticias 24</div><div class="grid-cell">+58 212 987 6543</div><div class="grid-cell">www.noticias24.ve</div><div class="grid-cell">Enfoque en periodismo de investigación.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">8</div><div class="grid-cell">Diego Mendoza</div><div class="grid-cell">Ecuador</div><div class="grid-cell">Quito</div><div class="grid-cell">34</div><div class="grid-cell">Desarrollador de Software</div><div class="grid-cell">SoftDev Corp</div><div class="grid-cell">+593 2 1234 5678</div><div class="grid-cell">www.softdev.ec</div><div class="grid-cell">Experiencia en desarrollo de apps móviles.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">9</div><div class="grid-cell">Fernanda Díaz</div><div class="grid-cell">Bolivia</div><div class="grid-cell">La Paz</div><div class="grid-cell">26</div><div class="grid-cell">Nutricionista</div><div class="grid-cell">Clínica La Paz</div><div class="grid-cell">+591 2 987 6543</div><div class="grid-cell">www.clinicalapaz.bo</div><div class="grid-cell">Especializada en dietas para deportistas.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">10</div><div class="grid-cell">Pablo Herrera</div><div class="grid-cell">Uruguay</div><div class="grid-cell">Montevideo</div><div class="grid-cell">45</div><div class="grid-cell">Gerente de Ventas</div><div class="grid-cell">Importadora del Este</div><div class="grid-cell">+598 2 123 4567</div><div class="grid-cell">www.importadoradeleste.uy</div><div class="grid-cell">Responsable de grandes cuentas.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">11</div><div class="grid-cell">Valeria Sola</div><div class="grid-cell">Paraguay</div><div class="grid-cell">Asunción</div><div class="grid-cell">31</div><div class="grid-cell">Contadora</div><div class="grid-cell">Asesores Financieros</div><div class="grid-cell">+595 21 987 6543</div><div class="grid-cell">www.asesoresfinancieros.py</div><div class="grid-cell">Auditoría y consultoría fiscal.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">12</div><div class="grid-cell">Andrés Ramírez</div><div class="grid-cell">Guatemala</div><div class="grid-cell">Ciudad de Guatemala</div><div class="grid-cell">39</div><div class="grid-cell">Consultor IT</div><div class="grid-cell">Consultoría Digital</div><div class="grid-cell">+502 2 123 4567</div><div class="grid-cell">www.consultoriadigital.gt</div><div class="grid-cell">Especialista en seguridad de redes.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">13</div><div class="grid-cell">Camila Soto</div><div class="grid-cell">Honduras</div><div class="grid-cell">Tegucigalpa</div><div class="grid-cell">27</div><div class="grid-cell">Abogada</div><div class="grid-cell">Bufete Legal Soto</div><div class="grid-cell">+504 2221 2345</div><div class="grid-cell">www.bufetesoto.hn</div><div class="grid-cell">Derecho corporativo y civil.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">14</div><div class="grid-cell">Gabriel Ortiz</div><div class="grid-cell">El Salvador</div><div class="grid-cell">San Salvador</div><div class="grid-cell">33</div><div class="grid-cell">Profesor</div><div class="grid-cell">Colegio Bilingüe</div><div class="grid-cell">+503 2212 3456</div><div class="grid-cell">www.colegiobil.sv</div><div class="grid-cell">Enseña historia y geografía.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">15</div><div class="grid-cell">Isabella Gil</div><div class="grid-cell">Costa Rica</div><div class="grid-cell">San José</div><div class="grid-cell">24</div><div class="grid-cell">Artista Plástica</div><div class="grid-cell">Galería de Arte</div><div class="grid-cell">+506 2200 1122</div><div class="grid-cell">www.galeriaarte.cr</div><div class="grid-cell">Exhibiciones de arte contemporáneo.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">16</div><div class="grid-cell">Felipe Vega</div><div class="grid-cell">Panamá</div><div class="grid-cell">Ciudad de Panamá</div><div class="grid-cell">48</div><div class="grid-cell">Médico</div><div class="grid-cell">Hospital Central</div><div class="grid-cell">+507 234 5678</div><div class="grid-cell">www.hospitalcentral.pa</div><div class="grid-cell">Especialista en cardiología.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">17</div><div class="grid-cell">Lorena Núñez</div><div class="grid-cell">Cuba</div><div class="grid-cell">La Habana</div><div class="grid-cell">36</div><div class="grid-cell">Diseñadora de Moda</div><div class="grid-cell">Atelier de Moda</div><div class="grid-cell">+53 7 987 6543</div><div class="grid-cell">www.atelierdemoda.cu</div><div class="grid-cell">Creación de colecciones exclusivas.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">18</div><div class="grid-cell">Manuel Cortés</div><div class="grid-cell">República Dominicana</div><div class="grid-cell">Santo Domingo</div><div class="grid-cell">50</div><div class="grid-cell">Cocinero</div><div class="grid-cell">Restaurante El Sabor</div><div class="grid-cell">+1 809 123 4567</div><div class="grid-cell">www.elsabordominicano.do</div><div class="grid-cell">Maestro de la cocina tradicional.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">19</div><div class="grid-cell">Natalia Rojas</div><div class="grid-cell">Puerto Rico</div><div class="grid-cell">San Juan</div><div class="grid-cell">29</div><div class="grid-cell">Fotógrafa</div><div class="grid-cell">Estudio Fotográfico</div><div class="grid-cell">+1 787 987 6543</div><div class="grid-cell">www.estudiofoto.pr</div><div class="grid-cell">Fotografía de eventos y retratos.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">20</div><div class="grid-cell">Jorge Molina</div><div class="grid-cell">Brasil</div><div class="grid-cell">São Paulo</div><div class="grid-cell">44</div><div class="grid-cell">Piloto</div><div class="grid-cell">Aerolíneas Nacionales</div><div class="grid-cell">+55 11 1234 5678</div><div class="grid-cell">www.aerolineasnac.br</div><div class="grid-cell">Capitán de vuelos internacionales.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">21</div><div class="grid-cell">Daniela Salas</div><div class="grid-cell">Alemania</div><div class="grid-cell">Berlín</div><div class="grid-cell">23</div><div class="grid-cell">Ingeniera Industrial</div><div class="grid-cell">AutoTech GmbH</div><div class="grid-cell">+49 30 12345678</div><div class="grid-cell">www.autotechgmbh.de</div><div class="grid-cell">Optimización de procesos de producción.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">22</div><div class="grid-cell">Esteban Garcés</div><div class="grid-cell">Francia</div><div class="grid-cell">París</div><div class="grid-cell">32</div><div class="grid-cell">Chef Pastelero</div><div class="grid-cell">Le Pâtissier</div><div class="grid-cell">+33 1 9876 5432</div><div class="grid-cell">www.lepatissier.fr</div><div class="grid-cell">Conocido por sus macarons.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">23</div><div class="grid-cell">Paula Escobar</div><div class="grid-cell">Canadá</div><div class="grid-cell">Toronto</div><div class="grid-cell">25</div><div class="grid-cell">Bióloga Marina</div><div class="grid-cell">Instituto de Biología</div><div class="grid-cell">+1 416 123 4567</div><div class="grid-cell">www.institutobiologia.ca</div><div class="grid-cell">Investigación en ecosistemas marinos.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">24</div><div class="grid-cell">Miguel Parra</div><div class="grid-cell">Italia</div><div class="grid-cell">Roma</div><div class="grid-cell">37</div><div class="grid-cell">Historiador</div><div class="grid-cell">Museo Nacional</div><div class="grid-cell">+39 06 9876 5432</div><div class="grid-cell">www.museonacional.it</div><div class="grid-cell">Especializado en historia del Imperio Romano.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">25</div><div class="grid-cell">Andrea León</div><div class="grid-cell">Japón</div><div class="grid-cell">Tokio</div><div class="grid-cell">28</div><div class="grid-cell">Ingeniera de Software</div><div class="grid-cell">Innovate Labs</div><div class="grid-cell">+81 3 1234 5678</div><div class="grid-cell">www.innovatelabs.jp</div><div class="grid-cell">Desarrollo de IA para robots.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">26</div><div class="grid-cell">Sebastián Ramos</div><div class="grid-cell">Australia</div><div class="grid-cell">Sídney</div><div class="grid-cell">40</div><div class="grid-cell">Arquitecto de Paisajes</div><div class="grid-cell">Green Spaces</div><div class="grid-cell">+61 2 9876 5432</div><div class="grid-cell">www.greenspaces.au</div><div class="grid-cell">Diseño de jardines botánicos.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">27</div><div class="grid-cell">Valentina Cruz</div><div class="grid-cell">Rusia</div><div class="grid-cell">Moscú</div><div class="grid-cell">26</div><div class="grid-cell">Traductora</div><div class="grid-cell">Servicios de Traducción</div><div class="grid-cell">+7 495 123 4567</div><div class="grid-cell">www.serviciostrad.ru</div><div class="grid-cell">Traducción de documentos técnicos.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">28</div><div class="grid-cell">Alejandro Peña</div><div class="grid-cell">Reino Unido</div><div class="grid-cell">Londres</div><div class="grid-cell">31</div><div class="grid-cell">Diseñador de Videojuegos</div><div class="grid-cell">Game Dev Studio</div><div class="grid-cell">+44 20 1234 5678</div><div class="grid-cell">www.gamedevstudio.uk</div><div class="grid-cell">Creación de personajes y entornos.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">29</div><div class="grid-cell">Luisa Mora</div><div class="grid-cell">Sudáfrica</div><div class="grid-cell">Ciudad del Cabo</div><div class="grid-cell">38</div><div class="grid-cell">Veterinaria</div><div class="grid-cell">Clínica Veterinaria</div><div class="grid-cell">+27 21 123 4567</div><div class="grid-cell">www.clinicavet.za</div><div class="grid-cell">Especialista en animales exóticos.</div>
                         </div>
-                        <div class="grid-row">
+                        <div class="grid-row data-row">
                             <div class="grid-cell">30</div><div class="grid-cell">Fernando Osorio</div><div class="grid-cell">China</div><div class="grid-cell">Beijing</div><div class="grid-cell">52</div><div class="grid-cell">Profesor de Artes Marciales</div><div class="grid-cell">Academia de Kung Fu</div><div class="grid-cell">+86 10 9876 5432</div><div class="grid-cell">www.academiakungfu.cn</div><div class="grid-cell">Instructor de tai chi y kung fu.</div>
                         </div>
                     </div>
@@ -465,7 +481,7 @@
         </div>
     </nav>
 
-    <!-- Script para el cambio de tema -->
+    <!-- Script para el cambio de tema y la nueva funcionalidad de búsqueda -->
     <script>
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
@@ -492,6 +508,47 @@
                 themeToggle.classList.add('dark-mode');
                 localStorage.setItem('theme', 'dark');
             }
+        });
+
+        // Lógica para el motor de búsqueda dinámico
+        const searchInput = document.getElementById('search-input');
+        const clearButton = document.getElementById('clear-search');
+        // Se ha actualizado el selector para apuntar solo a las filas de datos
+        const dataRows = document.querySelectorAll('.data-grid .grid-row');
+
+        // Escuchar el evento 'input' en el campo de búsqueda
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+
+            dataRows.forEach(row => {
+                // Obtener todas las celdas de la fila, excepto la primera (ID)
+                const cells = row.querySelectorAll('.grid-cell');
+                
+                let foundMatch = false;
+                cells.forEach(cell => {
+                    const cellText = cell.textContent.toLowerCase();
+                    // Buscamos la cadena de búsqueda en el contenido de la celda.
+                    // Usamos cell.cellIndex para omitir la primera celda (índice 0).
+                    if (cellText.includes(searchTerm)) {
+                        foundMatch = true;
+                    }
+                });
+
+                // Mostramos u ocultamos la fila según si se encontró una coincidencia
+                if (foundMatch) {
+                    row.style.display = 'contents';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Escuchar el evento 'click' en el botón de cancelar
+        clearButton.addEventListener('click', () => {
+            searchInput.value = ''; // Borrar el texto del campo de búsqueda
+            dataRows.forEach(row => {
+                row.style.display = 'contents'; // Mostrar todas las filas de nuevo
+            });
         });
     </script>
 
