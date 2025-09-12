@@ -331,19 +331,18 @@
                 <h3 class="text-2xl font-bold mb-4 text-center w-full">Datos de Ejemplo</h3>
 
                 <!-- Motor de Búsqueda Dinámica -->
-                <!-- Se ha reubicado aquí y se ha ajustado la alineación a la izquierda -->
-                <div class="mt-4 mb-4 flex flex-col sm:flex-row items-center justify-start gap-4 w-full">
+                <div class="mt-4 mb-4 flex items-center justify-start gap-4 w-full">
                     <!-- Campo de búsqueda con estilo minimalista (con fondo y sin sombra) -->
-                    <!-- Se ha cambiado la clase "rounded-full" a "rounded-lg" para un borde menos circular -->
                     <input type="text" id="search-input" placeholder="Buscar en la tabla..."
-                        class="w-full sm:w-1/2 p-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent-color-1 transition-all"
+                        class="flex-1 p-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent-color-1 transition-all"
                         style="background-color: var(--box-color); border: 1px solid var(--border-color); color: var(--text-color);">
                     
-                    <!-- Botón de cancelar con ícono, sin fondo ni sombra -->
+                    <!-- Botón de cancelar con ícono -->
+                    <!-- Se ha aumentado el tamaño y se ha añadido la clase 'font-bold' para enfatizar -->
                     <button id="clear-search"
-                        class="p-2 w-full large:w-auto rounded-full transition-all"
+                        class="p-2 rounded-full transition-all"
                         style="background-color: transparent; box-shadow: none;">
-                        <i class="fa-solid fa-xmark text-lg" style="color: var(--accent-color-1);"></i>
+                        <i class="fa-solid fa-xmark text-2xl font-bold" style="color: var(--accent-color-1);"></i>
                     </button>
                 </div>
 
@@ -411,48 +410,6 @@
                         </div>
                         <div class="grid-row data-row">
                             <div class="grid-cell">16</div><div class="grid-cell">Felipe Vega</div><div class="grid-cell">Panamá</div><div class="grid-cell">Ciudad de Panamá</div><div class="grid-cell">48</div><div class="grid-cell">Médico</div><div class="grid-cell">Hospital Central</div><div class="grid-cell">+507 234 5678</div><div class="grid-cell">www.hospitalcentral.pa</div><div class="grid-cell">Especialista en cardiología.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">17</div><div class="grid-cell">Lorena Núñez</div><div class="grid-cell">Cuba</div><div class="grid-cell">La Habana</div><div class="grid-cell">36</div><div class="grid-cell">Diseñadora de Moda</div><div class="grid-cell">Atelier de Moda</div><div class="grid-cell">+53 7 987 6543</div><div class="grid-cell">www.atelierdemoda.cu</div><div class="grid-cell">Creación de colecciones exclusivas.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">18</div><div class="grid-cell">Manuel Cortés</div><div class="grid-cell">República Dominicana</div><div class="grid-cell">Santo Domingo</div><div class="grid-cell">50</div><div class="grid-cell">Cocinero</div><div class="grid-cell">Restaurante El Sabor</div><div class="grid-cell">+1 809 123 4567</div><div class="grid-cell">www.elsabordominicano.do</div><div class="grid-cell">Maestro de la cocina tradicional.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">19</div><div class="grid-cell">Natalia Rojas</div><div class="grid-cell">Puerto Rico</div><div class="grid-cell">San Juan</div><div class="grid-cell">29</div><div class="grid-cell">Fotógrafa</div><div class="grid-cell">Estudio Fotográfico</div><div class="grid-cell">+1 787 987 6543</div><div class="grid-cell">www.estudiofoto.pr</div><div class="grid-cell">Fotografía de eventos y retratos.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">20</div><div class="grid-cell">Jorge Molina</div><div class="grid-cell">Brasil</div><div class="grid-cell">São Paulo</div><div class="grid-cell">44</div><div class="grid-cell">Piloto</div><div class="grid-cell">Aerolíneas Nacionales</div><div class="grid-cell">+55 11 1234 5678</div><div class="grid-cell">www.aerolineasnac.br</div><div class="grid-cell">Capitán de vuelos internacionales.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">21</div><div class="grid-cell">Daniela Salas</div><div class="grid-cell">Alemania</div><div class="grid-cell">Berlín</div><div class="grid-cell">23</div><div class="grid-cell">Ingeniera Industrial</div><div class="grid-cell">AutoTech GmbH</div><div class="grid-cell">+49 30 12345678</div><div class="grid-cell">www.autotechgmbh.de</div><div class="grid-cell">Optimización de procesos de producción.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">22</div><div class="grid-cell">Esteban Garcés</div><div class="grid-cell">Francia</div><div class="grid-cell">París</div><div class="grid-cell">32</div><div class="grid-cell">Chef Pastelero</div><div class="grid-cell">Le Pâtissier</div><div class="grid-cell">+33 1 9876 5432</div><div class="grid-cell">www.lepatissier.fr</div><div class="grid-cell">Conocido por sus macarons.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">23</div><div class="grid-cell">Paula Escobar</div><div class="grid-cell">Canadá</div><div class="grid-cell">Toronto</div><div class="grid-cell">25</div><div class="grid-cell">Bióloga Marina</div><div class="grid-cell">Instituto de Biología</div><div class="grid-cell">+1 416 123 4567</div><div class="grid-cell">www.institutobiologia.ca</div><div class="grid-cell">Investigación en ecosistemas marinos.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">24</div><div class="grid-cell">Miguel Parra</div><div class="grid-cell">Italia</div><div class="grid-cell">Roma</div><div class="grid-cell">37</div><div class="grid-cell">Historiador</div><div class="grid-cell">Museo Nacional</div><div class="grid-cell">+39 06 9876 5432</div><div class="grid-cell">www.museonacional.it</div><div class="grid-cell">Especializado en historia del Imperio Romano.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">25</div><div class="grid-cell">Andrea León</div><div class="grid-cell">Japón</div><div class="grid-cell">Tokio</div><div class="grid-cell">28</div><div class="grid-cell">Ingeniera de Software</div><div class="grid-cell">Innovate Labs</div><div class="grid-cell">+81 3 1234 5678</div><div class="grid-cell">www.innovatelabs.jp</div><div class="grid-cell">Desarrollo de IA para robots.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">26</div><div class="grid-cell">Sebastián Ramos</div><div class="grid-cell">Australia</div><div class="grid-cell">Sídney</div><div class="grid-cell">40</div><div class="grid-cell">Arquitecto de Paisajes</div><div class="grid-cell">Green Spaces</div><div class="grid-cell">+61 2 9876 5432</div><div class="grid-cell">www.greenspaces.au</div><div class="grid-cell">Diseño de jardines botánicos.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">27</div><div class="grid-cell">Valentina Cruz</div><div class="grid-cell">Rusia</div><div class="grid-cell">Moscú</div><div class="grid-cell">26</div><div class="grid-cell">Traductora</div><div class="grid-cell">Servicios de Traducción</div><div class="grid-cell">+7 495 123 4567</div><div class="grid-cell">www.serviciostrad.ru</div><div class="grid-cell">Traducción de documentos técnicos.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">28</div><div class="grid-cell">Alejandro Peña</div><div class="grid-cell">Reino Unido</div><div class="grid-cell">Londres</div><div class="grid-cell">31</div><div class="grid-cell">Diseñador de Videojuegos</div><div class="grid-cell">Game Dev Studio</div><div class="grid-cell">+44 20 1234 5678</div><div class="grid-cell">www.gamedevstudio.uk</div><div class="grid-cell">Creación de personajes y entornos.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">29</div><div class="grid-cell">Luisa Mora</div><div class="grid-cell">Sudáfrica</div><div class="grid-cell">Ciudad del Cabo</div><div class="grid-cell">38</div><div class="grid-cell">Veterinaria</div><div class="grid-cell">Clínica Veterinaria</div><div class="grid-cell">+27 21 123 4567</div><div class="grid-cell">www.clinicavet.za</div><div class="grid-cell">Especialista en animales exóticos.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">30</div><div class="grid-cell">Fernando Osorio</div><div class="grid-cell">China</div><div class="grid-cell">Beijing</div><div class="grid-cell">52</div><div class="grid-cell">Profesor de Artes Marciales</div><div class="grid-cell">Academia de Kung Fu</div><div class="grid-cell">+86 10 9876 5432</div><div class="grid-cell">www.academiakungfu.cn</div><div class="grid-cell">Instructor de tai chi y kung fu.</div>
                         </div>
                     </div>
                 </div>
