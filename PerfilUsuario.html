@@ -1,338 +1,492 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Formulario Perfil</title>
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
-  <style>
-    @import url("https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap");
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación Móvil</title>
+    <!-- Incluye el CDN de Tailwind CSS para un estilo rápido y moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Incluye la librería de iconos Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
+    <style>
+        /* Importa la fuente Poppins de Google Fonts */
+        @import url("https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap");
 
-    /* Definición de variables CSS para el tema claro */
-    :root {
-      --bg-color: #25252b;
-      --box-color: #2d2d39;
-      --border-color: #25252b;
-      --text-color: #fff;
-      --link-color: #ff2770;
-      --accent-color-1: #ff2770;
-      --accent-color-2: #dbeb7a;
-      --box-shadow-color: rgba(0,0,0,0.5);  
-    }
+        /* Definición de variables CSS para el tema claro */
+        :root {
+            --bg-color: #f0f2f5;
+            --box-color: #e9ecef;
+            --border-color: #dcdcdc;
+            --text-color: #111;
+            --link-color: #D61336;
+            --accent-color-1: #D61336;
+            --accent-color-2: #7aebbc;
+            --box-shadow-color: rgba(0,0,0,0.2);
+        }
 
-    /* Variables para el tema oscuro */
-    body.dark-mode {
-      --bg-color: #f0f2f5;
-      --box-color: #e9ecef;
-      --border-color: #dcdcdc;
-      --text-color: #111;
-      --link-color: #ff6347;
-      --accent-color-1: #ff6347;
-      --accent-color-2: #7aebbc;
-      --box-shadow-color: rgba(0,0,0,0.2);
-    }
+        /* Variables para el tema oscuro */
+        body.dark-mode {
+            --bg-color: #2d2d39;
+            --box-color: #2d2d39;
+            --border-color: #25252b;
+            --text-color: #fff;
+            --link-color: #ff6347;
+            --accent-color-1: #800D21;
+            --accent-color-2: #dbeb7a;
+            --box-shadow-color: rgba(0,0,0,0.5);
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        /* Clases de utilidad para un código más limpio */
+        .header-bg, .nav-bg {
+            background-color: var(--box-color);
+        }
 
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      /* Se ha cambiado de 'center' a 'flex-start' para alinear el contenido en la parte superior */
-      justify-content: flex-start;
-      min-height: 100vh;
-      background: var(--bg-color);
-      color: var(--text-color);
-      font-family: "Poppins", sans-serif;
-    }
+        .box-shadow {
+            box-shadow: 0 4px 6px -1px var(--box-shadow-color), 0 2px 4px -2px var(--box-shadow-color);
+        }
+        
+        .accent-link {
+            color: var(--link-color);
+        }
 
-    /* Estilos del encabezado y el botón de cambio de tema */
-    header {
-      position: fixed;
-      top: 0;
-      right: 0;
-      padding: 20px;
-      z-index: 2000;
-    }
+        .icon-size {
+            height: 1.5rem;
+            width: 1.5rem;
+        }
+        
+        .padding-container {
+            padding: 0 1rem;
+        }
 
-    .theme-toggle-btn {
-      width: 40px;
-      height: 40px;
-      background: var(--box-color);
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 5px 15px var(--box-shadow-color);
-      transition: all 0.3s ease;
-    }
+        .flex-row {
+            display: flex;
+            align-items: center;
+        }
 
-    .theme-toggle-btn i {
-      font-size: 1.2em;
-      color: var(--text-color);
-      transition: all 0.3s ease;
-    }
+        .flex-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-    /* Contenedor principal del dashboard */
-    .dashboard-container {
-        position: relative;
-        height: 80%;
-        min-height: 200px; 
-        width: 90%;
-        max-width: 780px;
-        background: var(--box-color);
-        border-radius: 10px;
-        filter: drop-shadow(0 15px 50px var(--box-shadow-color));
-        padding: 30px;
-        /* Se usa flexbox para organizar las tarjetas y el contenido */
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        margin-top: 70px;
-    }
+        .nav-link {
+            padding: 0.5rem;
+            border-radius: 9999px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-link:hover {
+            background-color: var(--box-color);
+        }
+        
+        /* Estilos específicos para los elementos */
+        .welcome-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
 
-    /* Estilos para el contenido dentro del contenedor */
-    .dashboard-content {
-      text-align: center;
-    }
-    
-    .dashboard-content h1 {
-        font-size: 2.5em;
-        margin-bottom: 20px;
-        color: var(--accent-color-2);
-    }
-    
-    .dashboard-content p {
-        font-size: 1.2em;
-        max-width: 600px;
-        line-height: 1.6;
-        margin: 0 auto;
-    }
+        .dashboard-box {
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+        }
 
-    /* Nuevo estilo para las tarjetas de contenido */
-    /* Regla añadida para el contenedor de las tarjetas */
-    .card-container {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    
-    .card {
-        background: var(--box-color);
-        border-radius: 15px;
-        padding: 20px;
-        border: 2px solid var(--border-color);
-        box-shadow: 0 5px 15px var(--box-shadow-color);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
+        .list-items {
+            list-style-type: disc;
+            list-style-position: inside;
+            margin-top: 1rem;
+        }
+        
+        /* Estilos para el nuevo Toggle Switch */
+        /* REDUCCIÓN DE TAMAÑO: 40px de ancho y 22px de alto */
+        .toggle-switch-container {
+            position: relative;
+            width: 40px; 
+            height: 22px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transform: translate3d(0, 0, 0);
+            font-size: 1.1rem;
+        }
 
-    .card h3 {
-        font-size: 1.5em;
-        color: var(--accent-color-2);
-        margin-bottom: 10px;
-    }
+        .toggle-switch-container:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 40px; 
+            height: 22px;
+            border-radius: 11px;
+            background-color: var(--text-color);
+            transition: background-color 0.3s cubic-bezier(0.86, 0, 0.07, 1);
+        }
 
-    .card img {
-        max-width: 100%;
-        border-radius: 10px;
-        margin-top: 15px;
-        /* Estilo para que la imagen se vea bien en el contenedor */
-        object-fit: cover;
-    }
-    
-    .profile-card {
-        width: 100%;
-        max-width: 730px; /* Se ha aumentado el ancho máximo de la tarjeta */
-        background: var(--box-color);
-        border-radius: 15px;
-        padding: 25px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        text-align: left;
-    }
+        .toggle-switch-container:active:before {
+            transition: background-color 0.3s cubic-bezier(0.86, 0, 0.07, 1);
+        }
 
-    .profile-card .profile-info {
-        width: 100%;
-    }
+        /* REDUCCIÓN DE TAMAÑO: 18px de ancho y 18px de alto */
+        .toggle-switch-container .toggle-button {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px; 
+            height: 18px;
+            border-radius: 50%;
+            background-color: var(--box-color);
+            transition: transform 0.3s cubic-bezier(0.86, 0, 0.07, 1), background-color 0.3s cubic-bezier(0.86, 0, 0.07, 1);
+        }
 
-    .profile-card h3 {
-        margin-top: 0;
-        margin-bottom: 15px;
-        font-size: 1.8em;
-        color: var(--accent-color-2);
-    }
+        .toggle-switch-container.dark-mode:before {
+            background-color: var(--accent-color-1);
+        }
 
-    .profile-card p {
-        margin: 5px 0;
-        font-size: 1em;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
+        /* AJUSTE DE LA POSICIÓN DE DESPLAZAMIENTO */
+        .toggle-switch-container.dark-mode .toggle-button {
+            transform: translateX(18px);
+            background-color: var(--box-color);
+        }
 
-    .profile-card p strong {
-        color: var(--link-color);
-        font-weight: 500;
-        /* Se ha cambiado de min-width a width para crear columnas de ancho fijo */
-        width: 170px; 
-        text-align: left;
-    }
+        /* Estilos para la tabla con CSS Grid */
+        .table-wrapper {
+            overflow: auto; /* Permite desplazamiento en ambas direcciones */
+            max-width: 100%;
+            /* Se ha añadido un max-height en unidades de la altura visible */
+            max-height: 60vh;
+            margin-top: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px var(--box-shadow-color), 0 2px 4px -2px var(--box-shadow-color);
+            background-color: var(--box-color);
+        }
+        
+        .data-grid {
+            display: grid;
+            /* Se han cambiado todas las columnas a 'auto' para que se ajusten automáticamente al contenido. */
+            grid-template-columns: auto auto auto auto auto auto auto auto auto auto;
+            width: max-content;
+        }
 
-    .profile-card i {
-        color: var(--accent-color-2);
-        font-size: 1.5em;
-        text-align: left;
-        width: 25px; 
-    }  
+        .grid-header, .grid-cell {
+            /* Se ha reducido el padding para minimizar el alto de las filas */
+            padding: 0.5rem; 
+            height: 30px;
+            /* Se ha añadido flexbox para centrar el contenido verticalmente */
+            display: flex;
+            align-items: center;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .grid-row {
+            display: contents; /* Permite que los elementos secundarios se coloquen en la cuadrícula principal */
+        }
 
-    /* Estilos para la barra lateral estatica y los menus hover */
-    #sidebar-menu {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
-      background-color: transparent;
-      padding-top: 20px;
-      z-index: 1000;
-      box-shadow: transparent;  
-    }
-    
-    #sidebar-menu a {
-      display: flex;
-      align-items: center;
-      color: var(--text-color);
-      text-decoration: none;
-      font-size: 1.2em;
-      padding: 10px 10px;
-      margin-bottom: 5px;
-      border-radius: 10px;
-      white-space: nowrap;
-      overflow: hidden;
-      min-width: 35px; 
-      transition: width 0.3s ease;
-      flex-grow: 0;
-      /* Propiedad para evitar el color de resaltado al tocar en iOS */
-      -webkit-tap-highlight-color: transparent;
-    }
+        /* Fija la primera fila con encabezados */
+        .grid-row:first-child .grid-header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background-color: var(--accent-color-1);
+            font-weight: 600;
+            color: #fff; /* Se ha cambiado el color del texto a blanco para la legibilidad */
+            text-transform: uppercase;
+        }
+        
+        /* Fija la primera columna */
+        .grid-row > .grid-cell:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 30;
+            background-color: var(--accent-color-1);
+            color: #fff; /* Se ha cambiado el color del texto a blanco para la legibilidad */
+        }
 
-    #sidebar-menu a i {
-      min-width: 40px;
-      text-align: center;
-      transition: text-shadow 0.3s ease;
-    }
-    
-    #sidebar-menu a:hover,
-    #sidebar-menu a.active {
-        width: auto;
-        background-color: transparent;
-    }
+        /* Fija la celda en la esquina superior izquierda */
+        .grid-row:first-child > .grid-header:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 40; /* Asegurar que la esquina se mantenga por encima de todo */
+            background-color: var(--accent-color-1);
+            color: #fff; /* Se ha cambiado el color del texto a blanco para la legibilidad */
+        }
+        
+        .grid-cell:last-child, .grid-header:last-child {
+            border-right: none;
+        }
 
-    /* Regla unificada para el hover y la clase activa */
-    #sidebar-menu a:hover i,
-    #sidebar-menu a.active i {
-      text-shadow: 0 0 5px var(--accent-color-2), 0 0 10px var(--accent-color-2), 0 0 20px var(--accent-color-2);
-    }
-    
+        /* Estilo para las filas pares en modo claro y oscuro, excluyendo la primera celda */
+        :root .data-grid .grid-row:nth-child(even) > div:not(:first-child) {
+            background-color: rgba(0,0,0,0.05);
+        }
+        body.dark-mode .data-grid .grid-row:nth-child(even) > div:not(:first-child) {
+            background-color: rgba(255,255,255,0.05);
+        }
+        
+        /* Efecto de hover y transición para los iconos de la barra de navegación */
+        .nav-link i, .nav-link span {
+            transition: transform 0.3s ease-in-out, color 0.3s ease, text-shadow 0.3s ease;
+            color: var(--text-color);
+        }
 
-  </style>
+        /* Efecto neón al pasar el cursor o tocar el elemento */
+        .nav-link:hover i,
+        .nav-link:hover span,
+        .nav-link.active i,
+        .nav-link.active span {
+            transform: scale(1.1) translateY(-3px);
+            color: var(--accent-color-1);
+            text-shadow: 0 0 2px var(--accent-color-1), 0 0 10px var(--accent-color-1), 0 0 15px var(--accent-color-1);
+        }
+
+        /* Media query para pantallas más grandes (mayor a 600px) */
+        @media (min-width: 600px) {
+            body {
+                /* Centrar el contenido de la página en pantallas grandes */
+                display: flex;
+                justify-content: center;
+                /* El cuerpo de la página tendrá un ancho máximo para evitar que se vea demasiado estirado en monitores grandes */
+                max-width: 1000px;
+                /* Eliminar el padding que se aplicaba al body en pantallas pequeñas */
+                padding: 0;
+                margin: 0 auto;
+            }
+
+            .dashboard-box {
+                padding: 2.5rem;
+            }
+
+            .table-wrapper {
+                /* Aumentar el max-height de la tabla para pantallas de escritorio */
+                max-height: 70vh;
+            }
+        }
+
+    </style>
 </head>
+<body class="dark-mode transition-colors">
 
-<body>
-  <!-- Encabezado para contener el botón de cambio de tema -->
-  <header>
-    <div class="theme-toggle-btn" onclick="toggleTheme()">
-      <i class="fa-solid fa-sun"></i>
-    </div>
-  </header>
+    <!-- 1. Cintillo Fijo (Header) -->
+    <header class="fixed top-0 left-0 w-full header-bg box-shadow z-50 transition-colors">
+        <div class="container mx-auto padding-container py-3 flex items-center justify-between">
+            <!-- Mensaje de Bienvenida (Asume que el usuario está logueado) -->
+            <div class="flex-row space-x-2">
+                <span class="welcome-text">¡Hola, Usuario!</span>
+            </div>
 
-  <div id="sidebar-menu">
-    <!-- El enlace "Perfil" ahora tiene la clase 'active' -->
-    <a href="#" data-page="Home"><i class="fa-solid fa-house"></i></a>
-    <a href="#" data-page="Registrar"><i class="fa-solid fa-user-pen"></i></a>
-    <a href="#" data-page="Buscar"><i class="fa-solid fa-magnifying-glass"></i></a>
-    <a href="#" data-page="Perfil" class="active"><i class="fa-solid fa-gear"></i></a>
-    <a href="#" data-page="Salir"><i class="fa-solid fa-right-from-bracket"></i></a>
-  </div>
-
-  <div class="dashboard-container">
-
-    <!-- Nueva sección con tarjetas de contenido -->
-    <section class="card-container">
-      <div class="card profile-card">
-        <h3>Datos de usuario</h3>
-        <div class="profile-info">
-            <p><i class="fas fa-user"></i>Usuario_Nombre</p>
-            <p><i class="fas fa-envelope"></i>Usuario_Correo</p>
-            <p><i class="fas fa-phone"></i>Usuario_Telefono</p>
-            <p><i class="fas fa-key"></i>Usuario_Clave</p>
-            <p><i class="fas fa-question-circle"></i>Usuario_PreguntaSeg</p>
-            <p><i class="fas fa-shield-alt"></i>Usuario_RespuestaSeg</p>
-            <p><i class="fas fa-id-badge"></i>Usuario_Perfil</p>
+            <div class="flex-row space-x-4">
+                <!-- Botón de Modo Claro/Oscuro -->
+                <div id="theme-toggle" class="toggle-switch-container dark-mode">
+                    <div class="toggle-button"></div>
+                </div>
+                
+                <!-- Botón para cerrar sesión -->
+                <button class="nav-link">
+                    <!-- Icono de cerrar sesión de Font Awesome -->
+                    <i class="fa-solid fa-right-from-bracket icon-size"></i>
+                </button>
+            </div>
         </div>
-      </div>
-    </section>
-  </div>
+    </header>
 
-  <script>
-    function toggleTheme() {
-      const body = document.body;
-      const icon = document.querySelector('.theme-toggle-btn i');
-      body.classList.toggle('dark-mode');
+    <!-- 2. Dashboard para Desarrollo Futuro -->
+    <main class="pt-20 pb-20 px-4">
+        <div class="container mx-auto py-8">
+            <h2 class="text-3xl font-bold mb-6 text-center">Dashboard</h2>
+            <div class="dashboard-box header-bg box-shadow">
+                <p>
+                    Este es el área del dashboard. Aquí es donde puedes agregar todos los componentes futuros de tu aplicación. 
+                    Actualmente, está vacía y lista para que la llenes con contenido dinámico.
+                </p>
+                <ul class="list-items">
+                    <li>Sección de noticias</li>
+                    <li>Lista de tareas</li>
+                    <li>Gráficos y estadísticas</li>
+                    <li>... y mucho más!</li>
+                </ul>
+            </div>
 
-      if (body.classList.contains('dark-mode')) {
-        icon.classList.remove('fa-sun');
-        icon.classList.add('fa-moon');
-      } else {
-        icon.classList.remove('fa-moon');
-        icon.classList.add('fa-sun');
-      }
-    }
-    
-    document.addEventListener('DOMContentLoaded', () => {
-        const navLinks = document.querySelectorAll('#sidebar-menu a');
+            <div class="flex flex-col items-center justify-center mt-8">
+                <h3 class="text-2xl font-bold mb-4 text-center">Datos de Ejemplo</h3>
+                <div class="table-wrapper">
+                    <div class="data-grid">
+                        <!-- Header Row -->
+                        <div class="grid-row">
+                            <div class="grid-header">ID</div>
+                            <div class="grid-header">Nombre</div>
+                            <div class="grid-header">País</div>
+                            <div class="grid-header">Ciudad</div>
+                            <div class="grid-header">Edad</div>
+                            <div class="grid-header">Profesión</div>
+                            <div class="grid-header">Empresa</div>
+                            <div class="grid-header">Teléfono</div>
+                            <div class="grid-header">Sitio Web</div>
+                            <div class="grid-header">Notas</div>
+                        </div>
 
-        navLinks.forEach(link => {
-            link.addEventListener('click', (event) => {
-                // Previene el comportamiento predeterminado del enlace para que la lógica de JS se ejecute.
-                event.preventDefault();
-                  
-                // Obtiene el texto del span dentro del enlace para saber qué página cargar.
-                // Se ha cambiado 'querySelector('span').textContent' por 'dataset.page' para arreglar el error.
-                const linkText = event.currentTarget.dataset.page;
+                        <!-- Data Rows -->
+                        <div class="grid-row">
+                            <div class="grid-cell">1</div><div class="grid-cell">Sofía Gómez</div><div class="grid-cell">México</div><div class="grid-cell">Ciudad de México</div><div class="grid-cell">28</div><div class="grid-cell">Diseñadora Gráfica</div><div class="grid-cell">Innovar Soluciones</div><div class="grid-cell">+52 55 1234 5678</div><div class="grid-cell">www.innovar.com</div><div class="grid-cell">Interesada en proyectos de branding.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">2</div><div class="grid-cell">Ricardo Pérez</div><div class="grid-cell">Colombia</div><div class="grid-cell">Medellín</div><div class="grid-cell">35</div><div class="grid-cell">Ingeniero Civil</div><div class="grid-cell">Constructora del Sur</div><div class="grid-cell">+57 4 9876 5432</div><div class="grid-cell">www.constructora.co</div><div class="grid-cell">Contactar para proyectos de infraestructura.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">3</div><div class="grid-cell">Ana López</div><div class="grid-cell">España</div><div class="grid-cell">Madrid</div><div class="grid-cell">22</div><div class="grid-cell">Estudiante</div><div class="grid-cell">Universidad Complutense</div><div class="grid-cell">+34 91 123 4567</div><div class="grid-cell">www.ucm.es</div><div class="grid-cell">Busca prácticas profesionales.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">4</div><div class="grid-cell">Juan Torres</div><div class="grid-cell">Argentina</div><div class="grid-cell">Buenos Aires</div><div class="grid-cell">41</div><div class="grid-cell">Analista de Datos</div><div class="grid-cell">Global Tech</div><div class="grid-cell">+54 11 1234 5678</div><div class="grid-cell">www.globaltech.com.ar</div><div class="grid-cell">Experto en big data y análisis predictivo.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">5</div><div class="grid-cell">María Ruiz</div><div class="grid-cell">Chile</div><div class="grid-cell">Santiago</div><div class="grid-cell">30</div><div class="grid-cell">Marketing Digital</div><div class="grid-cell">Creative Solutions</div><div class="grid-cell">+56 2 9876 5432</div><div class="grid-cell">www.creativesol.cl</div><div class="grid-cell">Especialista en SEO y campañas en redes.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">6</div><div class="grid-cell">Carlos Castro</div><div class="grid-cell">Perú</div><div class="grid-cell">Lima</div><div class="grid-cell">55</div><div class="grid-cell">Arquitecto</div><div class="grid-cell">Estudio Castro</div><div class="grid-cell">+51 1 123 4567</div><div class="grid-cell">www.castroarquitectos.pe</div><div class="grid-cell">Diseño de edificios eco-amigables.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">7</div><div class="grid-cell">Laura Vargas</div><div class="grid-cell">Venezuela</div><div class="grid-cell">Caracas</div><div class="grid-cell">29</div><div class="grid-cell">Periodista</div><div class="grid-cell">Noticias 24</div><div class="grid-cell">+58 212 987 6543</div><div class="grid-cell">www.noticias24.ve</div><div class="grid-cell">Enfoque en periodismo de investigación.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">8</div><div class="grid-cell">Diego Mendoza</div><div class="grid-cell">Ecuador</div><div class="grid-cell">Quito</div><div class="grid-cell">34</div><div class="grid-cell">Desarrollador de Software</div><div class="grid-cell">SoftDev Corp</div><div class="grid-cell">+593 2 1234 5678</div><div class="grid-cell">www.softdev.ec</div><div class="grid-cell">Experiencia en desarrollo de apps móviles.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">9</div><div class="grid-cell">Fernanda Díaz</div><div class="grid-cell">Bolivia</div><div class="grid-cell">La Paz</div><div class="grid-cell">26</div><div class="grid-cell">Nutricionista</div><div class="grid-cell">Clínica La Paz</div><div class="grid-cell">+591 2 987 6543</div><div class="grid-cell">www.clinicalapaz.bo</div><div class="grid-cell">Especializada en dietas para deportistas.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">10</div><div class="grid-cell">Pablo Herrera</div><div class="grid-cell">Uruguay</div><div class="grid-cell">Montevideo</div><div class="grid-cell">45</div><div class="grid-cell">Gerente de Ventas</div><div class="grid-cell">Importadora del Este</div><div class="grid-cell">+598 2 123 4567</div><div class="grid-cell">www.importadoradeleste.uy</div><div class="grid-cell">Responsable de grandes cuentas.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">11</div><div class="grid-cell">Valeria Sola</div><div class="grid-cell">Paraguay</div><div class="grid-cell">Asunción</div><div class="grid-cell">31</div><div class="grid-cell">Contadora</div><div class="grid-cell">Asesores Financieros</div><div class="grid-cell">+595 21 987 6543</div><div class="grid-cell">www.asesoresfinancieros.py</div><div class="grid-cell">Auditoría y consultoría fiscal.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">12</div><div class="grid-cell">Andrés Ramírez</div><div class="grid-cell">Guatemala</div><div class="grid-cell">Ciudad de Guatemala</div><div class="grid-cell">39</div><div class="grid-cell">Consultor IT</div><div class="grid-cell">Consultoría Digital</div><div class="grid-cell">+502 2 123 4567</div><div class="grid-cell">www.consultoriadigital.gt</div><div class="grid-cell">Especialista en seguridad de redes.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">13</div><div class="grid-cell">Camila Soto</div><div class="grid-cell">Honduras</div><div class="grid-cell">Tegucigalpa</div><div class="grid-cell">27</div><div class="grid-cell">Abogada</div><div class="grid-cell">Bufete Legal Soto</div><div class="grid-cell">+504 2221 2345</div><div class="grid-cell">www.bufetesoto.hn</div><div class="grid-cell">Derecho corporativo y civil.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">14</div><div class="grid-cell">Gabriel Ortiz</div><div class="grid-cell">El Salvador</div><div class="grid-cell">San Salvador</div><div class="grid-cell">33</div><div class="grid-cell">Profesor</div><div class="grid-cell">Colegio Bilingüe</div><div class="grid-cell">+503 2212 3456</div><div class="grid-cell">www.colegiobil.sv</div><div class="grid-cell">Enseña historia y geografía.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">15</div><div class="grid-cell">Isabella Gil</div><div class="grid-cell">Costa Rica</div><div class="grid-cell">San José</div><div class="grid-cell">24</div><div class="grid-cell">Artista Plástica</div><div class="grid-cell">Galería de Arte</div><div class="grid-cell">+506 2200 1122</div><div class="grid-cell">www.galeriaarte.cr</div><div class="grid-cell">Exhibiciones de arte contemporáneo.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">16</div><div class="grid-cell">Felipe Vega</div><div class="grid-cell">Panamá</div><div class="grid-cell">Ciudad de Panamá</div><div class="grid-cell">48</div><div class="grid-cell">Médico</div><div class="grid-cell">Hospital Central</div><div class="grid-cell">+507 234 5678</div><div class="grid-cell">www.hospitalcentral.pa</div><div class="grid-cell">Especialista en cardiología.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">17</div><div class="grid-cell">Lorena Núñez</div><div class="grid-cell">Cuba</div><div class="grid-cell">La Habana</div><div class="grid-cell">36</div><div class="grid-cell">Diseñadora de Moda</div><div class="grid-cell">Atelier de Moda</div><div class="grid-cell">+53 7 987 6543</div><div class="grid-cell">www.atelierdemoda.cu</div><div class="grid-cell">Creación de colecciones exclusivas.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">18</div><div class="grid-cell">Manuel Cortés</div><div class="grid-cell">República Dominicana</div><div class="grid-cell">Santo Domingo</div><div class="grid-cell">50</div><div class="grid-cell">Cocinero</div><div class="grid-cell">Restaurante El Sabor</div><div class="grid-cell">+1 809 123 4567</div><div class="grid-cell">www.elsabordominicano.do</div><div class="grid-cell">Maestro de la cocina tradicional.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">19</div><div class="grid-cell">Natalia Rojas</div><div class="grid-cell">Puerto Rico</div><div class="grid-cell">San Juan</div><div class="grid-cell">29</div><div class="grid-cell">Fotógrafa</div><div class="grid-cell">Estudio Fotográfico</div><div class="grid-cell">+1 787 987 6543</div><div class="grid-cell">www.estudiofoto.pr</div><div class="grid-cell">Fotografía de eventos y retratos.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">20</div><div class="grid-cell">Jorge Molina</div><div class="grid-cell">Brasil</div><div class="grid-cell">São Paulo</div><div class="grid-cell">44</div><div class="grid-cell">Piloto</div><div class="grid-cell">Aerolíneas Nacionales</div><div class="grid-cell">+55 11 1234 5678</div><div class="grid-cell">www.aerolineasnac.br</div><div class="grid-cell">Capitán de vuelos internacionales.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">21</div><div class="grid-cell">Daniela Salas</div><div class="grid-cell">Alemania</div><div class="grid-cell">Berlín</div><div class="grid-cell">23</div><div class="grid-cell">Ingeniera Industrial</div><div class="grid-cell">AutoTech GmbH</div><div class="grid-cell">+49 30 12345678</div><div class="grid-cell">www.autotechgmbh.de</div><div class="grid-cell">Optimización de procesos de producción.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">22</div><div class="grid-cell">Esteban Garcés</div><div class="grid-cell">Francia</div><div class="grid-cell">París</div><div class="grid-cell">32</div><div class="grid-cell">Chef Pastelero</div><div class="grid-cell">Le Pâtissier</div><div class="grid-cell">+33 1 9876 5432</div><div class="grid-cell">www.lepatissier.fr</div><div class="grid-cell">Conocido por sus macarons.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">23</div><div class="grid-cell">Paula Escobar</div><div class="grid-cell">Canadá</div><div class="grid-cell">Toronto</div><div class="grid-cell">25</div><div class="grid-cell">Bióloga Marina</div><div class="grid-cell">Instituto de Biología</div><div class="grid-cell">+1 416 123 4567</div><div class="grid-cell">www.institutobiologia.ca</div><div class="grid-cell">Investigación en ecosistemas marinos.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">24</div><div class="grid-cell">Miguel Parra</div><div class="grid-cell">Italia</div><div class="grid-cell">Roma</div><div class="grid-cell">37</div><div class="grid-cell">Historiador</div><div class="grid-cell">Museo Nacional</div><div class="grid-cell">+39 06 9876 5432</div><div class="grid-cell">www.museonacional.it</div><div class="grid-cell">Especializado en historia del Imperio Romano.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">25</div><div class="grid-cell">Andrea León</div><div class="grid-cell">Japón</div><div class="grid-cell">Tokio</div><div class="grid-cell">28</div><div class="grid-cell">Ingeniera de Software</div><div class="grid-cell">Innovate Labs</div><div class="grid-cell">+81 3 1234 5678</div><div class="grid-cell">www.innovatelabs.jp</div><div class="grid-cell">Desarrollo de IA para robots.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">26</div><div class="grid-cell">Sebastián Ramos</div><div class="grid-cell">Australia</div><div class="grid-cell">Sídney</div><div class="grid-cell">40</div><div class="grid-cell">Arquitecto de Paisajes</div><div class="grid-cell">Green Spaces</div><div class="grid-cell">+61 2 9876 5432</div><div class="grid-cell">www.greenspaces.au</div><div class="grid-cell">Diseño de jardines botánicos.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">27</div><div class="grid-cell">Valentina Cruz</div><div class="grid-cell">Rusia</div><div class="grid-cell">Moscú</div><div class="grid-cell">26</div><div class="grid-cell">Traductora</div><div class="grid-cell">Servicios de Traducción</div><div class="grid-cell">+7 495 123 4567</div><div class="grid-cell">www.serviciostrad.ru</div><div class="grid-cell">Traducción de documentos técnicos.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">28</div><div class="grid-cell">Alejandro Peña</div><div class="grid-cell">Reino Unido</div><div class="grid-cell">Londres</div><div class="grid-cell">31</div><div class="grid-cell">Diseñador de Videojuegos</div><div class="grid-cell">Game Dev Studio</div><div class="grid-cell">+44 20 1234 5678</div><div class="grid-cell">www.gamedevstudio.uk</div><div class="grid-cell">Creación de personajes y entornos.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">29</div><div class="grid-cell">Luisa Mora</div><div class="grid-cell">Sudáfrica</div><div class="grid-cell">Ciudad del Cabo</div><div class="grid-cell">38</div><div class="grid-cell">Veterinaria</div><div class="grid-cell">Clínica Veterinaria</div><div class="grid-cell">+27 21 123 4567</div><div class="grid-cell">www.clinicavet.za</div><div class="grid-cell">Especialista en animales exóticos.</div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell">30</div><div class="grid-cell">Fernando Osorio</div><div class="grid-cell">China</div><div class="grid-cell">Beijing</div><div class="grid-cell">52</div><div class="grid-cell">Profesor de Artes Marciales</div><div class="grid-cell">Academia de Kung Fu</div><div class="grid-cell">+86 10 9876 5432</div><div class="grid-cell">www.academiakungfu.cn</div><div class="grid-cell">Instructor de tai chi y kung fu.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
-                switch (linkText) {
-                    case 'Home':
-                        window.location.href = 'dashboard.html';
-                        break;
-                    case 'Registrar':
-                        window.location.href = 'RegistroData.html';
-                        break;
-                    case 'Buscar':
-                        window.location.href = 'BuscarData.html';
-                        break;
-                    case 'Perfil':
-                        window.location.href = 'PerfilUsuario.html';
-                        break;
-                    case 'Salir':
-                        window.location.href = 'index.html';
-                        break;
-                    default:
-                        console.log('Enlace de navegación no reconocido.');
-                        break;
-                }
-            });
-        });
-    });
- </script>
+    <!-- 3. Barra de Navegación Fija (Footer) -->
+    <nav class="fixed bottom-0 left-0 w-full nav-bg box-shadow z-50 transition-colors">
+        <div class="container mx-auto padding-container py-2 flex justify-around items-center">
+            <!-- Botón de Inicio -->
+            <a href="#" class="flex-col nav-link accent-link justify-center gap-1">
+                <i class="fa-solid fa-house icon-size"></i>
+                <span class="link-text">Inicio</span>
+            </a>
 
-  <!-- // Fin de dieño estandar para la app -->
+            <!-- Botón de Buscar -->
+            <a href="#" class="flex-col nav-link justify-center gap-1">
+                <i class="fa-solid fa-magnifying-glass icon-size"></i>
+                <span class="link-text">Buscar</span>
+            </a>
+
+            <!-- Botón de Perfil -->
+            <a href="#" class="flex-col nav-link justify-center gap-1">
+                <i class="fa-solid fa-user icon-size"></i>
+                <span class="link-text">Perfil</span>
+            </a>
+
+            <!-- Botón de Nuevo -->
+            <a href="#" class="flex-col nav-link justify-center gap-1">
+                <i class="fa-solid fa-plus icon-size"></i>
+                <span class="link-text">Nuevo</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Script para el cambio de tema -->
     <script>
-     <!-- // Funcionabilidad de la app según Menú -->
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        // Cargar el tema guardado al iniciar
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme) {
+            body.classList.add(currentTheme + '-mode');
+            themeToggle.classList.add(currentTheme + '-mode');
+        } else {
+            // Establecer el modo oscuro como predeterminado si no hay preferencia
+            body.classList.add('dark-mode');
+            themeToggle.classList.add('dark-mode');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            const isDarkMode = body.classList.contains('dark-mode');
+            if (isDarkMode) {
+                body.classList.remove('dark-mode');
+                themeToggle.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark-mode');
+                themeToggle.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
     </script>
-   
+
 </body>
 </html>
