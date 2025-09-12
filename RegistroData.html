@@ -165,7 +165,7 @@
             max-width: 100%;
             /* Se ha añadido un max-height en unidades de la altura visible */
             max-height: 60vh;
-            margin-top: 2rem;
+            margin-top: 1rem;
             border-radius: 0.5rem;
             box-shadow: 0 4px 6px -1px var(--box-shadow-color), 0 2px 4px -2px var(--box-shadow-color);
             background-color: var(--box-color);
@@ -253,13 +253,20 @@
             color: var(--accent-color-1);
             text-shadow: 0 0 2px var(--accent-color-1), 0 0 10px var(--accent-color-1), 0 0 15px var(--accent-color-1);
         }
-
+        
         /* Nuevo estilo para el icono de cancelar */
         #clear-search:hover i {
             transform: scale(1.2);
             transition: transform 0.2s ease-in-out;
         }
-        
+
+        /* Regla específica para el botón de cerrar sesión que anula el cambio de color pero mantiene los demás efectos */
+        .logout-link:hover i {
+            color: var(--text-color);
+            /* Cambia el color del "brillo" a blanco o el color del texto del tema actual */
+            text-shadow: 0 0 2px var(--text-color), 0 0 10px var(--text-color), 0 0 15px var(--text-color);
+        }
+
         /* Media query para pantallas más grandes (mayor a 600px) */
         @media (min-width: 600px) {
             body {
@@ -283,7 +290,6 @@
             }
         }
 
-
     </style>
 </head>
 <body class="dark-mode transition-colors">
@@ -303,9 +309,9 @@
                 </div>
                 
                 <!-- Botón para cerrar sesión -->
-                <button class="nav-link">
+                <button class="nav-link logout-link">
                     <!-- Icono de cerrar sesión de Font Awesome -->
-                    <i class="fa-solid fa-right-from-bracket icon-size"></i>
+                    <i class="text-3xl fa-solid fa-right-from-bracket icon-size "></i>
                 </button>
             </div>
         </div>
@@ -329,12 +335,14 @@
             </div>
             
             <div class="flex flex-col items-start mt-8">
-                <h3 class="text-2xl font-bold mb-4 text-center w-full">Datos de Ejemplo</h3>
+                <!-- Se ha reducido el margen inferior para reducir el espacio con el elemento de abajo -->
+                <h3 class="text-2xl font-bold mb-2 text-center w-full">Datos de Ejemplo con CSS Grid</h3>
 
                 <!-- Motor de Búsqueda Dinámica -->
-                <div class="mt-4 mb-4 flex items-center justify-start gap-4 w-full">
+                <!-- Se ha reducido el margen superior para reducir el espacio con el elemento de arriba -->
+                <div class="mt-2 mb-0 flex items-center justify-start gap-4 w-full">
                     <!-- Campo de búsqueda con estilo minimalista (con fondo y sin sombra) -->
-                    <input type="text" id="search-input" placeholder="Buscar en la tabla..."
+                    <input type="text" id="search-input" placeholder="Buscar información..."
                         class="flex-1 p-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent-color-1 transition-all"
                         style="background-color: var(--box-color); border: 1px solid var(--border-color); color: var(--text-color);">
                     
@@ -343,7 +351,7 @@
                     <button id="clear-search"
                         class="p-2 rounded-full transition-all"
                         style="background-color: transparent; box-shadow: none;">
-                        <i class="fa-solid fa-xmark text-2xl font-bold" style="color: var(--accent-color-1);"></i>
+                        <i class="fa-solid fa-xmark text-3xl font-bold" style="color: var(--accent-color-1);"></i>
                     </button>
                 </div>
 
@@ -420,7 +428,7 @@
 
     <!-- 3. Barra de Navegación Fija (Footer) -->
     <nav class="fixed bottom-0 left-0 w-full nav-bg box-shadow-up z-50 transition-colors">
-        <div class="container mx-auto padding-container py-2 flex justify-around items-center">
+        <div class="container mx-auto padding-container py-1 flex justify-around items-center">
             <!-- Botón de Inicio -->
             <a href="#" class="flex-col nav-link accent-link justify-center gap-1">
                 <i class="fa-solid fa-house icon-size"></i>
