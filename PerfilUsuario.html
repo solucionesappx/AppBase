@@ -254,6 +254,12 @@
             text-shadow: 0 0 2px var(--accent-color-1), 0 0 10px var(--accent-color-1), 0 0 15px var(--accent-color-1);
         }
 
+        /* Nuevo estilo para el icono de cancelar */
+        #clear-search:hover i {
+            transform: scale(1.2);
+            transition: transform 0.2s ease-in-out;
+        }
+
         /* Media query para pantallas más grandes (mayor a 600px) */
         @media (min-width: 600px) {
             body {
@@ -321,24 +327,24 @@
                 </ul>
             </div>
             
-            <!-- Motor de Búsqueda Dinámica -->
-            <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-                <!-- Campo de búsqueda con estilo minimalista (sin fondo y sin sombra) -->
-                <input type="text" id="search-input" placeholder="Buscar en la tabla..."
-                    class="w-full sm:w-1/2 p-2 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-accent-color-1 transition-all"
-                    style="background-color: transparent; box-shadow: none; border: 1px solid var(--border-color); color: var(--text-color);">
-                
-                <!-- Botón de cancelar con ícono, sin fondo ni sombra -->
-                <button id="clear-search"
-                    class="p-2 w-full sm:w-auto rounded-full transition-all"
-                    style="background-color: transparent; box-shadow: none;">
-                    <i class="fa-solid fa-xmark text-lg" style="color: var(--link-color);"></i>
-                </button>
-            </div>
-
-
             <div class="flex flex-col items-center justify-center mt-8">
                 <h3 class="text-2xl font-bold mb-4 text-center">Datos de Ejemplo</h3>
+
+                <!-- Motor de Búsqueda Dinámica -->
+                <div class="mt-4 mb-4 flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                    <!-- Campo de búsqueda con estilo minimalista (con fondo y sin sombra) -->
+                    <input type="text" id="search-input" placeholder="Buscar en la tabla..."
+                        class="w-full sm:w-1/2 p-2 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-accent-color-1 transition-all"
+                        style="background-color: var(--box-color); border: 1px solid var(--border-color); color: var(--text-color);">
+                    
+                    <!-- Botón de cancelar con ícono, sin fondo ni sombra -->
+                    <button id="clear-search"
+                        class="p-2 w-full sm:w-auto rounded-full transition-all"
+                        style="background-color: transparent; box-shadow: none;">
+                        <i class="fa-solid fa-xmark text-lg" style="color: var(--accent-color-1);"></i>
+                    </button>
+                </div>
+
                 <div class="table-wrapper">
                     <div class="data-grid">
                         <!-- Header Row -->
