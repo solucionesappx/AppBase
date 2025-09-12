@@ -33,7 +33,8 @@
             --link-color: #ff6347;
             --accent-color-1: #800D21;
             --accent-color-2: #dbeb7a;
-            --box-shadow-color: rgba(0,0,0,0.5);
+            /* Se ha ajustado la sombra para que sea más visible en el modo oscuro */
+            --box-shadow-color: rgba(255,255,255,0.15);
         }
         
         body {
@@ -50,6 +51,11 @@
 
         .box-shadow {
             box-shadow: 0 4px 6px -1px var(--box-shadow-color), 0 2px 4px -2px var(--box-shadow-color);
+        }
+
+        /* Nueva clase para la sombra que va hacia arriba */
+        .box-shadow-up {
+            box-shadow: 0 -4px 6px -1px var(--box-shadow-color), 0 -2px 4px -2px var(--box-shadow-color);
         }
         
         .accent-link {
@@ -430,7 +436,7 @@
     </main>
 
     <!-- 3. Barra de Navegación Fija (Footer) -->
-    <nav class="fixed bottom-0 left-0 w-full nav-bg box-shadow z-50 transition-colors">
+    <nav class="fixed bottom-0 left-0 w-full nav-bg box-shadow-up z-50 transition-colors">
         <div class="container mx-auto padding-container py-2 flex justify-around items-center">
             <!-- Botón de Inicio -->
             <a href="#" class="flex-col nav-link accent-link justify-center gap-1">
