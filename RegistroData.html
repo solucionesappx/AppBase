@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplicación Móvil</title>
+    <title>Aplicación Móvil con Generación de Imagen</title>
     <!-- Incluye el CDN de Tailwind CSS para un estilo rápido y moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Incluye la librería de iconos Font Awesome -->
@@ -290,6 +290,22 @@
             }
         }
 
+        /* Estilos para el spinner de carga */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--accent-color-1);
+            animation: spin 1s ease infinite;
+            margin: 2rem auto;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="dark-mode transition-colors">
@@ -332,6 +348,17 @@
                     <li>Gráficos y estadísticas</li>
                     <li>... y mucho más!</li>
                 </ul>
+
+                <!-- Contenedor para la imagen generada -->
+                <div class="flex flex-col items-center mt-6">
+                    <button id="generate-image-btn" class="bg-accent-color-1 text-white py-2 px-4 rounded-lg font-semibold transition-all hover:bg-opacity-80">
+                        Generar imagen de Keith Haring
+                    </button>
+                    <!-- Spinner de carga que se mostrará al generar la imagen -->
+                    <div id="loading-spinner" class="spinner"></div>
+                    <img id="generated-image" class="w-full h-auto mt-6 rounded-lg shadow-md" style="display: none;">
+                </div>
+
             </div>
             
             <div class="flex flex-col items-start mt-8">
@@ -459,6 +486,9 @@
     <script>
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
+        const generateImageBtn = document.getElementById('generate-image-btn');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const generatedImage = document.getElementById('generated-image');
 
         // Cargar el tema guardado al iniciar
         const currentTheme = localStorage.getItem('theme');
@@ -524,7 +554,68 @@
                 row.style.display = 'contents'; // Mostrar todas las filas de nuevo
             });
         });
-    </script>
 
+        // Lógica para la generación de la imagen
+        generateImageBtn.addEventListener('click', async () => {
+            // Mostrar el spinner de carga
+            loadingSpinner.style.display = 'block';
+            generatedImage.style.display = 'none';
+            generateImageBtn.disabled = true;
+
+            const prompt = "A vibrant and energetic drawing in the style of Keith Haring, with dancing figures and bold lines.";
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+
+            const payload = { 
+                instances: [{ prompt: prompt }], 
+                parameters: { "sampleCount": 1 } 
+            };
+            
+            let retries = 0;
+            const maxRetries = 3;
+            const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
+            while (retries < maxRetries) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                        const base64Data = result.predictions[0].bytesBase64Encoded;
+                        const imageUrl = `data:image/png;base64,${base64Data}`;
+                        generatedImage.src = imageUrl;
+                        generatedImage.style.display = 'block';
+                        loadingSpinner.style.display = 'none';
+                        generateImageBtn.disabled = false;
+                        return; // Salir del bucle si es exitoso
+                    } else {
+                        throw new Error("Invalid API response format.");
+                    }
+                } catch (error) {
+                    console.error('Error generating image:', error);
+                    retries++;
+                    if (retries < maxRetries) {
+                        await delay(Math.pow(2, retries) * 1000);
+                        console.log(`Retrying... attempt ${retries}`);
+                    } else {
+                        loadingSpinner.style.display = 'none';
+                        generatedImage.src = 'https://placehold.co/600x400/D61336/ffffff?text=Error';
+                        generatedImage.style.display = 'block';
+                        generateImageBtn.disabled = false;
+                        console.error('Failed to generate image after multiple retries.');
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
