@@ -327,25 +327,27 @@
                 </ul>
             </div>
             
-            <div class="flex flex-col items-center justify-center mt-8">
-                <h3 class="text-2xl font-bold mb-4 text-center">Datos de Ejemplo</h3>
+            <div class="flex flex-col items-start mt-8">
+                <h3 class="text-2xl font-bold mb-4 text-center w-full">Datos de Ejemplo</h3>
 
                 <!-- Motor de Búsqueda Dinámica -->
-                <div class="mt-4 mb-4 flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                <!-- Se ha reubicado aquí y se ha ajustado la alineación a la izquierda -->
+                <div class="mt-4 mb-4 flex flex-col sm:flex-row items-center justify-start gap-4 w-full">
                     <!-- Campo de búsqueda con estilo minimalista (con fondo y sin sombra) -->
+                    <!-- Se ha cambiado la clase "rounded-full" a "rounded-lg" para un borde menos circular -->
                     <input type="text" id="search-input" placeholder="Buscar en la tabla..."
-                        class="w-full sm:w-1/2 p-2 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-accent-color-1 transition-all"
+                        class="w-full sm:w-1/2 p-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent-color-1 transition-all"
                         style="background-color: var(--box-color); border: 1px solid var(--border-color); color: var(--text-color);">
                     
                     <!-- Botón de cancelar con ícono, sin fondo ni sombra -->
                     <button id="clear-search"
-                        class="p-2 w-full sm:w-auto rounded-full transition-all"
+                        class="p-2 w-full large:w-auto rounded-full transition-all"
                         style="background-color: transparent; box-shadow: none;">
                         <i class="fa-solid fa-xmark text-lg" style="color: var(--accent-color-1);"></i>
                     </button>
                 </div>
 
-                <div class="table-wrapper">
+                <div class="table-wrapper w-full">
                     <div class="data-grid">
                         <!-- Header Row -->
                         <div class="grid-row header-row">
