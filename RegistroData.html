@@ -336,14 +336,14 @@
             padding: 0.5rem;
             border-radius: 0.5rem;
             transition: all 0.3s ease;
-            gap: 0.5rem; /* Espacio entre el ícono y el texto */
+            gap: 0.2rem; /* Espacio entre el ícono y el texto */
             color: var(--text-color);
         }
 
         /* **MODIFICADO** Sin background, solo efecto neón en hover y active */
         .nav-link-top:hover {
             transform: translateY(-2px);
-            color: var(--accent-color-1);
+            color: var(--text-color);
             /* Se ha eliminado la sombra de texto (efecto neón) */
             text-shadow: none;
         }
@@ -383,7 +383,7 @@
 
     <!-- Nueva barra de navegación para los dashboards -->
     <!-- **MODIFICADO** Ahora tiene un padding vertical para que los enlaces no estén demasiado pegados al cintillo superior -->
-    <nav class="fixed top-16 left-0 w-full nav-bg box-shadow z-40 transition-colors py-4">
+    <nav class="fixed top-20 left-0 w-full nav-bg box-shadow z-40 transition-colors py-0">
         <div class="container mx-auto padding-container py-2 flex justify-around items-center">
             <!-- **MODIFICADO** Enlaces con íconos y texto apilados verticalmente -->
             <a href="#" class="nav-link-top" data-target="home-dashboard">
@@ -404,7 +404,7 @@
     <!-- 2. Contenedor principal para las diferentes secciones del dashboard -->
     <!-- **MODIFICADO** Aumenta el padding-top para evitar que el contenido se solape con las nuevas barras de navegación -->
     <main class="pt-40 pb-20 px-4">
-        <div class="container mx-auto py-8">
+        <div class="container mx-auto py-12">
             <!-- Dashboard de Datos Básicos -->
             <div id="home-dashboard" class="dashboard-section">
                 <h2 class="text-3xl font-bold mb-6 text-center">Dashboard de Datos Básicos</h2>
