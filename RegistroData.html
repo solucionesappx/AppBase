@@ -328,10 +328,10 @@
         }
         
         /* Estilos para la nueva barra de navegación superior con íconos */
-        /* **MODIFICADO** Ahora usa flex-row para alinear el ícono y el texto uno al lado del otro */
+        /* **MODIFICADO** Ahora usa flex-col para apilar el ícono y el texto uno encima del otro */
         .nav-link-top {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             align-items: center;
             padding: 0.5rem;
             border-radius: 0.5rem;
@@ -385,7 +385,7 @@
     <!-- **MODIFICADO** Ahora tiene un padding vertical para que los enlaces no estén demasiado pegados al cintillo superior -->
     <nav class="fixed top-16 left-0 w-full nav-bg box-shadow z-40 transition-colors py-4">
         <div class="container mx-auto padding-container py-2 flex justify-around items-center">
-            <!-- **MODIFICADO** Enlaces con íconos a la izquierda y texto a la derecha -->
+            <!-- **MODIFICADO** Enlaces con íconos y texto apilados verticalmente -->
             <a href="#" class="nav-link-top" data-target="home-dashboard">
                 <i class="fa-solid fa-house text-2xl"></i>
                 <span class="font-semibold text-sm">Inicio</span>
