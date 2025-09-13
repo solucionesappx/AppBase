@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplicación Móvil con Generación de Imagen X1</title>
+    <title>Aplicación Móvil con Generación de Imagen</title>
+    <!-- Configuración para PWA: se enlaza con el archivo manifest -->
+    <link rel="manifest" href="./manifest.json">
     <!-- Incluye el CDN de Tailwind CSS para un estilo rápido y moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Incluye la librería de iconos Font Awesome -->
@@ -616,6 +618,19 @@
                 }
             }
         });
+        
+        // Registro del Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado con éxito:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Fallo el registro de Service Worker:', error);
+                    });
+            });
+        }
     </script>
 </body>
 </html>
