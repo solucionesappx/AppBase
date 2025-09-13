@@ -281,30 +281,7 @@
             /* Cambia el color del "brillo" a blanco o el color del texto del tema actual */
             text-shadow: 0 0 2px var(--text-color), 0 0 10px var(--text-color), 0 0 15px var(--text-color);
         }
-
-        /* Media query para pantallas más grandes (mayor a 600px) */
-        @media (min-width: 600px) {
-            body {
-                /* Centrar el contenido de la página en pantallas grandes */
-                display: flex;
-                justify-content: center;
-                /* El cuerpo de la página tendrá un ancho máximo para evitar que se vea demasiado estirado en monitores grandes */
-                max-width: 1000px;
-                /* Eliminar el padding que se aplicaba al body en pantallas pequeñas */
-                padding: 0;
-                margin: 0 auto;
-            }
-
-            .dashboard-box {
-                padding: 2.5rem;
-            }
-
-            .table-wrapper {
-                /* Aumentar el max-height de la tabla para pantallas de escritorio */
-                max-height: 70vh;
-            }
-        }
-
+        
         /* Estilos para el spinner de carga */
         .spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
@@ -336,7 +313,7 @@
             padding: 0.5rem;
             border-radius: 0.5rem;
             transition: all 0.3s ease;
-            gap: 0.2rem; /* Espacio entre el ícono y el texto */
+            gap: 0.5rem; /* Espacio entre el ícono y el texto */
             color: var(--text-color);
         }
 
@@ -353,6 +330,25 @@
             color: var(--accent-color-1);
             /* Se ha eliminado la sombra de texto (efecto neón) */
             text-shadow: none;
+        }
+
+        /* Media query para pantallas más grandes (mayor a 600px) */
+        @media (min-width: 600px) {
+            .dashboard-box {
+                padding: 2.5rem;
+            }
+
+            .table-wrapper {
+                /* Aumentar el max-height de la tabla para pantallas de escritorio */
+                max-height: 70vh;
+            }
+            
+            /* **NUEVO** Estilos para el enlace de navegación superior en escritorio */
+            .nav-link-top-desktop {
+                flex-direction: row;
+                gap: 0.5rem;
+                padding: 0.5rem 1rem; /* Padding horizontal para un mejor aspecto */
+            }
         }
     </style>
 </head>
@@ -383,18 +379,18 @@
 
     <!-- Nueva barra de navegación para los dashboards -->
     <!-- **MODIFICADO** Ahora tiene un padding vertical para que los enlaces no estén demasiado pegados al cintillo superior -->
-    <nav class="fixed top-16 left-0 w-full nav-bg box-shadow z-40 transition-colors py-0">
+    <nav class="fixed top-16 left-0 w-full nav-bg box-shadow z-40 transition-colors py-2">
         <div class="container mx-auto padding-container py-2 flex justify-around items-center">
             <!-- **MODIFICADO** Enlaces con íconos y texto apilados verticalmente -->
-            <a href="#" class="nav-link-top" data-target="home-dashboard">
+            <a href="#" class="nav-link-top nav-link-top-desktop" data-target="home-dashboard">
                 <i class="fa-solid fa-house text-2xl"></i>
                 <span class="font-semibold text-sm">Datos Básicos</span>
             </a>
-            <a href="#" class="nav-link-top" data-target="dashboard-two">
+            <a href="#" class="nav-link-top nav-link-top-desktop" data-target="dashboard-two">
                 <i class="fa-solid fa-calendar-check text-2xl"></i>
                 <span class="font-semibold text-sm">Vacaciones</span>
             </a>
-            <a href="#" class="nav-link-top" data-target="dashboard-three">
+            <a href="#" class="nav-link-top nav-link-top-desktop" data-target="dashboard-three">
                 <i class="fa-solid fa-calendar-times text-2xl"></i>
                 <span class="font-semibold text-sm">Absentismos</span>
             </a>
