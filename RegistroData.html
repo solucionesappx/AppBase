@@ -253,7 +253,7 @@
             color: #fff;
         }
 
-        /* Efecto de hover y transición para los iconos de la barra de navegación */
+        /* Efecto de hover y transición para los iconos de la barra de navegación inferior */
         .nav-link i, .nav-link span {
             transition: transform 0.3s ease-in-out, color 0.3s ease, text-shadow 0.3s ease;
             color: var(--text-color);
@@ -321,6 +321,39 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Clase para ocultar los dashboards no activos */
+        .hidden {
+            display: none;
+        }
+        
+        /* Estilos para la nueva barra de navegación superior con íconos */
+        /* **MODIFICADO** Ahora usa flex-row para alinear el ícono y el texto uno al lado del otro */
+        .nav-link-top {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            gap: 0.5rem; /* Espacio entre el ícono y el texto */
+            color: var(--text-color);
+        }
+
+        /* **MODIFICADO** Sin background, solo efecto neón en hover y active */
+        .nav-link-top:hover {
+            transform: translateY(-2px);
+            color: var(--accent-color-1);
+            /* Se ha eliminado la sombra de texto (efecto neón) */
+            text-shadow: none;
+        }
+
+        /* **MODIFICADO** Sin background, solo efecto neón para el link activo */
+        .nav-link-top.active {
+            color: var(--accent-color-1);
+            /* Se ha eliminado la sombra de texto (efecto neón) */
+            text-shadow: none;
+        }
     </style>
 </head>
 <body class="dark-mode transition-colors">
@@ -348,139 +381,179 @@
         </div>
     </header>
 
-    <!-- 2. Dashboard para Desarrollo Futuro -->
-    <main class="pt-20 pb-20 px-4">
+    <!-- Nueva barra de navegación para los dashboards -->
+    <!-- **MODIFICADO** Ahora tiene un padding vertical para que los enlaces no estén demasiado pegados al cintillo superior -->
+    <nav class="fixed top-16 left-0 w-full nav-bg box-shadow z-40 transition-colors py-4">
+        <div class="container mx-auto padding-container py-2 flex justify-around items-center">
+            <!-- **MODIFICADO** Enlaces con íconos a la izquierda y texto a la derecha -->
+            <a href="#" class="nav-link-top" data-target="home-dashboard">
+                <i class="fa-solid fa-house text-2xl"></i>
+                <span class="font-semibold text-sm">Inicio</span>
+            </a>
+            <a href="#" class="nav-link-top" data-target="dashboard-two">
+                <i class="fa-solid fa-calendar-check text-2xl"></i>
+                <span class="font-semibold text-sm">Vacaciones</span>
+            </a>
+            <a href="#" class="nav-link-top" data-target="dashboard-three">
+                <i class="fa-solid fa-calendar-times text-2xl"></i>
+                <span class="font-semibold text-sm">Absentismos</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- 2. Contenedor principal para las diferentes secciones del dashboard -->
+    <!-- **MODIFICADO** Aumenta el padding-top para evitar que el contenido se solape con las nuevas barras de navegación -->
+    <main class="pt-40 pb-20 px-4">
         <div class="container mx-auto py-8">
-            <h2 class="text-3xl font-bold mb-6 text-center">Dashboard</h2>
-            <div class="dashboard-box header-bg box-shadow">
-                <p>
-                    Este es el área del dashboard. Aquí es donde puedes agregar todos los componentes futuros de tu aplicación. 
-                    Actualmente, está vacía y lista para que la llenes con contenido dinámico.
-                </p>
-                <ul class="list-items">
-                    <li>Sección de noticias</li>
-                    <li>Lista de tareas</li>
-                    <li>Gráficos y estadísticas</li>
-                    <li>... y mucho más!</li>
-                </ul>
+            <!-- Dashboard de Datos Básicos -->
+            <div id="home-dashboard" class="dashboard-section">
+                <h2 class="text-3xl font-bold mb-6 text-center">Dashboard de Datos Básicos</h2>
+                <div class="dashboard-box header-bg box-shadow">
+                    <p>
+                        Esta es el área del dashboard de Datos Básicos. Aquí es donde puedes agregar todos los componentes futuros de tu aplicación. 
+                        Actualmente, está vacía y lista para que la llenes con contenido dinámico.
+                    </p>
+                    <ul class="list-items">
+                        <li>Sección de noticias</li>
+                        <li>Lista de tareas</li>
+                        <li>Gráficos y estadísticas</li>
+                        <li>... y mucho más!</li>
+                    </ul>
 
-                <!-- Contenedor para la imagen generada -->
-                <div class="flex flex-col items-center mt-6">
-                    <button id="generate-image-btn" class="bg-accent-color-1 text-white py-2 px-4 rounded-lg font-semibold transition-all hover:bg-opacity-80">
-                        Generar imagen de Keith Haring
-                    </button>
-                    <!-- Spinner de carga que se mostrará al generar la imagen -->
-                    <div id="loading-spinner" class="spinner"></div>
-                    <img id="generated-image" class="w-full h-auto mt-6 rounded-lg shadow-md" style="display: none;">
-                </div>
-
-            </div>
-            
-            <div class="flex flex-col items-start mt-8">
-                <!-- Se ha reducido el margen inferior para reducir el espacio con el elemento de abajo -->
-                <h3 class="text-2xl font-bold mb-2 text-center w-full">Datos de Ejemplo con CSS Grid</h3>
-
-                <!-- Motor de Búsqueda Dinámica -->
-                <!-- Se ha reducido el margen superior para reducir el espacio con el elemento de arriba -->
-                <div class="mt-2 mb-0 flex items-center justify-start gap-4 w-full">
-                    <!-- Campo de búsqueda con estilo minimalista (con fondo y sin sombra) -->
-                    <input type="text" id="search-input" placeholder="Buscar información..."
-                        class="flex-1 p-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent-color-1 transition-all"
-                        style="background-color: var(--box-color); border: 1px solid var(--border-color); color: var(--text-color);">
-                    
-                    <!-- Botón de cancelar con ícono -->
-                    <!-- Se ha aumentado el tamaño y se ha añadido la clase 'font-bold' para enfatizar -->
-                    <button id="clear-search"
-                        class="p-2 rounded-full transition-all"
-                        style="background-color: transparent; box-shadow: none;">
-                        <i class="fa-solid fa-xmark text-3xl font-bold" style="color: var(--accent-color-1);"></i>
-                    </button>
-                </div>
-
-                <div class="table-wrapper w-full">
-                    <div class="data-grid">
-                        <!-- Header Row -->
-                        <div class="grid-row header-row">
-                            <div class="grid-header">ID</div>
-                            <div class="grid-header">Nombre</div>
-                            <div class="grid-header">País</div>
-                            <div class="grid-header">Ciudad</div>
-                            <div class="grid-header">Edad</div>
-                            <div class="grid-header">Profesión</div>
-                            <div class="grid-header">Empresa</div>
-                            <div class="grid-header">Teléfono</div>
-                            <div class="grid-header">Sitio Web</div>
-                            <div class="grid-header">Notas</div>
-                        </div>
-
-                        <!-- Data Rows -->
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">1</div><div class="grid-cell">Sofía Gómez</div><div class="grid-cell">México</div><div class="grid-cell">Ciudad de México</div><div class="grid-cell">28</div><div class="grid-cell">Diseñadora Gráfica</div><div class="grid-cell">Innovar Soluciones</div><div class="grid-cell">+52 55 1234 5678</div><div class="grid-cell">www.innovar.com</div><div class="grid-cell">Interesada en proyectos de branding.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">2</div><div class="grid-cell">Ricardo Pérez</div><div class="grid-cell">Colombia</div><div class="grid-cell">Medellín</div><div class="grid-cell">35</div><div class="grid-cell">Ingeniero Civil</div><div class="grid-cell">Constructora del Sur</div><div class="grid-cell">+57 4 9876 5432</div><div class="grid-cell">www.constructora.co</div><div class="grid-cell">Contactar para proyectos de infraestructura.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">3</div><div class="grid-cell">Ana López</div><div class="grid-cell">España</div><div class="grid-cell">Madrid</div><div class="grid-cell">22</div><div class="grid-cell">Estudiante</div><div class="grid-cell">Universidad Complutense</div><div class="grid-cell">+34 91 123 4567</div><div class="grid-cell">www.ucm.es</div><div class="grid-cell">Busca prácticas profesionales.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">4</div><div class="grid-cell">Juan Torres</div><div class="grid-cell">Argentina</div><div class="grid-cell">Buenos Aires</div><div class="grid-cell">41</div><div class="grid-cell">Analista de Datos</div><div class="grid-cell">Global Tech</div><div class="grid-cell">+54 11 1234 5678</div><div class="grid-cell">www.globaltech.com.ar</div><div class="grid-cell">Experto en big data y análisis predictivo.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">5</div><div class="grid-cell">María Ruiz</div><div class="grid-cell">Chile</div><div class="grid-cell">Santiago</div><div class="grid-cell">30</div><div class="grid-cell">Marketing Digital</div><div class="grid-cell">Creative Solutions</div><div class="grid-cell">+56 2 9876 5432</div><div class="grid-cell">www.creativesol.cl</div><div class="grid-cell">Especialista en SEO y campañas en redes.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">6</div><div class="grid-cell">Carlos Castro</div><div class="grid-cell">Perú</div><div class="grid-cell">Lima</div><div class="grid-cell">55</div><div class="grid-cell">Arquitecto</div><div class="grid-cell">Estudio Castro</div><div class="grid-cell">+51 1 123 4567</div><div class="grid-cell">www.castroarquitectos.pe</div><div class="grid-cell">Diseño de edificios eco-amigables.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">7</div><div class="grid-cell">Laura Vargas</div><div class="grid-cell">Venezuela</div><div class="grid-cell">Caracas</div><div class="grid-cell">29</div><div class="grid-cell">Periodista</div><div class="grid-cell">Noticias 24</div><div class="grid-cell">+58 212 987 6543</div><div class="grid-cell">www.noticias24.ve</div><div class="grid-cell">Enfoque en periodismo de investigación.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">8</div><div class="grid-cell">Diego Mendoza</div><div class="grid-cell">Ecuador</div><div class="grid-cell">Quito</div><div class="grid-cell">34</div><div class="grid-cell">Desarrollador de Software</div><div class="grid-cell">SoftDev Corp</div><div class="grid-cell">+593 2 1234 5678</div><div class="grid-cell">www.softdev.ec</div><div class="grid-cell">Experiencia en desarrollo de apps móviles.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">9</div><div class="grid-cell">Fernanda Díaz</div><div class="grid-cell">Bolivia</div><div class="grid-cell">La Paz</div><div class="grid-cell">26</div><div class="grid-cell">Nutricionista</div><div class="grid-cell">Clínica La Paz</div><div class="grid-cell">+591 2 987 6543</div><div class="grid-cell">www.clinicalapaz.bo</div><div class="grid-cell">Especializada en dietas para deportistas.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">10</div><div class="grid-cell">Pablo Herrera</div><div class="grid-cell">Uruguay</div><div class="grid-cell">Montevideo</div><div class="grid-cell">45</div><div class="grid-cell">Gerente de Ventas</div><div class="grid-cell">Importadora del Este</div><div class="grid-cell">+598 2 123 4567</div><div class="grid-cell">www.importadoradeleste.uy</div><div class="grid-cell">Responsable de grandes cuentas.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">11</div><div class="grid-cell">Valeria Sola</div><div class="grid-cell">Paraguay</div><div class="grid-cell">Asunción</div><div class="grid-cell">31</div><div class="grid-cell">Contadora</div><div class="grid-cell">Asesores Financieros</div><div class="grid-cell">+595 21 987 6543</div><div class="grid-cell">www.asesoresfinancieros.py</div><div class="grid-cell">Auditoría y consultoría fiscal.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">12</div><div class="grid-cell">Andrés Ramírez</div><div class="grid-cell">Guatemala</div><div class="grid-cell">Ciudad de Guatemala</div><div class="grid-cell">39</div><div class="grid-cell">Consultor IT</div><div class="grid-cell">Consultoría Digital</div><div class="grid-cell">+502 2 123 4567</div><div class="grid-cell">www.consultoriadigital.gt</div><div class="grid-cell">Especialista en seguridad de redes.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">13</div><div class="grid-cell">Camila Soto</div><div class="grid-cell">Honduras</div><div class="grid-cell">Tegucigalpa</div><div class="grid-cell">27</div><div class="grid-cell">Abogada</div><div class="grid-cell">Bufete Legal Soto</div><div class="grid-cell">+504 2221 2345</div><div class="grid-cell">www.bufetesoto.hn</div><div class="grid-cell">Derecho corporativo y civil.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">14</div><div class="grid-cell">Gabriel Ortiz</div><div class="grid-cell">El Salvador</div><div class="grid-cell">San Salvador</div><div class="grid-cell">33</div><div class="grid-cell">Profesor</div><div class="grid-cell">Colegio Bilingüe</div><div class="grid-cell">+503 2212 3456</div><div class="grid-cell">www.colegiobil.sv</div><div class="grid-cell">Enseña historia y geografía.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">15</div><div class="grid-cell">Isabella Gil</div><div class="grid-cell">Costa Rica</div><div class="grid-cell">San José</div><div class="grid-cell">24</div><div class="grid-cell">Artista Plástica</div><div class="grid-cell">Galería de Arte</div><div class="grid-cell">+506 2200 1122</div><div class="grid-cell">www.galeriaarte.cr</div><div class="grid-cell">Exhibiciones de arte contemporáneo.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">16</div><div class="grid-cell">Felipe Vega</div><div class="grid-cell">Panamá</div><div class="grid-cell">Ciudad de Panamá</div><div class="grid-cell">48</div><div class="grid-cell">Médico</div><div class="grid-cell">Hospital Central</div><div class="grid-cell">+507 234 5678</div><div class="grid-cell">www.hospitalcentral.pa</div><div class="grid-cell">Especialista en cardiología.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">17</div><div class="grid-cell">Valeria Sola</div><div class="grid-cell">Paraguay</div><div class="grid-cell">Asunción</div><div class="grid-cell">31</div><div class="grid-cell">Contadora</div><div class="grid-cell">Asesores Financieros</div><div class="grid-cell">+595 21 987 6543</div><div class="grid-cell">www.asesoresfinancieros.py</div><div class="grid-cell">Auditoría y consultoría fiscal.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">18</div><div class="grid-cell">Andrés Ramírez</div><div class="grid-cell">Guatemala</div><div class="grid-cell">Ciudad de Guatemala</div><div class="grid-cell">39</div><div class="grid-cell">Consultor IT</div><div class="grid-cell">Consultoría Digital</div><div class="grid-cell">+502 2 123 4567</div><div class="grid-cell">www.consultoriadigital.gt</div><div class="grid-cell">Especialista en seguridad de redes.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">19</div><div class="grid-cell">Camila Soto</div><div class="grid-cell">Honduras</div><div class="grid-cell">Tegucigalpa</div><div class="grid-cell">27</div><div class="grid-cell">Abogada</div><div class="grid-cell">Bufete Legal Soto</div><div class="grid-cell">+504 2221 2345</div><div class="grid-cell">www.bufetesoto.hn</div><div class="grid-cell">Derecho corporativo y civil.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">20</div><div class="grid-cell">Gabriel Ortiz</div><div class="grid-cell">El Salvador</div><div class="grid-cell">San Salvador</div><div class="grid-cell">33</div><div class="grid-cell">Profesor</div><div class="grid-cell">Colegio Bilingüe</div><div class="grid-cell">+503 2212 3456</div><div class="grid-cell">www.colegiobil.sv</div><div class="grid-cell">Enseña historia y geografía.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">21</div><div class="grid-cell">Isabella Gil</div><div class="grid-cell">Costa Rica</div><div class="grid-cell">San José</div><div class="grid-cell">24</div><div class="grid-cell">Artista Plástica</div><div class="grid-cell">Galería de Arte</div><div class="grid-cell">+506 2200 1122</div><div class="grid-cell">www.galeriaarte.cr</div><div class="grid-cell">Exhibiciones de arte contemporáneo.</div>
-                        </div>
-                        <div class="grid-row data-row">
-                            <div class="grid-cell">22</div><div class="grid-cell">Felipe Vega</div><div class="grid-cell">Panamá</div><div class="grid-cell">Ciudad de Panamá</div><div class="grid-cell">48</div><div class="grid-cell">Médico</div><div class="grid-cell">Hospital Central</div><div class="grid-cell">+507 234 5678</div><div class="grid-cell">www.hospitalcentral.pa</div><div class="grid-cell">Especialista en cardiología.</div>
-                        </div>                        
+                    <!-- Contenedor para la imagen generada -->
+                    <div class="flex flex-col items-center mt-6">
+                        <button id="generate-image-btn" class="bg-accent-color-1 text-white py-2 px-4 rounded-lg font-semibold transition-all hover:bg-opacity-80">
+                            Generar imagen de Keith Haring
+                        </button>
+                        <!-- Spinner de carga que se mostrará al generar la imagen -->
+                        <div id="loading-spinner" class="spinner"></div>
+                        <img id="generated-image" class="w-full h-auto mt-6 rounded-lg shadow-md" style="display: none;">
                     </div>
+
+                </div>
+                
+                <div class="flex flex-col items-start mt-8">
+                    <!-- Se ha reducido el margen inferior para reducir el espacio con el elemento de abajo -->
+                    <h3 class="text-2xl font-bold mb-2 text-center w-full">Datos de Ejemplo con CSS Grid</h3>
+
+                    <!-- Motor de Búsqueda Dinámica -->
+                    <!-- Se ha reducido el margen superior para reducir el espacio con el elemento de arriba -->
+                    <div class="mt-2 mb-0 flex items-center justify-start gap-4 w-full">
+                        <!-- Campo de búsqueda con estilo minimalista (con fondo y sin sombra) -->
+                        <input type="text" id="search-input" placeholder="Buscar información..."
+                            class="flex-1 p-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent-color-1 transition-all"
+                            style="background-color: var(--box-color); border: 1px solid var(--border-color); color: var(--text-color);">
+                        
+                        <!-- Botón de cancelar con ícono -->
+                        <!-- Se ha aumentado el tamaño y se ha añadido la clase 'font-bold' para enfatizar -->
+                        <button id="clear-search"
+                            class="p-2 rounded-full transition-all"
+                            style="background-color: transparent; box-shadow: none;">
+                            <i class="fa-solid fa-xmark text-3xl font-bold" style="color: var(--accent-color-1);"></i>
+                        </button>
+                    </div>
+
+                    <div class="table-wrapper w-full">
+                        <div class="data-grid">
+                            <!-- Header Row -->
+                            <div class="grid-row header-row">
+                                <div class="grid-header">ID</div>
+                                <div class="grid-header">Nombre</div>
+                                <div class="grid-header">País</div>
+                                <div class="grid-header">Ciudad</div>
+                                <div class="grid-header">Edad</div>
+                                <div class="grid-header">Profesión</div>
+                                <div class="grid-header">Empresa</div>
+                                <div class="grid-header">Teléfono</div>
+                                <div class="grid-header">Sitio Web</div>
+                                <div class="grid-header">Notas</div>
+                            </div>
+
+                            <!-- Data Rows -->
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">1</div><div class="grid-cell">Sofía Gómez</div><div class="grid-cell">México</div><div class="grid-cell">Ciudad de México</div><div class="grid-cell">28</div><div class="grid-cell">Diseñadora Gráfica</div><div class="grid-cell">Innovar Soluciones</div><div class="grid-cell">+52 55 1234 5678</div><div class="grid-cell">www.innovar.com</div><div class="grid-cell">Interesada en proyectos de branding.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">2</div><div class="grid-cell">Ricardo Pérez</div><div class="grid-cell">Colombia</div><div class="grid-cell">Medellín</div><div class="grid-cell">35</div><div class="grid-cell">Ingeniero Civil</div><div class="grid-cell">Constructora del Sur</div><div class="grid-cell">+57 4 9876 5432</div><div class="grid-cell">www.constructora.co</div><div class="grid-cell">Contactar para proyectos de infraestructura.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">3</div><div class="grid-cell">Ana López</div><div class="grid-cell">España</div><div class="grid-cell">Madrid</div><div class="grid-cell">22</div><div class="grid-cell">Estudiante</div><div class="grid-cell">Universidad Complutense</div><div class="grid-cell">+34 91 123 4567</div><div class="grid-cell">www.ucm.es</div><div class="grid-cell">Busca prácticas profesionales.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">4</div><div class="grid-cell">Juan Torres</div><div class="grid-cell">Argentina</div><div class="grid-cell">Buenos Aires</div><div class="grid-cell">41</div><div class="grid-cell">Analista de Datos</div><div class="grid-cell">Global Tech</div><div class="grid-cell">+54 11 1234 5678</div><div class="grid-cell">www.globaltech.com.ar</div><div class="grid-cell">Experto en big data y análisis predictivo.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">5</div><div class="grid-cell">María Ruiz</div><div class="grid-cell">Chile</div><div class="grid-cell">Santiago</div><div class="grid-cell">30</div><div class="grid-cell">Marketing Digital</div><div class="grid-cell">Creative Solutions</div><div class="grid-cell">+56 2 9876 5432</div><div class="grid-cell">www.creativesol.cl</div><div class="grid-cell">Especialista en SEO y campañas en redes.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">6</div><div class="grid-cell">Carlos Castro</div><div class="grid-cell">Perú</div><div class="grid-cell">Lima</div><div class="grid-cell">55</div><div class="grid-cell">Arquitecto</div><div class="grid-cell">Estudio Castro</div><div class="grid-cell">+51 1 123 4567</div><div class="grid-cell">www.castroarquitectos.pe</div><div class="grid-cell">Diseño de edificios eco-amigables.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">7</div><div class="grid-cell">Laura Vargas</div><div class="grid-cell">Venezuela</div><div class="grid-cell">Caracas</div><div class="grid-cell">29</div><div class="grid-cell">Periodista</div><div class="grid-cell">Noticias 24</div><div class="grid-cell">+58 212 987 6543</div><div class="grid-cell">www.noticias24.ve</div><div class="grid-cell">Enfoque en periodismo de investigación.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">8</div><div class="grid-cell">Diego Mendoza</div><div class="grid-cell">Ecuador</div><div class="grid-cell">Quito</div><div class="grid-cell">34</div><div class="grid-cell">Desarrollador de Software</div><div class="grid-cell">SoftDev Corp</div><div class="grid-cell">+593 2 1234 5678</div><div class="grid-cell">www.softdev.ec</div><div class="grid-cell">Experiencia en desarrollo de apps móviles.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">9</div><div class="grid-cell">Fernanda Díaz</div><div class="grid-cell">Bolivia</div><div class="grid-cell">La Paz</div><div class="grid-cell">26</div><div class="grid-cell">Nutricionista</div><div class="grid-cell">Clínica La Paz</div><div class="grid-cell">+591 2 987 6543</div><div class="grid-cell">www.clinicalapaz.bo</div><div class="grid-cell">Especializada en dietas para deportistas.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">10</div><div class="grid-cell">Pablo Herrera</div><div class="grid-cell">Uruguay</div><div class="grid-cell">Montevideo</div><div class="grid-cell">45</div><div class="grid-cell">Gerente de Ventas</div><div class="grid-cell">Importadora del Este</div><div class="grid-cell">+598 2 123 4567</div><div class="grid-cell">www.importadoradeleste.uy</div><div class="grid-cell">Responsable de grandes cuentas.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">11</div><div class="grid-cell">Valeria Sola</div><div class="grid-cell">Paraguay</div><div class="grid-cell">Asunción</div><div class="grid-cell">31</div><div class="grid-cell">Contadora</div><div class="grid-cell">Asesores Financieros</div><div class="grid-cell">+595 21 987 6543</div><div class="grid-cell">www.asesoresfinancieros.py</div><div class="grid-cell">Auditoría y consultoría fiscal.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">12</div><div class="grid-cell">Andrés Ramírez</div><div class="grid-cell">Guatemala</div><div class="grid-cell">Ciudad de Guatemala</div><div class="grid-cell">39</div><div class="grid-cell">Consultor IT</div><div class="grid-cell">Consultoría Digital</div><div class="grid-cell">+502 2 123 4567</div><div class="grid-cell">www.consultoriadigital.gt</div><div class="grid-cell">Especialista en seguridad de redes.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">13</div><div class="grid-cell">Camila Soto</div><div class="grid-cell">Honduras</div><div class="grid-cell">Tegucigalpa</div><div class="grid-cell">27</div><div class="grid-cell">Abogada</div><div class="grid-cell">Bufete Legal Soto</div><div class="grid-cell">+504 2221 2345</div><div class="grid-cell">www.bufetesoto.hn</div><div class="grid-cell">Derecho corporativo y civil.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">14</div><div class="grid-cell">Gabriel Ortiz</div><div class="grid-cell">El Salvador</div><div class="grid-cell">San Salvador</div><div class="grid-cell">33</div><div class="grid-cell">Profesor</div><div class="grid-cell">Colegio Bilingüe</div><div class="grid-cell">+503 2212 3456</div><div class="grid-cell">www.colegiobil.sv</div><div class="grid-cell">Enseña historia y geografía.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">15</div><div class="grid-cell">Isabella Gil</div><div class="grid-cell">Costa Rica</div><div class="grid-cell">San José</div><div class="grid-cell">24</div><div class="grid-cell">Artista Plástica</div><div class="grid-cell">Galería de Arte</div><div class="grid-cell">+506 2200 1122</div><div class="grid-cell">www.galeriaarte.cr</div><div class="grid-cell">Exhibiciones de arte contemporáneo.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">16</div><div class="grid-cell">Felipe Vega</div><div class="grid-cell">Panamá</div><div class="grid-cell">Ciudad de Panamá</div><div class="grid-cell">48</div><div class="grid-cell">Médico</div><div class="grid-cell">Hospital Central</div><div class="grid-cell">+507 234 5678</div><div class="grid-cell">www.hospitalcentral.pa</div><div class="grid-cell">Especialista en cardiología.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">17</div><div class="grid-cell">Valeria Sola</div><div class="grid-cell">Paraguay</div><div class="grid-cell">Asunción</div><div class="grid-cell">31</div><div class="grid-cell">Contadora</div><div class="grid-cell">Asesores Financieros</div><div class="grid-cell">+595 21 987 6543</div><div class="grid-cell">www.asesoresfinancieros.py</div><div class="grid-cell">Auditoría y consultoría fiscal.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">18</div><div class="grid-cell">Andrés Ramírez</div><div class="grid-cell">Guatemala</div><div class="grid-cell">Ciudad de Guatemala</div><div class="grid-cell">39</div><div class="grid-cell">Consultor IT</div><div class="grid-cell">Consultoría Digital</div><div class="grid-cell">+502 2 123 4567</div><div class="grid-cell">www.consultoriadigital.gt</div><div class="grid-cell">Especialista en seguridad de redes.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">19</div><div class="grid-cell">Camila Soto</div><div class="grid-cell">Honduras</div><div class="grid-cell">Tegucigalpa</div><div class="grid-cell">27</div><div class="grid-cell">Abogada</div><div class="grid-cell">Bufete Legal Soto</div><div class="grid-cell">+504 2221 2345</div><div class="grid-cell">www.bufetesoto.hn</div><div class="grid-cell">Derecho corporativo y civil.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">20</div><div class="grid-cell">Gabriel Ortiz</div><div class="grid-cell">El Salvador</div><div class="grid-cell">San Salvador</div><div class="grid-cell">33</div><div class="grid-cell">Profesor</div><div class="grid-cell">Colegio Bilingüe</div><div class="grid-cell">+503 2212 3456</div><div class="grid-cell">www.colegiobil.sv</div><div class="grid-cell">Enseña historia y geografía.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">21</div><div class="grid-cell">Isabella Gil</div><div class="grid-cell">Costa Rica</div><div class="grid-cell">San José</div><div class="grid-cell">24</div><div class="grid-cell">Artista Plástica</div><div class="grid-cell">Galería de Arte</div><div class="grid-cell">+506 2200 1122</div><div class="grid-cell">www.galeriaarte.cr</div><div class="grid-cell">Exhibiciones de arte contemporáneo.</div>
+                            </div>
+                            <div class="grid-row data-row">
+                                <div class="grid-cell">22</div><div class="grid-cell">Felipe Vega</div><div class="grid-cell">Panamá</div><div class="grid-cell">Ciudad de Panamá</div><div class="grid-cell">48</div><div class="grid-cell">Médico</div><div class="grid-cell">Hospital Central</div><div class="grid-cell">+507 234 5678</div><div class="grid-cell">www.hospitalcentral.pa</div><div class="grid-cell">Especialista en cardiología.</div>
+                            </div>                        
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Segundo Dashboard (oculto por defecto) -->
+            <div id="dashboard-two" class="dashboard-section hidden">
+                <h2 class="text-3xl font-bold mb-6 text-center">Dashboard de Vacaciones</h2>
+                <div class="dashboard-box header-bg box-shadow">
+                    <p>Esta es la sección de Vacaciones. Puedes usar este espacio para mostrar diferentes datos o funcionalidades. Por ejemplo, un gráfico de rendimiento o una lista de proyectos. ¡Adelante, eres libre de explorar!</p>
+                </div>
+            </div>
+
+            <!-- Tercer Dashboard (oculto por defecto) -->
+            <div id="dashboard-three" class="dashboard-section hidden">
+                <h2 class="text-3xl font-bold mb-6 text-center">Dashboard de Absentismos</h2>
+                <div class="dashboard-box header-bg box-shadow">
+                    <p>Esta es la sección de Absentismos. Es perfecta para un panel de control personalizado o para mostrar información del usuario, como un historial de actividad o preferencias. ¡Las posibilidades son infinitas!</p>
                 </div>
             </div>
         </div>
@@ -689,6 +762,49 @@
                 // Seleccionar la fila actual
                 clickedRow.classList.add('selected-row');
             }
+        });
+
+        // Lógica de navegación del dashboard
+        const navLinks = document.querySelectorAll('[data-target]');
+        const dashboardSections = document.querySelectorAll('.dashboard-section');
+
+        // Función para mostrar el dashboard seleccionado y actualizar el enlace activo
+        function showDashboard(targetId) {
+            // Ocultar todas las secciones del dashboard
+            dashboardSections.forEach(section => {
+                section.classList.add('hidden');
+            });
+
+            // Mostrar la sección de destino
+            const targetDashboard = document.getElementById(targetId);
+            if (targetDashboard) {
+                targetDashboard.classList.remove('hidden');
+            }
+
+            // Eliminar la clase 'active' de todos los enlaces de navegación
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Agregar la clase 'active' al enlace actual
+            const currentLink = document.querySelector(`[data-target="${targetId}"]`);
+            if (currentLink) {
+                currentLink.classList.add('active');
+            }
+        }
+
+        // Asignar manejadores de eventos a los enlaces de navegación
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('data-target');
+                showDashboard(targetId);
+            });
+        });
+
+        // Mostrar el dashboard de inicio al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            showDashboard('home-dashboard');
         });
     </script>
 </body>
