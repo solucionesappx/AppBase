@@ -48,15 +48,18 @@
         }
         
         /* Clases de utilidad para un código más limpio */
-        .header-bg, .nav-bg {
+        .header-bg {
             background-color: var(--box-color);
+        }
+        /* **AJUSTE** La barra de navegación ahora usa el color del body */
+        .nav-bg {
+            background-color: var(--bg-color);
         }
 
         .box-shadow {
             box-shadow: 0 4px 6px -1px var(--box-shadow-color), 0 2px 4px -2px var(--box-shadow-color);
         }
 
-        /* Nueva clase para la sombra que va hacia arriba */
         .box-shadow-up {
             box-shadow: 0 -4px 6px -1px var(--box-shadow-color), 0 -2px 4px -2px var(--box-shadow-color);
         }
@@ -112,8 +115,6 @@
             margin-top: 1rem;
         }
         
-        /* Estilos para el nuevo Toggle Switch */
-        /* REDUCCIÓN DE TAMAÑO: 40px de ancho y 22px de alto */
         .toggle-switch-container {
             position: relative;
             width: 40px; 
@@ -139,7 +140,6 @@
             transition: background-color 0.3s cubic-bezier(0.86, 0, 0.07, 1);
         }
 
-        /* REDUCCIÓN DE TAMAÑO: 18px de ancho y 18px de alto */
         .toggle-switch-container .toggle-button {
             position: absolute;
             top: 2px;
@@ -155,7 +155,6 @@
             background-color: var(--accent-color-1);
         }
 
-        /* AJUSTE DE LA POSICIÓN DE DESPLAZAMIENTO */
         .toggle-switch-container.dark-mode .toggle-button {
             transform: translateX(18px);
             background-color: var(--box-color);
@@ -163,9 +162,8 @@
 
         /* Estilos para la tabla con CSS Grid */
         .table-wrapper {
-            overflow: auto; /* Permite desplazamiento en ambas direcciones */
+            overflow: auto; 
             max-width: 100%;
-            /* Se ha añadido un max-height en unidades de la altura visible */
             max-height: 60vh;
             margin-top: 1rem;
             border-radius: 0.5rem;
@@ -175,16 +173,13 @@
         
         .data-grid {
             display: grid;
-            /* Se han cambiado todas las columnas a 'auto' para que se ajusten automáticamente al contenido. */
             grid-template-columns: auto auto auto auto auto auto auto auto auto auto;
             width: max-content;
         }
 
         .grid-header, .grid-cell {
-            /* Se ha reducido el padding para minimizar el alto de las filas */
             padding: 0.5rem; 
             height: 30px;
-            /* Se ha añadido flexbox para centrar el contenido verticalmente */
             display: flex;
             align-items: center;
             text-align: left;
@@ -196,7 +191,7 @@
         }
         
         .grid-row {
-            display: contents; /* Permite que los elementos secundarios se coloquen en la cuadrícula principal */
+            display: contents; 
         }
 
         /* Fija la primera fila con encabezados */
@@ -206,7 +201,7 @@
             z-index: 20;
             background-color: var(--accent-color-1);
             font-weight: 600;
-            color: #fff; /* Se ha cambiado el color del texto a blanco para la legibilidad */
+            color: #fff; 
             text-transform: uppercase;
         }
         
@@ -223,7 +218,7 @@
         .grid-row:first-child > .grid-header:first-child {
             position: sticky;
             left: 0;
-            z-index: 40; /* Asegurar que la esquina se mantenga por encima de todo */
+            z-index: 40;
             background-color: var(--accent-color-1);
             color: #fff; /* Se ha cambiado el color del texto a blanco para la legibilidad */
         }
@@ -324,21 +319,17 @@
             color: var(--text-color);
         }
 
-        /* **MODIFICADO** Sin background, solo efecto neón en hover y active */
         .nav-link-top:hover {
             transform: translateY(-2px);
             color: var(--text-color);
-            /* Se ha eliminado la sombra de texto (efecto neón) */
             text-shadow: none;
         }
 
-        /* **MODIFICADO** Sin background, solo efecto neón para el link activo */
         .nav-link-top.active {
             color: var(--accent-color-1);
-            /* Se ha eliminado la sombra de texto (efecto neón) */
             text-shadow: none;
         }
-
+        
         /* **NUEVO** Estilos para el formulario modal */
         .form-container {
             position: fixed;
@@ -358,20 +349,51 @@
             padding: 2rem;
             border-radius: 0.5rem;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            width: 90%;
+            /* Se ha añadido max-width y se ha actualizado el ancho del 100% */
+            width: 100%;
             max-width: 500px;
             position: relative;
+            /* Se ha añadido overflow: hidden para ocultar las ventanas que no están activas */
+            overflow: hidden;
+        }
+
+        /* **NUEVO** Estilos para el contenedor de las ventanas del formulario */
+        .form-windows {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            /* **CORRECCIÓN** Se establece una anchura explícita para el contenedor */
+            width: 100%;
+        }
+        
+        /* **NUEVO** Estilos para cada ventana */
+        .form-window {
+            width: 100%;
+            flex-shrink: 0;
+            position: relative; /* Añadido para posicionar el botón de cierre */
+        }
+
+        /* **MODIFICADO** Los íconos de navegación ahora son absolutos */
+        .nav-icon {
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: color 0.2s, transform 0.2s;
+        }
+
+        .nav-icon:hover {
+            color: var(--accent-color-1);
+            transform: scale(1.1);
         }
         
         .form-content h3 {
             font-size: 1.5rem;
             font-weight: 600;
-            margin-bottom: 1rem;
             color: var(--text-color);
         }
         
+        /* **AJUSTE** Se ha reducido el margen inferior para unir los grupos de campos */
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
         
         .form-group label {
@@ -379,10 +401,10 @@
             font-size: 0.875rem;
             font-weight: 500;
             color: var(--text-color);
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.05rem;
         }
 
-        .form-group input {
+        .form-group input, .form-group textarea {
             width: 100%;
             padding: 0.5rem;
             border: 1px solid var(--border-color);
@@ -393,7 +415,8 @@
         }
 
         /* Botón de cerrar para el formulario */
-        #close-form-btn {
+        /* **MODIFICADO** Ahora usa una clase para ser usado en múltiples botones */
+        .close-form-btn {
             position: absolute;
             top: 1rem;
             right: 1rem;
@@ -403,9 +426,11 @@
             font-size: 1.5rem;
             color: var(--text-color);
             transition: transform 0.2s;
+            /* Se ha añadido padding inferior para aumentar la separación visual */
+            padding-bottom: 0.5rem;
         }
         
-        #close-form-btn:hover {
+        .close-form-btn:hover {
             transform: scale(1.2);
             color: var(--accent-color-1);
         }
@@ -456,8 +481,8 @@
     </header>
 
     <!-- Nueva barra de navegación para los dashboards -->
-    <!-- **MODIFICADO** Ahora tiene un padding vertical para que los enlaces no estén demasiado pegados al cintillo superior -->
-    <nav class="fixed top-16 left-0 w-full nav-bg box-shadow z-40 transition-colors py-2">
+    <!-- **MODIFICADO** Ahora no tiene la clase box-shadow -->
+    <nav class="fixed top-16 left-0 w-full nav-bg z-40 transition-colors py-2">
         <div class="container mx-auto padding-container py-2 flex justify-around items-center">
             <!-- **MODIFICADO** Enlaces con íconos y texto apilados verticalmente -->
             <a href="#" class="nav-link-top nav-link-top-desktop" data-target="home-dashboard">
@@ -870,34 +895,54 @@
     <!-- **NUEVO** Formulario modal para mostrar los datos de la fila seleccionada -->
     <div id="data-form" class="form-container">
         <div class="form-content">
-            <button id="close-form-btn">&times;</button>
-            <h3 id="form-title">Detalles de la Fila</h3>
-            <form>
-                <div class="form-group">
-                    <label for="form-id">ID</label>
-                    <input type="text" id="form-id" readonly>
+            <!-- Contenedor para las ventanas del formulario -->
+            <!-- Se ha eliminado el contenedor form-windows ya que solo hay una ventana -->
+            <!-- Se ha eliminado el overflow: hidden del form-content -->
+            <div id="window-one" class="form-window">
+                <button class="close-form-btn">&times;</button>
+                <!-- **ACTUALIZADO** Título y botones de navegación en un mismo contenedor flex -->
+                <div class="flex items-center justify-between mb-4">
+                    <!-- Se ha eliminado el 'form-title-one' ya que solo hay una ventana -->
+                    <h3 id="form-title">Detalles de la Fila</h3>
                 </div>
-                <div class="form-group">
-                    <label for="form-nombre">Nombre</label>
-                    <input type="text" id="form-nombre" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="form-pais">País</label>
-                    <input type="text" id="form-pais" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="form-ciudad">Ciudad</label>
-                    <input type="text" id="form-ciudad" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="form-profesion">Profesión</label>
-                    <input type="text" id="form-profesion" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="form-empresa">Empresa</label>
-                    <input type="text" id="form-empresa" readonly>
-                </div>
-            </form>
+                <form>
+                    <!-- **CORRECCIÓN** El campo de ID ahora es un campo de entrada oculto -->
+                    <input type="hidden" id="form-id">
+                    
+                    <div class="form-group">
+                        <label for="form-nombre">Nombre</label>
+                        <input type="text" id="form-nombre" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-pais">País</label>
+                        <input type="text" id="form-pais" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-ciudad">Ciudad</label>
+                        <input type="text" id="form-ciudad" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-profesion">Profesión</label>
+                        <input type="text" id="form-profesion" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-empresa">Empresa</label>
+                        <input type="text" id="form-empresa" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-telefono">Teléfono</label>
+                        <input type="text" id="form-telefono" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-sitio-web">Sitio Web</label>
+                        <input type="text" id="form-sitio-web" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-notas">Notas</label>
+                        <textarea id="form-notas" rows="4" readonly class="w-full resize-none"></textarea>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -941,15 +986,19 @@
         
         // **NUEVO** Elementos del formulario
         const dataForm = document.getElementById('data-form');
-        const closeFormBtn = document.getElementById('close-form-btn');
-        const formTitle = document.getElementById('form-title');
+        const closeFormBtns = document.querySelectorAll('.close-form-btn'); // Se ha cambiado a querySelectorAll
+        // Se ha ajustado para el nuevo HTML
         const formId = document.getElementById('form-id');
         const formNombre = document.getElementById('form-nombre');
         const formPais = document.getElementById('form-pais');
         const formCiudad = document.getElementById('form-ciudad');
         const formProfesion = document.getElementById('form-profesion');
         const formEmpresa = document.getElementById('form-empresa');
-
+        // Nuevos campos para la segunda ventana
+        const formTelefono = document.getElementById('form-telefono');
+        const formSitioWeb = document.getElementById('form-sitio-web');
+        const formNotas = document.getElementById('form-notas');
+        
         // Cargar el tema guardado al iniciar
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme) {
@@ -1093,7 +1142,7 @@
         const navLinks = document.querySelectorAll('[data-target]');
         const dashboardSections = document.querySelectorAll('.dashboard-section');
         const dataGrid = document.querySelector('.data-grid');
-
+        
         // Función para mostrar el dashboard seleccionado y actualizar el enlace activo
         function showDashboard(targetId) {
             // Ocultar todas las secciones del dashboard
@@ -1107,65 +1156,77 @@
                 targetDashboard.classList.remove('hidden');
             }
 
-            // Eliminar la clase 'active' de todos los enlaces de navegación
+            // Eliminar la clase 'active' de todos los enlaces y añadirla al seleccionado
             navLinks.forEach(link => {
                 link.classList.remove('active');
+                if (link.getAttribute('data-target') === targetId) {
+                    link.classList.add('active');
+                }
             });
-
-            // Agregar la clase 'active' al enlace actual
-            const currentLink = document.querySelector(`[data-target="${targetId}"]`);
-            if (currentLink) {
-                currentLink.classList.add('active');
-            }
         }
         
-        // **NUEVO** Manejador de eventos para el clic en las filas
-        dataGrid.addEventListener('click', (e) => {
-            const clickedCell = e.target.closest('.grid-cell');
-            if (!clickedCell) return;
-            
-            const clickedRow = clickedCell.closest('.data-row');
-            if (!clickedRow) return;
-
-            // Deseleccionar cualquier fila previamente seleccionada
-            const selectedRow = document.querySelector('.selected-row');
-            if (selectedRow) {
-                selectedRow.classList.remove('selected-row');
-            }
-
-            // Seleccionar la fila actual
-            clickedRow.classList.add('selected-row');
-            
-            // Obtener los datos de la fila y llenar el formulario
-            const cells = clickedRow.querySelectorAll('.grid-cell');
-            formId.value = cells[0].textContent;
-            formNombre.value = cells[1].textContent;
-            formPais.value = cells[2].textContent;
-            formCiudad.value = cells[3].textContent;
-            formProfesion.value = cells[5].textContent;
-            formEmpresa.value = cells[6].textContent;
-
-            // Mostrar el formulario
-            dataForm.style.display = 'flex';
-        });
-
-        // **NUEVO** Manejador de eventos para cerrar el formulario
-        closeFormBtn.addEventListener('click', () => {
-            dataForm.style.display = 'none';
-        });
-
-        // Asignar manejadores de eventos a los enlaces de navegación
+        // Lógica para la navegación entre dashboards
         navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
+            link.addEventListener('click', (event) => {
+                event.preventDefault(); // Evita el comportamiento de enlace predeterminado
                 const targetId = link.getAttribute('data-target');
                 showDashboard(targetId);
             });
         });
 
-        // Mostrar el dashboard de inicio al cargar la página
-        document.addEventListener('DOMContentLoaded', () => {
+        // Mostrar el dashboard por defecto al cargar la página
+        window.addEventListener('DOMContentLoaded', () => {
             showDashboard('home-dashboard');
+        });
+        
+        // Lógica para seleccionar y mostrar datos en el formulario modal
+        dataGrid.addEventListener('click', (event) => {
+            const row = event.target.closest('.data-row');
+            if (row) {
+                // Elimina la clase 'selected-row' de cualquier fila previamente seleccionada
+                const selectedRow = document.querySelector('.selected-row');
+                if (selectedRow) {
+                    selectedRow.classList.remove('selected-row');
+                }
+                // Añade la clase 'selected-row' a la fila clicada
+                row.classList.add('selected-row');
+                
+                // Extraer datos de la fila seleccionada
+                const cells = row.querySelectorAll('.grid-cell');
+                const rowData = {
+                    id: cells[0].textContent,
+                    nombre: cells[1].textContent,
+                    pais: cells[2].textContent,
+                    ciudad: cells[3].textContent,
+                    edad: cells[4].textContent,
+                    profesion: cells[5].textContent,
+                    empresa: cells[6].textContent,
+                    telefono: cells[7].textContent,
+                    sitioWeb: cells[8].textContent,
+                    notas: cells[9].textContent
+                };
+                
+                // Rellenar el formulario con los datos de la fila
+                formId.value = rowData.id;
+                formNombre.value = rowData.nombre;
+                formPais.value = rowData.pais;
+                formCiudad.value = rowData.ciudad;
+                formProfesion.value = rowData.profesion;
+                formEmpresa.value = rowData.empresa;
+                formTelefono.value = rowData.telefono;
+                formSitioWeb.value = rowData.sitioWeb;
+                formNotas.value = rowData.notas;
+                
+                // Mostrar el formulario
+                dataForm.style.display = 'flex';
+            }
+        });
+        
+        // Lógica para cerrar el formulario
+        closeFormBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                dataForm.style.display = 'none';
+            });
         });
     </script>
 </body>
