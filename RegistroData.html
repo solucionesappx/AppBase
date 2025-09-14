@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplicación con Generación de Imagen y Formulario</title>
-    <!-- Configuración para PWA: se enlaza con el archivo manifest -->
-    <link rel="manifest" href="./manifest.json">
     <!-- Incluye el CDN de Tailwind CSS para un estilo rápido y moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Incluye la librería de iconos Font Awesome -->
@@ -340,10 +338,13 @@
             background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
             display: none; /* Oculto por defecto */
             justify-content: center;
-            align-items: center;
+            /* **MODIFICADO** Alinear el contenido al principio (parte superior) */
+            align-items: flex-start;
             z-index: 9999;
+            /* **NUEVO** padding superior para evitar que se solape con el cintillo */
+            padding-top: 50px;
         }
-
+        
         .form-content {
             background-color: var(--box-color);
             padding: 2rem;
@@ -355,6 +356,8 @@
             position: relative;
             /* Se ha añadido overflow: hidden para ocultar las ventanas que no están activas */
             overflow: hidden;
+            /* **NUEVO** Margin top para separar del borde superior */
+            margin-top: 2rem;
         }
 
         /* **NUEVO** Estilos para el contenedor de las ventanas del formulario */
@@ -383,6 +386,43 @@
         .nav-icon:hover {
             color: var(--accent-color-1);
             transform: scale(1.1);
+        }
+        
+        /* **NUEVOS ESTILOS** para los botones de navegación circulares */
+        .circular-btn {
+            background-color: var(--accent-color-1);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            padding: 0.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .circular-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+        }
+        
+        .circular-btn svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            stroke: var(--text-color); /* Se ajusta el color del trazo del SVG para ser visible */
+        }
+        
+        .dark-mode .circular-btn svg {
+            stroke: #fff; /* En modo oscuro el trazo del SVG es blanco */
+        }
+
+        /* Clase para ocultar los botones de navegación */
+        .circular-btn.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
         }
         
         .form-content h3 {
@@ -433,6 +473,11 @@
         .close-form-btn:hover {
             transform: scale(1.2);
             color: var(--accent-color-1);
+        }
+        
+        .form-step {
+            width: 100%;
+            flex-shrink: 0;
         }
 
         /* Media query para pantallas más grandes (mayor a 600px) */
@@ -496,6 +541,7 @@
             <a href="#" class="nav-link-top nav-link-top-desktop" data-target="dashboard-three">
                 <i class="fa-solid fa-calendar-times text-2xl"></i>
                 <span class="font-semibold text-sm">Absentismos</span>
+                
             </a>
         </div>
     </nav>
@@ -518,16 +564,6 @@
                         <li>Gráficos y estadísticas</li>
                         <li>... y mucho más!</li>
                     </ul>
-
-                    <!-- Contenedor para la imagen generada -->
-                    <div class="flex flex-col items-center mt-6">
-                        <button id="generate-image-btn" class="bg-accent-color-1 text-white py-2 px-4 rounded-lg font-semibold transition-all hover:bg-opacity-80">
-                            Generar imagen de Keith Haring
-                        </button>
-                        <!-- Spinner de carga que se mostrará al generar la imagen -->
-                        <div id="loading-spinner" class="spinner"></div>
-                        <img id="generated-image" class="w-full h-auto mt-6 rounded-lg shadow-md" style="display: none;">
-                    </div>
 
                 </div>
                 
@@ -895,20 +931,34 @@
     <!-- **NUEVO** Formulario modal para mostrar los datos de la fila seleccionada -->
     <div id="data-form" class="form-container">
         <div class="form-content">
-            <!-- Contenedor para las ventanas del formulario -->
-            <!-- Se ha eliminado el contenedor form-windows ya que solo hay una ventana -->
-            <!-- Se ha eliminado el overflow: hidden del form-content -->
-            <div id="window-one" class="form-window">
-                <button class="close-form-btn">&times;</button>
-                <!-- **ACTUALIZADO** Título y botones de navegación en un mismo contenedor flex -->
-                <div class="flex items-center justify-between mb-4">
-                    <!-- Se ha eliminado el 'form-title-one' ya que solo hay una ventana -->
-                    <h3 id="form-title">Detalles de la Fila</h3>
+            <!-- Botón para cerrar el modal -->
+            <button class="close-form-btn">&times;</button>
+            
+            <!-- Contenedor del encabezado con el título y los botones de navegación -->
+            <!-- Se ha unificado en un solo contenedor para evitar duplicación -->
+            <div id="header-container" class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-semibold text-text-color" id="form-title">Paso 1: Información Personal</h3>
+                <div id="navigation-icons" class="flex items-center space-x-2">
+                    <!-- Botón de navegación a la izquierda (oculto por defecto) -->
+                    <button id="prev-btn" class="circular-btn hidden" aria-label="Anterior">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <!-- Botón de navegación a la derecha -->
+                    <button id="next-btn" class="circular-btn" aria-label="Siguiente">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
                 </div>
-                <form>
-                    <!-- **CORRECCIÓN** El campo de ID ahora es un campo de entrada oculto -->
-                    <input type="hidden" id="form-id">
-                    
+            </div>
+
+            <form id="multi-step-form">
+                <!-- **CORREGIDO** Se ha añadido el campo oculto `form-id` -->
+                <input type="hidden" id="form-id">
+                
+                <div id="step-1" class="form-step">
                     <div class="form-group">
                         <label for="form-nombre">Nombre</label>
                         <input type="text" id="form-nombre" readonly>
@@ -925,6 +975,9 @@
                         <label for="form-profesion">Profesión</label>
                         <input type="text" id="form-profesion" readonly>
                     </div>
+                </div>
+                
+                <div id="step-2" class="form-step hidden">
                     <div class="form-group">
                         <label for="form-empresa">Empresa</label>
                         <input type="text" id="form-empresa" readonly>
@@ -941,8 +994,8 @@
                         <label for="form-notas">Notas</label>
                         <textarea id="form-notas" rows="4" readonly class="w-full resize-none"></textarea>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -980,9 +1033,6 @@
     <script>
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
-        const generateImageBtn = document.getElementById('generate-image-btn');
-        const loadingSpinner = document.getElementById('loading-spinner');
-        const generatedImage = document.getElementById('generated-image');
         
         // **NUEVO** Elementos del formulario
         const dataForm = document.getElementById('data-form');
@@ -1064,80 +1114,6 @@
             });
         });
 
-        // Lógica para la generación de la imagen
-        generateImageBtn.addEventListener('click', async () => {
-            // Mostrar el spinner de carga
-            loadingSpinner.style.display = 'block';
-            generatedImage.style.display = 'none';
-            generateImageBtn.disabled = true;
-
-            const prompt = "A vibrant and energetic drawing in the style of Keith Haring, with dancing figures and bold lines.";
-            const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
-
-            const payload = { 
-                instances: [{ prompt: prompt }], 
-                parameters: { "sampleCount": 1 } 
-            };
-            
-            let retries = 0;
-            const maxRetries = 3;
-            const delay = (ms) => new Promise(res => setTimeout(res, ms));
-
-            while (retries < maxRetries) {
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    const result = await response.json();
-                    
-                    if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
-                        const base64Data = result.predictions[0].bytesBase64Encoded;
-                        const imageUrl = `data:image/png;base64,${base64Data}`;
-                        generatedImage.src = imageUrl;
-                        generatedImage.style.display = 'block';
-                        loadingSpinner.style.display = 'none';
-                        generateImageBtn.disabled = false;
-                        return; // Salir del bucle si es exitoso
-                    } else {
-                        throw new Error("Invalid API response format.");
-                    }
-                } catch (error) {
-                    console.error('Error generating image:', error);
-                    retries++;
-                    if (retries < maxRetries) {
-                        await delay(Math.pow(2, retries) * 1000);
-                    } else {
-                        loadingSpinner.style.display = 'none';
-                        generatedImage.src = 'https://placehold.co/600x400/D61336/ffffff?text=Error';
-                        generatedImage.style.display = 'block';
-                        generateImageBtn.disabled = false;
-                        console.error('Failed to generate image after multiple retries.');
-                    }
-                }
-            }
-        });
-        
-        // Registro del Service Worker para PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js')
-                    .then(registration => {
-                        console.log('Service Worker registrado con éxito:', registration);
-                    })
-                    .catch(error => {
-                        console.log('Fallo el registro de Service Worker:', error);
-                    });
-            });
-        }
-
         // Lógica para la navegación y selección de filas
         const navLinks = document.querySelectorAll('[data-target]');
         const dashboardSections = document.querySelectorAll('.dashboard-section');
@@ -1179,6 +1155,65 @@
             showDashboard('home-dashboard');
         });
         
+        // **NUEVA LÓGICA** para la navegación del formulario
+        const step1 = document.getElementById('step-1');
+        const step2 = document.getElementById('step-2');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const formTitle = document.getElementById('form-title');
+        
+        let formSteps = [step1, step2]; // Definir los pasos del formulario
+        let currentStepIndex = 0; // Índice del paso actual
+
+        function showStep(stepIndex) {
+            formSteps.forEach(step => {
+                step.classList.add('hidden');
+            });
+            formSteps[stepIndex].classList.remove('hidden');
+            currentStepIndex = stepIndex;
+            updateFormUI();
+        }
+
+        function updateFormUI() {
+            // Actualizar título del formulario
+            if (currentStepIndex === 0) {
+                formTitle.textContent = 'Paso 1: Información Personal';
+            } else if (currentStepIndex === 1) {
+                formTitle.textContent = 'Paso 2: Información Adicional';
+            }
+
+            // Actualizar visibilidad del botón 'Anterior'
+            if (currentStepIndex === 0) {
+                prevBtn.classList.add('hidden');
+            } else {
+                prevBtn.classList.remove('hidden');
+            }
+            
+            // Actualizar icono del botón 'Siguiente'
+            if (currentStepIndex === formSteps.length - 1) {
+                nextBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>`;
+            } else {
+                nextBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>`;
+            }
+        }
+        
+        nextBtn.addEventListener('click', () => {
+            if (currentStepIndex < formSteps.length - 1) {
+                showStep(currentStepIndex + 1);
+            }
+            // Agrega aquí la lógica de envío del formulario si estás en el último paso
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentStepIndex > 0) {
+                showStep(currentStepIndex - 1);
+            }
+        });
+
         // Lógica para seleccionar y mostrar datos en el formulario modal
         dataGrid.addEventListener('click', (event) => {
             const row = event.target.closest('.data-row');
@@ -1217,8 +1252,9 @@
                 formSitioWeb.value = rowData.sitioWeb;
                 formNotas.value = rowData.notas;
                 
-                // Mostrar el formulario
+                // Mostrar el formulario y el primer paso
                 dataForm.style.display = 'flex';
+                showStep(0); // Mostrar el primer paso al abrir el formulario
             }
         });
         
