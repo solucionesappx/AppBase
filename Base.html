@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZXC1</title>
+    <!-- Incluye el CDN de Tailwind CSS para un estilo rápido y moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Incluye la librería de iconos Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
+    <style>
+        /* Importa la fuente Poppins de Google Fonts */
+        @import url("https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap");
+
+        /* Definición de variables CSS para el tema claro */
+        :root {
+            --bg-color: #f0f2f5;
+            --box-color: #e9ecef;
+            --border-color: #dcdcdc;
+            --text-color: #111;
+            --link-color: #D61336;
+            --accent-color-1: #4041C2;
+            --accent-color-2: #7aebbc;
+            --box-shadow-color: rgba(0,0,0,0.2);
+        }
+
+        /* Variables para el tema oscuro */
+        body.dark-mode {
+            --bg-color: #25252b;
+             --box-color: #3a3a45;
+            --border-color: #25252b;
+            --text-color: #fff;
+            --link-color: #4041C2;
+            --accent-color-1: #4041C2;
+            --accent-color-2: #dbeb7a;
+            --box-shadow-color: rgba(255,255,255,0.15);
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        /* Clases de utilidad para un código más limpio */
+        .header-bg {
+            background-color: var(--box-color);
+        }
+        /* **AJUSTE** La barra de navegación ahora usa el color del body */
+        .nav-bg {
+            background-color: var(--bg-color);
+        }
+
+        .box-shadow {
+            box-shadow: 0 4px 6px -1px var(--box-shadow-color), 0 2px 4px -2px var(--box-shadow-color);
+        }
+
+        .box-shadow-up {
+            box-shadow: 0 -4px 6px -1- var(--box-shadow-color), 0 -2px 4px -2px var(--box-shadow-color);
+        }
+        
+        .accent-link {
+            color: var(--link-color);
+        }
+
+        .icon-size {
+            height: 1.5rem;
+            width: 1.5rem;
+        }
+        
+        .padding-container {
+            padding: 0 1rem;
+        }
+
+        .flex-row {
+            display: flex;
+            align-items: center;
+        }
+
+        .flex-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .nav-link {
+            padding: 0.5rem;
+            border-radius: 9999px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-link:hover {
+            background-color: none;
+        }
+        
+        /* Estilos específicos para los elementos */
+        .welcome-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .dashboard-box {
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+        }
+        
+        .toggle-switch-container {
+            position: relative;
+            width: 40px; 
+            height: 22px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transform: translate3d(0, 0, 0);
+            font-size: 1.1rem;
+        }
+
+        .toggle-switch-container:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 40px; 
+            height: 22px;
+            border-radius: 11px;
+            background-color: var(--text-color);
+            transition: background-color 0.3s cubic-bezier(0.86, 0, 0.07, 1);
+        }
+
+        .toggle-switch-container:active:before {
+            transition: background-color 0.3s cubic-bezier(0.86, 0, 0.07, 1);
+        }
+
+        .toggle-switch-container .toggle-button {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px; 
+            height: 18px;
+            border-radius: 50%;
+            background-color: var(--box-color);
+            transition: transform 0.3s cubic-bezier(0.86, 0, 0.07, 1), background-color 0.3s cubic-bezier(0.86, 0, 0.07, 1);
+        }
+
+        .toggle-switch-container.dark-mode:before {
+            background-color: var(--accent-color-1);
+        }
+
+        .toggle-switch-container.dark-mode .toggle-button {
+            transform: translateX(18px);
+            background-color: var(--box-color);
+        }
+        
+        /* Efecto de hover y transición para los iconos de la barra de navegación inferior */
+        .nav-link i, .nav-link span {
+            transition: transform 0.3s ease-in-out, color 0.3s ease, text-shadow 0.3s ease;
+            color: var(--text-color);
+        }
+
+        /* Efecto neón al pasar el cursor o tocar el elemento */
+        .nav-link:hover i,
+        .nav-link:hover span,
+        .nav-link.active i,
+        .nav-link.active span {
+            transform: scale(1.05) translateY(-2px); /* Disminuimos el efecto de subida */
+            color: var(--accent-color-1);
+            text-shadow: 0 0 1px var(--accent-color-1), 0 0 5px var(--accent-color-1); /* Disminuimos el efecto de neón */
+        }
+        
+        /* Regla específica para el botón de cerrar sesión que anula el cambio de color pero mantiene los demás efectos */
+        .logout-link:hover i {
+            color: var(--text-color);
+            text-shadow: 0 0 2px var(--text-color), 0 0 10px var(--text-color), 0 0 15px var(--text-color);
+        }
+        
+        /* Clase para ocultar los dashboards no activos */
+        .hidden {
+            display: none;
+        }
+        
+        /* Estilos para la nueva barra de navegación superior con íconos */
+        .nav-link-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            gap: 0.5rem; /* Espacio entre el ícono y el texto */
+            color: var(--text-color);
+        }
+
+        .nav-link-top:hover {
+            transform: translateY(-2px);
+            color: var(--text-color);
+            text-shadow: none;
+        }
+
+        .nav-link-top.active {
+            color: var(--accent-color-1);
+            text-shadow: none;
+        }
+        
+        /* Media query para pantallas más grandes (mayor a 600px) */
+        @media (min-width: 600px) {
+            .dashboard-box {
+                padding: 2.5rem;
+            }
+            
+            /* **NUEVO** Estilos para el enlace de navegación superior en escritorio */
+            .nav-link-top-desktop {
+                flex-direction: row;
+                gap: 0.5rem;
+                padding: 0.5rem 1rem; /* Padding horizontal para un mejor aspecto */
+            }
+        }
+    </style>
+</head>
+<body class="dark-mode transition-colors">
+
+    <!-- 1. Cintillo Fijo (Header) -->
+    <header class="fixed top-0 left-0 w-full header-bg box-shadow z-50 transition-colors">
+        <div class="container mx-auto padding-container py-3 flex items-center justify-between">
+            <!-- Mensaje de Bienvenida (Asume que el usuario está logueado) -->
+            <div class="flex-row space-x-2">
+                <span class="welcome-text">¡Hola, Usuario!</span>
+            </div>
+
+            <div class="flex-row space-x-4">
+                <!-- Botón de Modo Claro/Oscuro -->
+                <div id="theme-toggle" class="toggle-switch-container dark-mode">
+                    <div class="toggle-button"></div>
+                </div>
+                
+                <!-- Botón para cerrar sesión -->
+                <button class="nav-link logout-link">
+                    <!-- Icono de cerrar sesión de Font Awesome -->
+                    <i class="text-3xl fa-solid fa-right-from-bracket icon-size "></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. Contenedor principal para la sección del dashboard -->
+    <!-- Se ha ajustado el padding-top para que no haya un espacio vacío donde estaba la barra superior -->
+    <main class="pt-20 pb-20 px-4">
+        <div class="container mx-auto py-12">
+            <!-- Dashboard de Datos Básicos -->
+            <div id="dashboard-section" class="dashboard-section">
+                <h2 class="text-3xl font-bold mb-6 text-center">Dashboard</h2>
+                <div class="p-6 rounded-lg box-shadow">
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    
+
+    <!-- 3. Barra de Navegación Fija (Footer) -->
+    <nav class="fixed bottom-0 left-0 w-full nav-bg box-shadow-up z-50 transition-colors">
+        <div class="container mx-auto padding-container py-1 flex justify-around items-center">
+            <!-- Botón de Inicio -->
+            <a href="#" class="flex-col nav-link accent-link justify-center gap-1 active">
+                <i class="fa-solid fa-house icon-size"></i>
+                <span class="link-text">Inicio</span>
+            </a>
+            
+            <!-- Botón de Buscar -->
+            <a href="#" class="flex-col nav-link justify-center gap-1">
+                <i class="fa-solid fa-magnifying-glass icon-size"></i>
+                <span class="link-text">Buscar</span>
+            </a>
+
+            <!-- Botón de Perfil -->
+            <a href="#" class="flex-col nav-link justify-center gap-1">
+                <i class="fa-solid fa-user icon-size"></i>
+                <span class="link-text">Perfil</span>
+            </a>
+
+            <!-- Botón de Nuevo -->
+            <a href="#" class="flex-col nav-link justify-center gap-1">
+                <i class="fa-solid fa-plus icon-size"></i>
+                <span class="link-text">Nuevo</span>
+            </a>
+        </div>
+    </nav>
+
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        
+        // Cargar el tema guardado al iniciar
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme) {
+            body.classList.add(currentTheme + '-mode');
+            themeToggle.classList.add(currentTheme + '-mode');
+        } else {
+            // Establecer el modo oscuro como predeterminado si no hay preferencia
+            body.classList.add('dark-mode');
+            themeToggle.classList.add('dark-mode');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            const isDarkMode = body.classList.contains('dark-mode');
+            if (isDarkMode) {
+                body.classList.remove('dark-mode');
+                themeToggle.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark-mode');
+                themeToggle.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (event) => {
+                    // Previene el comportamiento predeterminado del enlace para que la lógica de JS se ejecute.
+                    event.preventDefault();
+                    
+                    // Obtiene el texto del span dentro del enlace para saber qué página cargar.
+                    const linkText = event.currentTarget.querySelector('span').textContent;
+
+                    switch (linkText) {
+                        case 'Inicio':
+                            window.location.href = 'dashboard.html';
+                            break;
+                        case 'Buscar':
+                            window.location.href = 'buscarData.html';
+                            break;
+                        case 'Perfil':
+                            window.location.href = 'perfilUsuario.html';
+                            break;
+                        case 'Nuevo':
+                            window.location.href = 'menuAdmin.html';
+                            break;
+                        default:
+                            console.log('Enlace de navegación no reconocido.');
+                            break;
+                    }
+                });
+            });
+        });
+        
+    </script>
+</body>
+</html>
