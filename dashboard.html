@@ -342,10 +342,9 @@
         <h1 class="text-2xl font-bold mb-2 text-center">Datos del Personal</h1>
         <p class="text-sm mb-4 text-center">Tabla con datos cargados desde Google Apps Script.</p>
         
-        <!-- Contenedor de búsqueda y ordenación -->
-        <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2 mb-2">
-            <!-- Se elimina `flex-grow` para que el campo de búsqueda no ocupe todo el ancho disponible y se usa la clase `w-4/5` para controlar su tamaño. -->
-            <input type="text" id="searchInput" placeholder="Buscar..." class="w-4/5 sm:w-auto p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" autocomplete="off">
+        <!-- Contenedor de búsqueda y ordenación, ahora siempre en una fila -->
+        <div class="flex flex-row items-center space-x-2 mb-2">
+            <input type="text" id="searchInput" placeholder="Buscar..." class="w-4/5 p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" autocomplete="off">
             <button id="sortButton" class="text-3xl bg-transparent hover:text-blue-600 text-blue-500 font-bold py-2 px-4 rounded transition-colors duration-300 ease-in-out" aria-label="Ordenar por Apellidos">
                 <i class="fa-solid fa-arrow-down-a-z"></i>
             </button>
