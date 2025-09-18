@@ -179,6 +179,18 @@
             background-color: rgba(122, 235, 188, 0.6) !important;
             cursor: pointer;
         }
+        
+        /* Estilo para la fila seleccionada */
+        .data-table tbody tr.selected {
+            background-color: #5ab6a5 !important;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .data-table tbody tr.selected td:first-child {
+            background-color: #5ab6a5 !important;
+        }
+
 
         /* Regla para el resaltado de la primera columna durante el hover */
         .data-table tbody tr:hover td:first-child {
@@ -336,7 +348,7 @@
                 </div>
                 
                 <!-- Botón para cerrar sesión -->
-                <button class="nav-link text-xl" style="color: var(--text-color);">
+                <button id="logoutBtn" class="nav-link text-xl text-[var(--text-color)] hover:text-red-500 transition-colors">
                     <!-- Icono de cerrar sesión de Font Awesome -->
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
@@ -350,6 +362,11 @@
         <div id="loader" class="hidden absolute inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50 rounded-xl">
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
         </div>
+        <!-- Mensaje de notificación / error -->
+        <div id="messageBox" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-4 bg-red-500 text-white rounded-md shadow-lg z-50">
+            <p id="messageText"></p>
+        </div>
+
         <h1 class="text-2xl font-bold mb-2 text-center">Datos del Personal</h1>
         <p class="text-sm mb-4 text-center">Tabla con datos cargados desde Google Apps Script.</p>
         
@@ -388,11 +405,11 @@
         </div>
     </div>
 
-    <!-- Contenedor del Modal -->
+    <!-- Contenedor del Modal de Detalles (Visualizar) -->
     <div id="detailsModal" class="modal-container hidden">
         <div class="modal-content relative">
             <!-- Botón de cerrar reubicado -->
-            <button id="closeModalBtn" class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors">
+            <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
                 <i class="fa-solid fa-xmark"></i>
             </button>
 
@@ -400,10 +417,10 @@
                 <div class="flex items-center space-x-4">
                     <h3 class="text-xl font-bold">Detalles</h3>
                     <div class="flex space-x-2">
-                        <button id="prevPageBtn" class="modal-nav-button" disabled>
+                        <button id="prevPageBtnDetails" class="modal-nav-button" disabled>
                             <i class="fa-solid fa-angle-left"></i>
                         </button>
-                        <button id="nextPageBtn" class="modal-nav-button">
+                        <button id="nextPageBtnDetails" class="modal-nav-button">
                             <i class="fa-solid fa-angle-right"></i>
                         </button>
                     </div>
@@ -411,55 +428,172 @@
             </div>
             
             <!-- Contenido del modal (páginas de datos) -->
-            <div id="modal-pages-container">
+            <div id="modal-pages-container-details">
                 <!-- Página 1: Campos Empresa, Nómina, Apellidos, Nombres, Cédula -->
-                <div id="modal-page-1" class="modal-page">
+                <div id="modal-page-1-details" class="modal-page">
                     <div class="modal-field">
                         <label>Empresa:</label>
-                        <span id="field-empresa"></span>
+                        <span id="field-empresa-details"></span>
                     </div>
                     <div class="modal-field">
                         <label>Nómina:</label>
-                        <span id="field-nomina"></span>
+                        <span id="field-nomina-details"></span>
                     </div>
                     <div class="modal-field">
                         <label>Apellidos:</label>
-                        <span id="field-apellidos"></span>
+                        <span id="field-apellidos-details"></span>
                     </div>
                     <div class="modal-field">
                         <label>Nombres:</label>
-                        <span id="field-nombres"></span>
+                        <span id="field-nombres-details"></span>
                     </div>
                     <div class="modal-field">
                         <label>Cédula:</label>
-                        <span id="field-cedula"></span>
+                        <span id="field-cedula-details"></span>
                     </div>
                 </div>
 
                 <!-- Página 2: Campos Cargo, Ingreso, Sector, Perfil -->
-                <div id="modal-page-2" class="modal-page hidden">
+                <div id="modal-page-2-details" class="modal-page hidden">
                     <div class="modal-field">
                         <label>Cargo:</label>
-                        <span id="field-cargo"></span>
+                        <span id="field-cargo-details"></span>
                     </div>
                     <div class="modal-field">
                         <label>Ingreso:</label>
-                        <span id="field-ingreso"></span>
+                        <span id="field-ingreso-details"></span>
                     </div>
                     <div class="modal-field">
                         <label>Sector:</label>
-                        <span id="field-sector"></span>
+                        <span id="field-sector-details"></span>
                     </div>
                     <div class="modal-field">
                         <label>Perfil:</label>
-                        <span id="field-perfil"></span>
+                        <span id="field-perfil-details"></span>
                     </div>
                 </div>
             </div>
 
             <!-- Navegación del Modal -->
             <div class="modal-footer">
-                <button id="acceptBtn" class="modal-action-button">Aceptar</button>
+                <button class="modal-action-button close-modal-btn">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nuevo Modal: Cargar Archivo -->
+    <div id="uploadModal" class="modal-container hidden">
+        <div class="modal-content relative text-center">
+            <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-xl font-bold mb-4">Cargar Archivo</h3>
+            <p>Este es el modal para agregar un nuevo archivo.</p>
+            <div class="modal-footer">
+                <button class="modal-action-button mt-4 close-modal-btn">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nuevo Modal: Editar -->
+    <div id="editModal" class="modal-container hidden">
+        <div class="modal-content relative">
+            <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="modal-header">
+                <div class="flex items-center space-x-4">
+                    <h3 class="text-xl font-bold">Editar</h3>
+                    <div class="flex space-x-2">
+                        <button id="prevPageBtnEdit" class="modal-nav-button" disabled>
+                            <i class="fa-solid fa-angle-left"></i>
+                        </button>
+                        <button id="nextPageBtnEdit" class="modal-nav-button">
+                            <i class="fa-solid fa-angle-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenido del modal (páginas de edición) -->
+            <div id="modal-pages-container-edit">
+                <!-- Página 1: Campos Empresa, Nómina, Apellidos, Nombres, Cédula -->
+                <div id="modal-page-1-edit" class="modal-page">
+                    <div class="modal-field">
+                        <label>Empresa:</label>
+                        <input id="field-empresa-edit" type="text" class="text-color" />
+                    </div>
+                    <div class="modal-field">
+                        <label>Nómina:</label>
+                        <input id="field-nomina-edit" type="text" class="text-color" />
+                    </div>
+                    <div class="modal-field">
+                        <label>Apellidos:</label>
+                        <input id="field-apellidos-edit" type="text" class="text-color" />
+                    </div>
+                    <div class="modal-field">
+                        <label>Nombres:</label>
+                        <input id="field-nombres-edit" type="text" class="text-color" />
+                    </div>
+                    <div class="modal-field">
+                        <label>Cédula:</label>
+                        <input id="field-cedula-edit" type="text" class="text-color" />
+                    </div>
+                </div>
+
+                <!-- Página 2: Campos Cargo, Ingreso, Sector, Perfil -->
+                <div id="modal-page-2-edit" class="modal-page hidden">
+                    <div class="modal-field">
+                        <label>Cargo:</label>
+                        <input id="field-cargo-edit" type="text" class="text-color" />
+                    </div>
+                    <div class="modal-field">
+                        <label>Ingreso:</label>
+                        <input id="field-ingreso-edit" type="text" class="text-color" />
+                    </div>
+                    <div class="modal-field">
+                        <label>Sector:</label>
+                        <input id="field-sector-edit" type="text" class="text-color" />
+                    </div>
+                    <div class="modal-field">
+                        <label>Perfil:</label>
+                        <input id="field-perfil-edit" type="text" class="text-color" />
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer flex space-x-4">
+                <button id="saveBtn" class="modal-action-button bg-green-600 hover:bg-green-700">Guardar</button>
+                <button class="modal-action-button bg-red-600 hover:bg-red-700 close-modal-btn">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nuevo Modal: Ajustes -->
+    <div id="settingsModal" class="modal-container hidden">
+        <div class="modal-content relative text-center">
+            <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-xl font-bold mb-4">Ajustes</h3>
+            <p>Este es el modal de ajustes de la aplicación.</p>
+            <div class="modal-footer">
+                <button class="modal-action-button mt-4 close-modal-btn">Cerrar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Nuevo Modal: Ayuda -->
+    <div id="helpModal" class="modal-container hidden">
+        <div class="modal-content relative text-center">
+            <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-xl font-bold mb-4">Ayuda e Información</h3>
+            <p>Este es el modal de ayuda e información.</p>
+            <div class="modal-footer">
+                <button class="modal-action-button mt-4 close-modal-btn">Cerrar</button>
             </div>
         </div>
     </div>
@@ -469,36 +603,41 @@
         <div class="container max-w-lg mx-auto px-4 py-3 flex items-end justify-between relative">
             <!-- Contenedor izquierdo -->
             <div class="flex flex-row space-x-8">
-                <button class="nav-link text-2xl" aria-label="Editar">
-                    <i class="fa-solid fa-pen-to-square" style="color: var(--text-color);"></i>
+                <!-- Ícono para agregar un nuevo archivo -->
+                <button id="uploadBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Agregar Archivo">
+                    <i class="fa-solid fa-file-circle-plus"></i>
                 </button>
-                <button class="nav-link text-xl" aria-label="Reportes">
-                    <i class="fa-solid fa-chart-column" style="color: var(--text-color);"></i>
+                <button id="editBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Editar">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button id="reportsBtn" class="nav-link text-xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Reportes">
+                    <i class="fa-solid fa-chart-column"></i>
                 </button>
             </div>
 
             <!-- Contenedor para el botón central de Inicio -->
             <div class="nav-center-home">
-                <button class="nav-link text-3xl" aria-label="Inicio">
-                    <i class="fa-solid fa-house" style="color: #fff;"></i>
+                <button id="homeBtn" class="nav-link text-3xl" aria-label="Inicio">
+                    <i class="fa-solid fa-house text-white hover:text-gray-300 transition-colors"></i>
                 </button>
             </div>
             
             <!-- Contenedor derecho -->
-            <div class="flex flex-row space-x-4">
+            <div class="flex flex-row space-x-8">
                 <div class="relative">
-                    <button class="nav-link text-2xl" aria-label="Notificaciones">
-                        <i class="fa-solid fa-bell" style="color: var(--text-color);"></i>
+                    <button id="notificationsBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Notificaciones">
+                        <i class="fa-solid fa-bell"></i>
                     </button>
-                    <span class="absolute top-0 right-[-1rem] text-xs font-bold px-2 py-0.5 rounded-full bg-red-600 text-white leading-none">
-                        (3)
+                    <!-- Círculo de notificación corregido -->
+                    <span class="absolute -right-3 -top-2 w-6 h-6 text-xs font-bold rounded-full bg-red-600 text-white flex items-center justify-center">
+                        3
                     </span>
                 </div>
-                <button class="nav-link text-2xl" aria-label="Ajustes">
-                    <i class="fa-solid fa-gear" style="color: var(--text-color);"></i>
+                <button id="settingsBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Ajustes">
+                    <i class="fa-solid fa-gear"></i>
                 </button>
-                <button class="nav-link text-2xl" aria-label="Ayuda">
-                    <i class="fa-solid fa-circle-info" style="color: var(--text-color);"></i>
+                <button id="helpBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Ayuda">
+                    <i class="fa-solid fa-circle-info"></i>
                 </button>
             </div>
         </div>
@@ -546,6 +685,23 @@
             };
 
             let allPersonData = [];
+            let selectedRowIndex = -1;
+            let currentDetailsPage = 1;
+            const maxDetailsPages = 2;
+            let currentEditPage = 1;
+            const maxEditPages = 2;
+
+            function showMessage(message, duration = 3000) {
+                const messageBox = document.getElementById('messageBox');
+                const messageText = document.getElementById('messageText');
+                messageText.textContent = message;
+                messageBox.classList.remove('hidden');
+                messageBox.classList.add('bg-red-500'); // Estilo de error por defecto
+                
+                setTimeout(() => {
+                    messageBox.classList.add('hidden');
+                }, duration);
+            }
 
             async function loadPersonData() {
                 console.log("Cargando datos...");
@@ -590,7 +746,10 @@
                 }
                 data.forEach((row, index) => {
                     const tableRow = document.createElement('tr');
-                    tableRow.dataset.index = allPersonData.indexOf(row); // Usar el índice original
+                    tableRow.dataset.index = allPersonData.indexOf(row);
+                    if (allPersonData.indexOf(row) === selectedRowIndex) {
+                        tableRow.classList.add('selected');
+                    }
                     const idCell = document.createElement('td');
                     idCell.textContent = (allPersonData.indexOf(row) + 1);
                     idCell.classList.add('text-right');
@@ -636,30 +795,27 @@
             searchInput.addEventListener('input', filterTable);
             cancelButton.addEventListener('click', () => {
                 searchInput.value = '';
-                // Al cancelar, simplemente volvemos a renderizar los datos originales
+                selectedRowIndex = -1;
                 loadPersonData();
             });
             sortButton.addEventListener('click', sortData);
 
+            // --- Lógica del Modal de Detalles (Visualizar) ---
             const detailsModal = document.getElementById('detailsModal');
-            const closeModalBtn = document.getElementById('closeModalBtn');
-            const prevPageBtn = document.getElementById('prevPageBtn');
-            const nextPageBtn = document.getElementById('nextPageBtn');
-            const acceptBtn = document.getElementById('acceptBtn');
-            let currentPage = 1;
-            const maxPages = 2;
+            const prevPageBtnDetails = document.getElementById('prevPageBtnDetails');
+            const nextPageBtnDetails = document.getElementById('nextPageBtnDetails');
             let selectedPerson = null;
 
-            const modalFieldsMap = {
-                'APELLIDOS': document.getElementById('field-apellidos'),
-                'CARGO': document.getElementById('field-cargo'),
-                'CÉDULA': document.getElementById('field-cedula'),
-                'EMPRESA': document.getElementById('field-empresa'),
-                'INGRESO': document.getElementById('field-ingreso'),
-                'NOMINA': document.getElementById('field-nomina'),
-                'NOMBRES': document.getElementById('field-nombres'),
-                'PERFIL': document.getElementById('field-perfil'),
-                'SECTOR': document.getElementById('field-sector')
+            const detailsFieldsMap = {
+                'APELLIDOS': document.getElementById('field-apellidos-details'),
+                'CARGO': document.getElementById('field-cargo-details'),
+                'CÉDULA': document.getElementById('field-cedula-details'),
+                'EMPRESA': document.getElementById('field-empresa-details'),
+                'INGRESO': document.getElementById('field-ingreso-details'),
+                'NOMINA': document.getElementById('field-nomina-details'),
+                'NOMBRES': document.getElementById('field-nombres-details'),
+                'PERFIL': document.getElementById('field-perfil-details'),
+                'SECTOR': document.getElementById('field-sector-details')
             };
 
             const pageMapping = {
@@ -667,61 +823,205 @@
                 2: ['CARGO', 'INGRESO', 'SECTOR', 'PERFIL']
             };
 
-            function showModal(personData) {
+            function showDetailsModal(personData) {
                 selectedPerson = personData;
-                currentPage = 1;
-                updateModalContent();
+                currentDetailsPage = 1;
+                updateDetailsModalContent();
                 detailsModal.classList.remove('hidden');
                 detailsModal.classList.add('active');
             }
 
-            function hideModal() {
-                detailsModal.classList.add('hidden');
-                detailsModal.classList.remove('active');
-            }
-
-            function updateModalContent() {
-                document.querySelectorAll('.modal-page').forEach(page => page.classList.add('hidden'));
-                document.getElementById(`modal-page-${currentPage}`).classList.remove('hidden');
-                const fieldsToShow = pageMapping[currentPage];
+            function updateDetailsModalContent() {
+                document.querySelectorAll('#detailsModal .modal-page').forEach(page => page.classList.add('hidden'));
+                document.getElementById(`modal-page-${currentDetailsPage}-details`).classList.remove('hidden');
+                const fieldsToShow = pageMapping[currentDetailsPage];
                 fieldsToShow.forEach(key => {
                     let value = selectedPerson[key] || '';
                     if (key === 'Ingreso') {
                         value = formatDate(value);
                     }
-                    modalFieldsMap[key].textContent = value;
+                    detailsFieldsMap[key].textContent = value;
                 });
-                prevPageBtn.disabled = currentPage === 1;
-                nextPageBtn.disabled = currentPage === maxPages;
+                prevPageBtnDetails.disabled = currentDetailsPage === 1;
+                nextPageBtnDetails.disabled = currentDetailsPage === maxDetailsPages;
             }
 
-            DataGridBody.addEventListener('click', (event) => {
+            DataGridBody.addEventListener('dblclick', (event) => {
                 const clickedRow = event.target.closest('tr');
                 if (clickedRow) {
                     const index = clickedRow.dataset.index;
                     const personData = allPersonData[index];
                     if (personData) {
-                        showModal(personData);
+                        showDetailsModal(personData);
                     }
                 }
             });
 
-            closeModalBtn.addEventListener('click', hideModal);
-            nextPageBtn.addEventListener('click', () => {
-                if (currentPage < maxPages) {
-                    currentPage++;
-                    updateModalContent();
+            DataGridBody.addEventListener('click', (event) => {
+                const clickedRow = event.target.closest('tr');
+                if (clickedRow) {
+                    document.querySelectorAll('#Data-grid tbody tr').forEach(row => {
+                        row.classList.remove('selected');
+                    });
+                    clickedRow.classList.add('selected');
+                    selectedRowIndex = parseInt(clickedRow.dataset.index);
                 }
             });
-            prevPageBtn.addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    updateModalContent();
+
+            nextPageBtnDetails.addEventListener('click', () => {
+                if (currentDetailsPage < maxDetailsPages) {
+                    currentDetailsPage++;
+                    updateDetailsModalContent();
                 }
             });
-            acceptBtn.addEventListener('click', () => {
-                console.log("¡Aceptar presionado! Lógica de guardado iría aquí.");
-                hideModal();
+            prevPageBtnDetails.addEventListener('click', () => {
+                if (currentDetailsPage > 1) {
+                    currentDetailsPage--;
+                    updateDetailsModalContent();
+                }
+            });
+
+            // --- Lógica de navegación y modales nuevos ---
+            
+            const logoutBtn = document.getElementById('logoutBtn');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const editBtn = document.getElementById('editBtn');
+            const reportsBtn = document.getElementById('reportsBtn');
+            const homeBtn = document.getElementById('homeBtn');
+            const notificationsBtn = document.getElementById('notificationsBtn');
+            const settingsBtn = document.getElementById('settingsBtn');
+            const helpBtn = document.getElementById('helpBtn');
+
+            const uploadModal = document.getElementById('uploadModal');
+            const editModal = document.getElementById('editModal');
+            const settingsModal = document.getElementById('settingsModal');
+            const helpModal = document.getElementById('helpModal');
+
+            // Función genérica para mostrar un modal
+            function showModal(modalElement) {
+                // Primero, oculta cualquier modal que esté visible
+                document.querySelectorAll('.modal-container').forEach(modal => {
+                    modal.classList.add('hidden');
+                });
+                modalElement.classList.remove('hidden');
+                modalElement.classList.add('active');
+            }
+
+            // Función genérica para ocultar un modal
+            function hideModal(modalElement) {
+                modalElement.classList.add('hidden');
+                modalElement.classList.remove('active');
+            }
+
+            // Agrega event listeners a los botones de cierre de todos los modales
+            document.querySelectorAll('.close-modal-btn').forEach(btn => {
+                btn.addEventListener('click', (event) => {
+                    const modalToClose = event.target.closest('.modal-container');
+                    if (modalToClose) {
+                        hideModal(modalToClose);
+                    }
+                });
+            });
+
+            // --- Lógica del nuevo Modal de Editar ---
+            const saveBtn = document.getElementById('saveBtn');
+            const prevPageBtnEdit = document.getElementById('prevPageBtnEdit');
+            const nextPageBtnEdit = document.getElementById('nextPageBtnEdit');
+            
+            const editFieldsMap = {
+                'APELLIDOS': document.getElementById('field-apellidos-edit'),
+                'CARGO': document.getElementById('field-cargo-edit'),
+                'CÉDULA': document.getElementById('field-cedula-edit'),
+                'EMPRESA': document.getElementById('field-empresa-edit'),
+                'INGRESO': document.getElementById('field-ingreso-edit'),
+                'NOMINA': document.getElementById('field-nomina-edit'),
+                'NOMBRES': document.getElementById('field-nombres-edit'),
+                'PERFIL': document.getElementById('field-perfil-edit'),
+                'SECTOR': document.getElementById('field-sector-edit')
+            };
+
+            function showEditModal(personData) {
+                selectedPerson = personData;
+                currentEditPage = 1;
+                updateEditModalContent();
+                showModal(editModal);
+            }
+
+            function updateEditModalContent() {
+                document.querySelectorAll('#editModal .modal-page').forEach(page => page.classList.add('hidden'));
+                document.getElementById(`modal-page-${currentEditPage}-edit`).classList.remove('hidden');
+                const fieldsToShow = pageMapping[currentEditPage];
+                fieldsToShow.forEach(key => {
+                    let value = selectedPerson[key] || '';
+                    if (key === 'Ingreso') {
+                        value = formatDate(value);
+                    }
+                    editFieldsMap[key].value = value;
+                });
+                prevPageBtnEdit.disabled = currentEditPage === 1;
+                nextPageBtnEdit.disabled = currentEditPage === maxEditPages;
+            }
+
+            // Agrega event listeners a los botones del modal de edición
+            saveBtn.addEventListener('click', () => {
+                console.log("Datos de edición guardados. (Lógica de guardado en la API iría aquí)");
+                hideModal(editModal);
+            });
+            nextPageBtnEdit.addEventListener('click', () => {
+                if (currentEditPage < maxEditPages) {
+                    currentEditPage++;
+                    updateEditModalContent();
+                }
+            });
+            prevPageBtnEdit.addEventListener('click', () => {
+                if (currentEditPage > 1) {
+                    currentEditPage--;
+                    updateEditModalContent();
+                }
+            });
+
+            // Agrega event listeners a los botones de navegación
+            logoutBtn.addEventListener('click', () => {
+                // Simula la navegación a index.html
+                window.location.href = 'index.html';
+            });
+            
+            uploadBtn.addEventListener('click', () => {
+                showModal(uploadModal);
+            });
+
+            editBtn.addEventListener('click', () => {
+                if (selectedRowIndex === -1) {
+                    showMessage("Por favor, selecciona una fila para editar.");
+                    return;
+                }
+                const personData = allPersonData[selectedRowIndex];
+                if (personData) {
+                    showEditModal(personData);
+                }
+            });
+
+            reportsBtn.addEventListener('click', () => {
+                // Simula la navegación a reportes.html
+                window.location.href = 'reportes.html';
+            });
+
+            homeBtn.addEventListener('click', () => {
+                // Simula la navegación a dashboard.html
+                window.location.href = 'dashboard.html';
+            });
+
+            notificationsBtn.addEventListener('click', () => {
+                // Simula la navegación a notificaciones.html
+                window.location.href = 'notificaciones.html';
+            });
+            
+            settingsBtn.addEventListener('click', () => {
+                showModal(settingsModal);
+            });
+
+            helpBtn.addEventListener('click', () => {
+                showModal(helpModal);
             });
 
             loadPersonData();
