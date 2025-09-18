@@ -322,6 +322,20 @@
             left: 50%;
             transform: translateX(-50%);
         }
+
+        .file-upload-label {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .file-upload-label:hover {
+            background-color: #45a049;
+        }
     </style>
     <!-- Media query para ocultar la aplicación en pantallas de más de 450px -->
     <style>
@@ -363,7 +377,7 @@
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
         </div>
         <!-- Mensaje de notificación / error -->
-        <div id="messageBox" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-4 bg-red-500 text-white rounded-md shadow-lg z-50">
+        <div id="messageBox" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-4 text-white rounded-md shadow-lg z-50">
             <p id="messageText"></p>
         </div>
 
@@ -488,9 +502,15 @@
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <h3 class="text-xl font-bold mb-4">Cargar Archivo</h3>
-            <p>Este es el modal para agregar un nuevo archivo.</p>
-            <div class="modal-footer">
-                <button class="modal-action-button mt-4 close-modal-btn">Cerrar</button>
+            <p id="upload-modal-text" class="text-center mb-4">Selecciona un archivo para subir.</p>
+            <label for="fileInput" class="file-upload-label">
+                <i class="fa-solid fa-upload"></i> Seleccionar Archivo
+            </label>
+            <input type="file" id="fileInput" class="hidden" />
+
+            <div class="modal-footer mt-4 space-x-4">
+                <button id="uploadFileBtn" class="modal-action-button bg-green-600 hover:bg-green-700" disabled>Subir</button>
+                <button class="modal-action-button bg-red-600 hover:bg-red-700 close-modal-btn">Cancelar</button>
             </div>
         </div>
     </div>
@@ -691,12 +711,13 @@
             let currentEditPage = 1;
             const maxEditPages = 2;
 
-            function showMessage(message, duration = 3000) {
+            function showMessage(message, duration = 3000, isError = true) {
                 const messageBox = document.getElementById('messageBox');
                 const messageText = document.getElementById('messageText');
                 messageText.textContent = message;
                 messageBox.classList.remove('hidden');
-                messageBox.classList.add('bg-red-500'); // Estilo de error por defecto
+                messageBox.classList.toggle('bg-red-500', isError);
+                messageBox.classList.toggle('bg-green-500', !isError);
                 
                 setTimeout(() => {
                     messageBox.classList.add('hidden');
@@ -977,6 +998,35 @@
                 if (currentEditPage > 1) {
                     currentEditPage--;
                     updateEditModalContent();
+                }
+            });
+            
+            // --- Lógica de selección de archivos en el modal de carga ---
+            const fileInput = document.getElementById('fileInput');
+            const uploadFileBtn = document.getElementById('uploadFileBtn');
+            const uploadModalText = document.getElementById('upload-modal-text');
+
+            fileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    uploadModalText.textContent = `Archivo seleccionado: ${file.name}`;
+                    uploadFileBtn.disabled = false;
+                } else {
+                    uploadModalText.textContent = "Selecciona un archivo para subir.";
+                    uploadFileBtn.disabled = true;
+                }
+            });
+
+            uploadFileBtn.addEventListener('click', () => {
+                const file = fileInput.files[0];
+                if (file) {
+                    console.log(`Simulando la subida del archivo: ${file.name}`);
+                    showMessage(`¡Archivo "${file.name}" cargado con éxito!`, 3000, false);
+                    hideModal(uploadModal);
+                    // Resetear el input para permitir una nueva selección
+                    fileInput.value = '';
+                    uploadModalText.textContent = "Selecciona un archivo para subir.";
+                    uploadFileBtn.disabled = true;
                 }
             });
 
