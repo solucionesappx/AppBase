@@ -60,8 +60,13 @@
         .header-bg.dark-mode {
             background-color: var(--box-color);
         }
-        .box-shadow {
-            box-shadow: 0 4px 6px -1- var(--box-shadow-color), 0 2px 4px -1px var(--box-shadow-color);
+        .box-shadow-down {
+            box-shadow: 0 4px 6px -1px var(--box-shadow-color), 0 2px 4px -1px var(--box-shadow-color);
+        }
+
+        /* Estilos para el footer con sombra superior */
+        .box-shadow-up {
+            box-shadow: 0 -4px 6px -1px var(--box-shadow-color), 0 -2px 4px -1px var(--box-shadow-color);
         }
 
         /* Estilo para el toggle switch */
@@ -348,7 +353,7 @@
 </head>
 <body class="dark-mode min-h-screen flex flex-col">
     <!-- 1. Cintillo Fijo (Header) -->
-    <header class="fixed top-0 left-0 w-full header-bg box-shadow z-50 transition-colors">
+    <header class="fixed top-0 left-0 w-full header-bg box-shadow-down z-50 transition-colors">
         <div class="container max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
             <!-- Mensaje de Bienvenida (Asume que el usuario está logueado) -->
             <div class="flex-row space-x-2">
@@ -396,7 +401,7 @@
         </div>
 
         <!-- Contenedor de la tabla, ahora se estira para llenar el espacio restante -->
-        <div class="data-table-container flex-grow max-h-[400px]">
+        <div class="data-table-container flex-grow max-h-[420px]">
             <table id="Data-grid" class="data-table">
                 <thead>
                     <tr>
@@ -619,7 +624,7 @@
     </div>
 
     <!-- Barra de Navegación Fija (Footer) -->
-    <footer class="fixed bottom-0 left-0 w-full header-bg box-shadow z-50 transition-colors">
+    <footer class="fixed bottom-0 left-0 w-full header-bg box-shadow-up z-50 transition-colors">
         <div class="container max-w-lg mx-auto px-4 py-3 flex items-end justify-between relative">
             <!-- Contenedor izquierdo -->
             <div class="flex flex-row space-x-8">
