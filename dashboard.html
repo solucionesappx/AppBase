@@ -3,24 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZXC1</title>
+    <title>App JAL</title>
     <!-- Incluye el CDN de Tailwind CSS para un estilo rápido y moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Incluye la librería de iconos Font Awesome -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
-    <!-- Incluye la librería de Chart.js para los gráficos -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-    <!-- Incluye el plugin para mostrar etiquetas de datos en los gráficos -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
         /* Importa la fuente Poppins de Google Fonts */
-        @import url("https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap");
+        @import url("https://fonts.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap");
 
         /* Definición de variables CSS para el tema claro */
         :root {
             --bg-color: #f0f2f5;
             --box-color: #e9ecef;
-            --border-color: #dcdcdc;
+            --border-color: #000; /* Color de borde negro puro para el modo claro */
             --text-color: #111;
             --link-color: #D61336;
             --accent-color-1: #4041C2;
@@ -31,7 +27,7 @@
         /* Variables para el tema oscuro */
         body.dark-mode {
             --bg-color: #25252b;
-             --box-color: #3a3a45;
+            --box-color: #3a3a45;
             --border-color: #25252b;
             --text-color: #fff;
             --link-color: #4041C2;
@@ -39,578 +35,700 @@
             --accent-color-2: #dbeb7a;
             --box-shadow-color: rgba(255,255,255,0.15);
         }
-        
+
         body {
             font-family: 'Poppins', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            transition: background-color 0.3s, color 0.3s;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            /* Evita el resaltado azul al hacer clic en dispositivos móviles */
+            -webkit-tap-highlight-color: transparent;
         }
-        
-        /* Clases de utilidad para un código más limpio */
+
+        .container {
+            background-color: var(--box-color);
+            color: var(--text-color);
+            box-shadow: 0 4px 6px -1px var(--box-shadow-color), 0 2px 4px -1px var(--box-shadow-color);
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Estilos del header */
         .header-bg {
             background-color: var(--box-color);
+            color: var(--text-color);
         }
-        /* **AJUSTE** La barra de navegación ahora usa el color del body */
-        .nav-bg {
-            background-color: var(--bg-color);
+        .header-bg.dark-mode {
+            background-color: var(--box-color);
         }
-
         .box-shadow {
-            box-shadow: 0 4px 6px -1px var(--box-shadow-color), 0 2px 4px -2px var(--box-shadow-color);
+            box-shadow: 0 4px 6px -1- var(--box-shadow-color), 0 2px 4px -1px var(--box-shadow-color);
         }
 
-        .box-shadow-up {
-            box-shadow: 0 -4px 6px -1- var(--box-shadow-color), 0 -2px 4px -2px var(--box-shadow-color);
-        }
-        
-        .accent-link {
-            color: var(--link-color);
-        }
-
-        .icon-size {
-            height: 1.5rem;
-            width: 1.5rem;
-        }
-        
-        .padding-container {
-            padding: 0 1rem;
-        }
-
-        .flex-row {
-            display: flex;
-            align-items: center;
-        }
-
-        .flex-col {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .nav-link {
-            padding: 0.5rem;
-            border-radius: 9999px;
-            transition: background-color 0.3s;
-        }
-        
-        .nav-link:hover {
-            background-color: none;
-        }
-        
-        /* Estilos específicos para los elementos */
-        .welcome-text {
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .dashboard-box {
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-        }
-        
+        /* Estilo para el toggle switch */
         .toggle-switch-container {
             position: relative;
-            width: 40px; 
-            height: 22px;
+            display: inline-block;
+            width: 40px;
+            height: 24px;
+            border-radius: 30px;
+            background-color: #dcdcdc; /* Color directo para evitar conflictos con el borde de la tabla */
             cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-            transform: translate3d(0, 0, 0);
-            font-size: 1.1rem;
+            transition: background-color 0.3s ease;
         }
 
-        .toggle-switch-container:before {
-            content: '';
+        .toggle-button {
             position: absolute;
-            top: 0;
-            width: 40px; 
-            height: 22px;
-            border-radius: 11px;
+            left: 4px;
+            top: 4px;
+            width: 15px;
+            height: 15px;
             background-color: var(--text-color);
-            transition: background-color 0.3s cubic-bezier(0.86, 0, 0.07, 1);
-        }
-
-        .toggle-switch-container:active:before {
-            transition: background-color 0.3s cubic-bezier(0.86, 0, 0.07, 1);
-        }
-
-        .toggle-switch-container .toggle-button {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 18px; 
-            height: 18px;
             border-radius: 50%;
-            background-color: var(--box-color);
-            transition: transform 0.3s cubic-bezier(0.86, 0, 0.07, 1), background-color 0.3s cubic-bezier(0.86, 0, 0.07, 1);
+            transition: transform 0.3s ease, background-color 0.3s ease;
         }
 
-        .toggle-switch-container.dark-mode:before {
-            background-color: var(--accent-color-1);
+        .toggle-switch-container.dark-mode {
+            background-color: #2D59A1;
         }
-
+        
         .toggle-switch-container.dark-mode .toggle-button {
-            transform: translateX(18px);
+            transform: translateX(20px);
             background-color: var(--box-color);
         }
-        
-        /* Efecto de hover y transición para los iconos de la barra de navegación inferior */
-        .nav-link i, .nav-link span {
-            transition: transform 0.3s ease-in-out, color 0.3s ease, text-shadow 0.3s ease;
-            color: var(--text-color);
+
+        /* Estilos de la tabla */
+        .data-table-container {
+            /* La altura actual es de 450px; ajústala para mostrar aproximadamente 20 filas. Considera que la altura de cada fila puede variar según el tamaño de fuente y el padding. */
+            max-height: 450px;
+            overflow-y: auto;
+            overflow-x: auto;
+            width: 100%;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* Efecto neón al pasar el cursor o tocar el elemento */
-        .nav-link:hover i,
-        .nav-link:hover span,
-        .nav-link.active i,
-        .nav-link.active span {
-            transform: scale(1.05) translateY(-2px); /* Disminuimos el efecto de subida */
-            color: var(--accent-color-1);
-            text-shadow: 0 0 1px var(--accent-color-1), 0 0 5px var(--accent-color-1); /* Disminuimos el efecto de neón */
+        .data-table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: max-content;
         }
         
-        /* Regla específica para el botón de cerrar sesión que anula el cambio de color pero mantiene los demás efectos */
-        .logout-link:hover i {
-            color: var(--text-color);
-            text-shadow: 0 0 2px var(--text-color), 0 0 10px var(--text-color), 0 0 15px var(--text-color);
+        /* Estilo para anclar el encabezado de la tabla */
+        .data-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 30; /* Alto z-index para que la fila se mantenga sobre todo */
+            background-color: #2D59A1;
+            color: #fff; /* Se cambia el color de la fuente a blanco */
+            box-shadow: 0 2px 4px var(--box-shadow-color);
+        }
+
+        .data-table th, .data-table td {
+            padding: 0rem 0.6rem; /* El primer valor controla el espacio vertical, el segundo el horizontal. */
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            white-space: nowrap;
+            font-size: 0.875rem;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        .data-table th {
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .data-table tbody tr {
+            /* Transición para el efecto de hover */
+            transition: background-color 0.2s ease;
+        }
+
+        .data-table tbody tr:nth-child(odd) {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .data-table tbody tr:nth-child(odd) {
+            background-color: rgba(255, 255, 255, 0.05);
         }
         
-        /* Clase para ocultar los dashboards no activos */
-        .hidden {
-            display: none;
+        /* Estilos para el encabezado y las celdas de la primera columna (ID) */
+        .data-table th:first-child, .data-table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 20; /* Z-index menor que el encabezado para que quede debajo de él */
+            background-color: #2D59A1;
+            color: #fff; /* Se cambia el color de la fuente a blanco */
+            font-weight: 600; /* Asegura el mismo peso de fuente */
+            box-shadow: 2px 0 4px var(--box-shadow-color);
         }
         
-        /* Estilos para la nueva barra de navegación superior con íconos */
-        .nav-link-top {
+        /* Asegura que la celda de la esquina se fije correctamente */
+        .data-table th:first-child {
+            z-index: 40;
+        }
+
+        .data-table th:last-child, .data-table td:last-child {
+            border-right: none;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+
+        /* Regla de resaltado con hover (efecto de ratón) y cursor de puntero */
+        .data-table tbody tr:hover {
+            background-color: rgba(122, 235, 188, 0.6) !important;
+            cursor: pointer;
+        }
+
+        /* Regla para el resaltado de la primera columna durante el hover */
+        .data-table tbody tr:hover td:first-child {
+            background-color: rgba(122, 235, 188, 0.6) !important;
+        }
+
+        /* Estilos del modal */
+        .modal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
+            justify-content: center;
+            align-items: flex-start; /* Alinea el modal en la parte superior */
+            padding-top: 10rem; /* Agrega un poco de espacio en la parte superior */
+            z-index: 100;
+            backdrop-filter: blur(5px);
             transition: all 0.3s ease;
-            gap: 0.5rem; /* Espacio entre el ícono y el texto */
-            color: var(--text-color);
         }
 
-        .nav-link-top:hover {
-            transform: translateY(-2px);
+        .modal-content {
+            background-color: var(--box-color);
             color: var(--text-color);
-            text-shadow: none;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
         }
 
-        .nav-link-top.active {
-            color: var(--accent-color-1);
-            text-shadow: none;
+        .modal-container.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-field {
+            /* Se reduce el margen inferior del campo para acercar los elementos */
+            margin-bottom: 0.5rem;
         }
         
-        /* Media query para pantallas más grandes (mayor a 600px) */
-        @media (min-width: 600px) {
-            .dashboard-box {
-                padding: 2.5rem;
-            }
-            
-            /* **NUEVO** Estilos para el enlace de navegación superior en escritorio */
-            .nav-link-top-desktop {
-                flex-direction: row;
-                gap: 0.5rem;
-                padding: 0.5rem 1rem; /* Padding horizontal para un mejor aspecto */
-            }
+        .modal-field label {
+            font-weight: 600;
+            display: block;
+            /* Se reduce el margen inferior para acercar el título al campo de datos */
+            margin-bottom: 0.1rem;
+            font-size: 0.875rem; /* text-sm */
+            color: #3B82F6;
         }
+        
+        /* Estilos para los campos de datos en el modal */
+        .modal-field span {
+            font-weight: 400;
+            background-color: var(--bg-color);
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            display: block;
+            width: 100%;
+        }
+
+        .modal-field input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            border-radius: 0.25rem;
+            color: var(--text-color);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 1rem;
+        }
+
+        .modal-nav-button {
+            background-color: transparent;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--accent-color-1);
+            transition: color 0.2s ease;
+        }
+
+        .modal-nav-button:hover:not(:disabled) {
+            color: var(--accent-color-2);
+        }
+
+        .modal-nav-button:disabled {
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        /* Estilo para los botones de acción */
+        .modal-action-button {
+            padding: 0.5rem 1rem;
+            background-color: #2D59A1;
+            color: #fff;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-weight: 600;
+        }
+
     </style>
 </head>
-<body class="dark-mode transition-colors">
-
+<body class="dark-mode">
     <!-- 1. Cintillo Fijo (Header) -->
     <header class="fixed top-0 left-0 w-full header-bg box-shadow z-50 transition-colors">
-        <div class="container mx-auto padding-container py-3 flex items-center justify-between">
+        <div class="container max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
             <!-- Mensaje de Bienvenida (Asume que el usuario está logueado) -->
             <div class="flex-row space-x-2">
-                <span class="welcome-text">¡Hola, Usuario!</span>
+                <span class="text-sm font-semibold">¡Hola, Usuario!</span>
             </div>
 
-            <div class="flex-row space-x-4">
+            <div class="flex-row space-x-4 flex items-center">
                 <!-- Botón de Modo Claro/Oscuro -->
                 <div id="theme-toggle" class="toggle-switch-container dark-mode">
                     <div class="toggle-button"></div>
                 </div>
                 
                 <!-- Botón para cerrar sesión -->
-                <button id="logout-button" class="nav-link logout-link">
+                <button class="nav-link text-xl" style="color: var(--text-color);">
                     <!-- Icono de cerrar sesión de Font Awesome -->
-                    <i class="text-3xl fa-solid fa-right-from-bracket icon-size "></i>
+                    <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- 2. Contenedor principal para la sección del dashboard -->
-    <!-- Se ha ajustado el padding-top para que no haya un espacio vacío donde estaba la barra superior -->
-    <main class="pt-20 pb-20 px-6">
-        <div class="container mx-auto">
-            <!-- Dashboard de Datos Básicos -->
-            <div id="dashboard-section" class="dashboard-section">
-                <!-- Se ha ajustado el margen inferior para una mayor separación -->
-                <h2 class="text-3xl font-bold mt-8 mb-8 text-center">Empresa</h2>
-                <div class="px-1 py-6 rounded-lg box-shadow">
-                    <!-- Contenedor del gráfico. Se eliminó la clase 'max-w-sm' para permitir que el gráfico crezca. -->
-                    <div class="relative w-full mx-auto">
-                        <canvas id="doughnutChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div id="dashboard-section" class="dashboard-section">
-                <!-- Se ha ajustado el margen inferior para una mayor separación -->
-                <h2 class="text-3xl font-bold mt-8 mb-8 text-center">Antiguedad</h2>
-                <div class="p-1 rounded-lg box-shadow">
-                    <!-- Contenedor del gráfico. Se eliminó la clase 'max-w-sm' para permitir que el gráfico crezca. -->
-                    <div class="relative w-full mx-auto">
-                        <canvas id="barChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-    
-    
+    <!-- Contenedor que crea un espacio entre el header y el contenido principal -->
+    <div class="w-full h-20"></div>
 
-    <!-- 3. Barra de Navegación Fija (Footer) -->
-    <nav class="fixed bottom-0 left-0 w-full nav-bg box-shadow-up z-50 transition-colors">
-        <div class="container mx-auto padding-container py-1 flex justify-around items-center" id="nav-footer">
-            <!-- Botón de Inicio -->
-            <a href="#" class="flex-col nav-link accent-link justify-center gap-1 active">
-                <i class="fa-solid fa-house icon-size"></i>
-                <span class="link-text">Inicio</span>
-            </a>
+    <!-- Contenedor principal optimizado para dispositivos móviles -->
+    <div class="w-full max-w-lg mx-auto p-5 rounded-xl container relative">
+        <!-- Loader visual -->
+        <div id="loader" class="hidden absolute inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50 rounded-xl">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
+        </div>
+        <h1 class="text-2xl font-bold mb-2 text-center">Datos del Personal</h1>
+        <p class="text-sm mb-4 text-center">Tabla con datos cargados desde Google Apps Script.</p>
+        
+        <!-- Contenedor de búsqueda y ordenación -->
+        <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2 mb-2">
+            <input type="text" id="searchInput" placeholder="Buscar..." class="w-full sm:w-auto flex-grow p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" autocomplete="off">
+            <button id="sortButton" class="text-3xl bg-transparent hover:text-blue-600 text-blue-500 font-bold py-2 px-4 rounded transition-colors duration-300 ease-in-out" aria-label="Ordenar por Apellidos">
+                <i class="fa-solid fa-arrow-down-a-z"></i>
+            </button>
+            <button id="cancelButton" class="text-3xl text-red-600 hover:text-red-700 bg-transparent transition-colors focus:outline-none focus:ring-0">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Contenedor de la tabla -->
+        <div class="data-table-container">
+            <table id="Data-grid" class="data-table">
+                <thead>
+                    <tr>
+                        <th class="text-right">ID</th>
+                        <th>Empresa</th>
+                        <th>Nómina</th>
+                        <th>Apellidos</th>
+                        <th>Nombres</th>
+                        <th class="text-right">Cédula</th>
+                        <th>Cargo</th>
+                        <th class="text-right">Ingreso</th>
+                        <th>Sector</th>
+                        <th>Perfil</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los datos se renderizarán aquí con JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Contenedor del Modal -->
+    <div id="detailsModal" class="modal-container hidden">
+        <div class="modal-content relative">
+            <!-- Botón de cerrar reubicado -->
+            <button id="closeModalBtn" class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="modal-header">
+                <div class="flex items-center space-x-4">
+                    <h3 class="text-xl font-bold">Detalles</h3>
+                    <div class="flex space-x-2">
+                        <button id="prevPageBtn" class="modal-nav-button" disabled>
+                            <i class="fa-solid fa-angle-left"></i>
+                        </button>
+                        <button id="nextPageBtn" class="modal-nav-button">
+                            <i class="fa-solid fa-angle-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
             
-            <!-- Botón de Buscar -->
-            <a href="#" class="flex-col nav-link justify-center gap-1">
-                <i class="fa-solid fa-magnifying-glass icon-size"></i>
-                <span class="link-text">Buscar</span>
-            </a>
+            <!-- Contenido del modal (páginas de datos) -->
+            <div id="modal-pages-container">
+                <!-- Página 1: Campos Empresa, Nómina, Apellidos, Nombres, Cédula -->
+                <div id="modal-page-1" class="modal-page">
+                    <div class="modal-field">
+                        <label>Empresa:</label>
+                        <span id="field-empresa"></span>
+                    </div>
+                    <div class="modal-field">
+                        <label>Nómina:</label>
+                        <span id="field-nomina"></span>
+                    </div>
+                    <div class="modal-field">
+                        <label>Apellidos:</label>
+                        <span id="field-apellidos"></span>
+                    </div>
+                    <div class="modal-field">
+                        <label>Nombres:</label>
+                        <span id="field-nombres"></span>
+                    </div>
+                    <div class="modal-field">
+                        <label>Cédula:</label>
+                        <span id="field-cedula"></span>
+                    </div>
+                </div>
 
-            <!-- Botón de Perfil -->
-            <a href="#" class="flex-col nav-link justify-center gap-1">
-                <i class="fa-solid fa-user icon-size"></i>
-                <span class="link-text">Perfil</span>
-            </a>
+                <!-- Página 2: Campos Cargo, Ingreso, Sector, Perfil -->
+                <div id="modal-page-2" class="modal-page hidden">
+                    <div class="modal-field">
+                        <label>Cargo:</label>
+                        <span id="field-cargo"></span>
+                    </div>
+                    <div class="modal-field">
+                        <label>Ingreso:</label>
+                        <span id="field-ingreso"></span>
+                    </div>
+                    <div class="modal-field">
+                        <label>Sector:</label>
+                        <span id="field-sector"></span>
+                    </div>
+                    <div class="modal-field">
+                        <label>Perfil:</label>
+                        <span id="field-perfil"></span>
+                    </div>
+                </div>
+            </div>
 
-            <!-- Botón de Nuevo -->
-            <a href="#" class="flex-col nav-link justify-center gap-1">
-                <i class="fa-solid fa-plus icon-size"></i>
-                <span class="link-text">Nuevo</span>
-            </a>
+            <!-- Navegación del Modal -->
+            <div class="modal-footer">
+                <button id="acceptBtn" class="modal-action-button">Aceptar</button>
+            </div>
         </div>
-    </nav>
+    </div>
 
     <script>
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
-        
-        // Cargar el tema guardado al iniciar
-        const currentTheme = localStorage.getItem('theme');
-        if (currentTheme) {
-            body.classList.add(currentTheme + '-mode');
-            themeToggle.classList.add(currentTheme + '-mode');
-        } else {
-            // Establecer el modo oscuro como predeterminado si no hay preferencia
+
+        // Cargar la preferencia de tema guardada en localStorage
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
             body.classList.add('dark-mode');
             themeToggle.classList.add('dark-mode');
         }
-        
+
+        // Alternar el tema al hacer clic en el toggle
         themeToggle.addEventListener('click', () => {
-            const isDarkMode = body.classList.contains('dark-mode');
-            if (isDarkMode) {
-                body.classList.remove('dark-mode');
-                themeToggle.classList.remove('dark-mode');
-                localStorage.setItem('theme', 'light');
-            } else {
-                body.classList.add('dark-mode');
-                themeToggle.classList.add('dark-mode');
+            body.classList.toggle('dark-mode');
+            themeToggle.classList.toggle('dark-mode');
+            if (body.classList.contains('dark-mode')) {
                 localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
             }
         });
 
-        // Lógica para la navegación de los enlaces de la barra inferior y el botón de cerrar sesión
-        document.addEventListener('DOMContentLoaded', () => {
-            const navLinks = document.querySelectorAll('#nav-footer .nav-link');
-            const logoutButton = document.getElementById('logout-button');
+        // Código para la tabla: 
+        document.addEventListener("DOMContentLoaded", () => {
+            const DataGridBody = document.querySelector('#Data-grid tbody');
+            const loader = document.getElementById('loader');
+            const searchInput = document.getElementById('searchInput');
+            const cancelButton = document.getElementById('cancelButton');
+            const sortButton = document.getElementById('sortButton');
             
-            navLinks.forEach(link => {
-                link.addEventListener('click', (event) => {
-                    // Previene el comportamiento predeterminado del enlace para que la lógica de JS se ejecute.
-                    event.preventDefault();
-                    
-                    // Obtiene el texto del span dentro del enlace para saber qué página cargar.
-                    const linkText = event.currentTarget.querySelector('span').textContent;
+            // La URL de tu script de Google Apps
+            const GAS_URL = 'https://script.google.com/macros/s/AKfycbx87WvxA9ca1KyGMA1wsw1npZw5vPtjoItomhF823BICXScNrWGFh5m0Dj6Veb24CtHXQ/exec';
 
-                    switch (linkText) {
-                        case 'Inicio':
-                            window.location.href = 'dashboard.html';
-                            break;
-                        case 'Buscar':
-                            window.location.href = 'buscarData.html';
-                            break;
-                        case 'Perfil':
-                            window.location.href = 'perfilUsuario.html';
-                            break;
-                        case 'Nuevo':
-                            window.location.href = 'menuAdmin.html';
-                            break;
-                        default:
-                            console.log('Enlace de navegación no reconocido.');
-                            break;
+            // Mapeo de los encabezados del HTML a las claves de los datos JSON
+            const headerMapping = {
+                'Empresa': 'EMPRESA',
+                'Nómina': 'NOMINA',
+                'Apellidos': 'APELLIDOS',
+                'Nombres': 'NOMBRES',
+                'Cédula': 'CÉDULA',
+                'Cargo': 'CARGO',
+                'Ingreso': 'INGRESO',
+                'Sector': 'SECTOR',
+                'Perfil': 'PERFIL'
+            };
+
+            let allPersonData = []; // Variable para almacenar los datos completos.
+            let originalPersonData = []; // Variable para almacenar una copia de los datos originales sin ordenar.
+
+            /**
+             * Función asíncrona para cargar los datos desde la fuente externa.
+             */
+            async function loadPersonData() {
+                console.log("Cargando datos...");
+                loader.classList.remove('hidden'); // Muestra el loader
+                
+                try {
+                    const response = await fetch(`${GAS_URL}?sheet=V¿BD_Personal`);
+                    const result = await response.json();
+
+                    if (result.error) {
+                        DataGridBody.innerHTML = `<tr><td colspan="10" class="text-center text-red-600">Error de la API: ${result.error}</td></tr>`;
+                        console.error('GAS API Error:', result.error);
+                        return;
                     }
+
+                    allPersonData = result.data;
+                    // Guarda una copia de los datos originales
+                    originalPersonData = JSON.parse(JSON.stringify(result.data));
+                    renderTable(allPersonData);
+                    console.log("Datos cargados correctamente.");
+
+                } catch (error) {
+                    DataGridBody.innerHTML = `<tr><td colspan="10" class="text-center text-red-600">No se pudo conectar con el script. Por favor, asegúrese de que la URL sea correcta.</td></tr>`;
+                    console.error('Fetch Error:', error);
+                } finally {
+                    loader.classList.add('hidden'); // Oculta el loader
+                }
+            }
+
+            /**
+             * Función para formatear la fecha a dd/mm/aaaa
+             */
+            function formatDate(date) {
+                const d = new Date(date);
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const year = d.getFullYear();
+                return `${day}/${month}/${year}`;
+            }
+
+            /**
+             * Función para construir y mostrar la tabla a partir de los datos.
+             * @param {Array<Object>} data - Un array de objetos con los datos a mostrar.
+             */
+            function renderTable(data) {
+                // Elimina todas las filas de datos para renderizar la nueva versión
+                DataGridBody.innerHTML = '';
+
+                if (!data || data.length === 0) {
+                    const noDataRow = document.createElement('tr');
+                    noDataRow.innerHTML = '<td colspan="10" class="text-center">No hay datos para mostrar.</td>';
+                    DataGridBody.appendChild(noDataRow);
+                    return;
+                }
+                
+                data.forEach((row, index) => {
+                    const tableRow = document.createElement('tr');
+                    // Asigna un índice a cada fila para poder identificarla en el modal
+                    tableRow.dataset.index = index;
+
+                    // Crea la celda del ID con el número correlativo
+                    const idCell = document.createElement('td');
+                    idCell.textContent = (index + 1);
+                    idCell.classList.add('text-right');
+                    tableRow.appendChild(idCell);
+
+                    Object.keys(headerMapping).forEach((key, colIndex) => {
+                        const cell = document.createElement('td');
+                        const jsonKey = headerMapping[key];
+                        let cellContent = row[jsonKey] || '';
+
+                        if (key === 'Ingreso') {
+                            cellContent = formatDate(cellContent);
+                        }
+                        
+                        cell.textContent = cellContent;
+
+                        if (key === 'Cédula' || key === 'Ingreso') {
+                            cell.classList.add('text-right');
+                        }
+            
+                        tableRow.appendChild(cell);
+                    });
+                    DataGridBody.appendChild(tableRow);
                 });
+            }
+
+            /**
+             * Filtra la tabla basada en el valor del input de búsqueda.
+             */
+            function filterTable() {
+                const query = searchInput.value.toLowerCase();
+                const filteredData = allPersonData.filter(row => {
+                    return Object.values(row).some(value => {
+                        // Convierta todos los valores a string para la búsqueda, incluso las fechas
+                        return String(value).toLowerCase().includes(query);
+                    });
+                });
+                renderTable(filteredData);
+            }
+
+            /**
+             * Ordena la tabla por la columna de apellidos.
+             */
+            function sortData() {
+                allPersonData.sort((a, b) => {
+                    const apellidoA = a.APELLIDOS.toLowerCase();
+                    const apellidoB = b.APELLIDOS.toLowerCase();
+                    if (apellidoA < apellidoB) {
+                        return -1;
+                    }
+                    if (apellidoA > apellidoB) {
+                        return 1;
+                    }
+                    return 0;
+                });
+                renderTable(allPersonData);
+            }
+            
+            // Event Listeners para la búsqueda dinámica y ordenación
+            searchInput.addEventListener('input', filterTable);
+            cancelButton.addEventListener('click', () => {
+                searchInput.value = '';
+                // Restablece la tabla a su estado original sin ordenar
+                renderTable(originalPersonData);
+            });
+            sortButton.addEventListener('click', sortData);
+
+            // Código para el modal
+            const detailsModal = document.getElementById('detailsModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const prevPageBtn = document.getElementById('prevPageBtn');
+            const nextPageBtn = document.getElementById('nextPageBtn');
+            const acceptBtn = document.getElementById('acceptBtn');
+            let currentPage = 1;
+            const maxPages = 2;
+            let selectedPerson = null;
+
+            // Mapeo de las claves JSON a los elementos del DOM del modal
+            const modalFieldsMap = {
+                'APELLIDOS': document.getElementById('field-apellidos'),
+                'CARGO': document.getElementById('field-cargo'),
+                'CÉDULA': document.getElementById('field-cedula'),
+                'EMPRESA': document.getElementById('field-empresa'),
+                'INGRESO': document.getElementById('field-ingreso'),
+                'NOMINA': document.getElementById('field-nomina'),
+                'NOMBRES': document.getElementById('field-nombres'),
+                'PERFIL': document.getElementById('field-perfil'),
+                'SECTOR': document.getElementById('field-sector')
+            };
+
+            // Mapeo de la página a los campos que debe mostrar
+            const pageMapping = {
+                1: ['EMPRESA', 'NOMINA', 'APELLIDOS', 'NOMBRES', 'CÉDULA'],
+                2: ['CARGO', 'INGRESO', 'SECTOR', 'PERFIL']
+            };
+
+            function showModal(personData) {
+                selectedPerson = personData;
+                currentPage = 1;
+                updateModalContent();
+                detailsModal.classList.remove('hidden');
+                detailsModal.classList.add('active');
+            }
+
+            function hideModal() {
+                detailsModal.classList.add('hidden');
+                detailsModal.classList.remove('active');
+            }
+
+            function updateModalContent() {
+                // Oculta todas las páginas
+                document.querySelectorAll('.modal-page').forEach(page => page.classList.add('hidden'));
+
+                // Muestra la página actual
+                document.getElementById(`modal-page-${currentPage}`).classList.remove('hidden');
+
+                // Actualiza los datos en los campos de la página actual
+                const fieldsToShow = pageMapping[currentPage];
+                fieldsToShow.forEach(key => {
+                    let value = selectedPerson[key] || '';
+                    if (key === 'INGRESO') {
+                        value = formatDate(value);
+                    }
+                    modalFieldsMap[key].textContent = value;
+                });
+
+                // Control de los botones de navegación
+                prevPageBtn.disabled = currentPage === 1;
+                nextPageBtn.disabled = currentPage === maxPages;
+            }
+
+            // Evento para abrir el modal al hacer clic en una fila de la tabla
+            DataGridBody.addEventListener('click', (event) => {
+                const clickedRow = event.target.closest('tr');
+                if (clickedRow) {
+                    const index = clickedRow.dataset.index;
+                    const personData = allPersonData[index];
+                    if (personData) {
+                        showModal(personData);
+                    }
+                }
             });
 
-            logoutButton.addEventListener('click', () => {
-                window.location.href = 'index.html';
+            // Evento para cerrar el modal
+            closeModalBtn.addEventListener('click', hideModal);
+
+            // Evento para navegar a la página siguiente
+            nextPageBtn.addEventListener('click', () => {
+                if (currentPage < maxPages) {
+                    currentPage++;
+                    updateModalContent();
+                }
             });
 
-            // Función para cargar y renderizar el gráfico de dona
-            const loadDoughnutChart = async () => {
-                const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS4kx7BCfQj1Bjr_GFlG50H22tfqfoiERrA8pwdmgscxOEZGY1yVEmKfv6Tr5p2q3sHLMIMbIeGQerJ/pub?gid=0&single=true&output=csv';
-                
-                try {
-                    const response = await fetch(csvUrl);
-                    const text = await response.text();
-                    
-                    // Ignorar la primera línea (cabecera)
-                    const rows = text.trim().split('\n').slice(1);
-                    
-                    const dataCounts = {};
-                    rows.forEach(row => {
-                        const columnAValue = row.split(',')[0].trim();
-                        if (columnAValue) {
-                            dataCounts[columnAValue] = (dataCounts[columnAValue] || 0) + 1;
-                        }
-                    });
-
-                    // Convertir el objeto a un array de pares [etiqueta, valor] y ordenarlos de mayor a menor
-                    const sortedData = Object.entries(dataCounts).sort(([, a], [, b]) => b - a);
-
-                    const labels = sortedData.map(([label]) => label);
-                    const data = sortedData.map(([, value]) => value);
-                    
-                    // Generar una paleta de colores con un degradado más visible.
-                    // Se usa el modelo HSL para mantener el tono azul constante y variar la luminosidad
-                    // de forma más notoria.
-                    const hue = 240; // Tono para el color azul
-                    const saturation = 70; // Saturación del 70%
-                    const totalItems = labels.length;
-
-                    const backgroundColors = sortedData.map((_, index) => {
-                        // El factor va de 0 a 1.
-                        const factor = index / (totalItems > 1 ? totalItems - 1 : 1);
-                        // Se interpola la luminosidad entre 20% (más oscuro) y 80% (más claro)
-                        const lightness = 20 + factor * (80 - 20);
-                        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-                    });
-
-                    const ctx = document.getElementById('doughnutChart').getContext('2d');
-                    
-                    new Chart(ctx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                data: data,
-                                backgroundColor: backgroundColors,
-                                borderColor: 'white',
-                                borderWidth: 2,
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            // NO MODIFICAR Gira el gráfico 660 grados en sentido horario
-                            rotation: 660 * (Math.PI / 180),
-                            plugins: {
-                                legend: {
-                                    position: 'right',
-                                    align: 'start',
-                                },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            let label = context.label || '';
-                                            if (label) {
-                                                label += ': ';
-                                            }
-                                            if (context.parsed) {
-                                                const total = context.dataset.data.reduce((acc, current) => acc + current, 0);
-                                                const percentage = ((context.parsed / total) * 100).toFixed(2);
-                                                label += `${context.parsed} (${percentage}%)`;
-                                            }
-                                            return label;
-                                        }
-                                    }
-                                },
-                                datalabels: {
-                                    // Nuevo formato para mostrar los valores fuera del gráfico
-                                    align: 'end',
-                                    anchor: 'end',
-                                    offset: 15,
-                                    color: '#FFFFFF',
-                                    font: {
-                                        weight: 'bold',
-                                        size: 14,
-                                    },
-                                    formatter: (value, context) => {
-                                        const total = context.dataset.data.reduce((acc, current) => acc + current, 0);
-                                        const percentage = ((value / total) * 100).toFixed(0);
-                                        return `${percentage}%`;
-                                    },
-                                    // Utiliza la configuración de "connector" del plugin
-                                    connector: {
-                                        enabled: true,
-                                        color: '#00FFFF', // Cambiado a un color brillante
-                                        lineWidth: 2, // Aumentado el grosor de la línea
-                                    }
-                                }
-                            }
-                        },
-                        // Registrar el plugin de datalabels en el gráfico
-                        plugins: [ChartDataLabels],
-                    });
-                } catch (error) {
-                    console.error("Error al cargar o procesar los datos del CSV:", error);
-                    const dashboard = document.getElementById('dashboard-section').querySelector('.p-6');
-                    dashboard.innerHTML = '<p class="text-center text-red-500">Error al cargar los datos del gráfico.</p>';
+            // Evento para navegar a la página anterior
+            prevPageBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updateModalContent();
                 }
-            };
-            
-            // Función para cargar y renderizar el gráfico de barras horizontales
-            const loadBarChart = async () => {
-                const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS4kx7BCfQj1Bjr_GFlG50H22tfqfoiERrA8pwdmgscxOEZGY1yVEmKfv6Tr5p2q3sHLMIMbIeGQerJ/pub?gid=0&single=true&output=csv';
-                
-                try {
-                    const response = await fetch(csvUrl);
-                    const text = await response.text();
-                    
-                    const rows = text.trim().split('\n').slice(1);
-                    const today = new Date();
-                    
-                    // Rangos de antigüedad actualizados
-                    const dataCounts = {
-                        'Hasta 5 años': 0,
-                        'Mayor a 5 y hasta 10 años': 0,
-                        'Mayor a 10 y hasta 20 años': 0,
-                        'Más de 20 años': 0
-                    };
-                    
-                    rows.forEach(row => {
-                        const columns = row.split(',');
-                        const dateStr = columns[6].trim();
-                        
-                        if (!dateStr || dateStr === 'N/A') {
-                            return;
-                        }
+            });
 
-                        const date = new Date(dateStr);
-                        
-                        // Calcular la antigüedad en años
-                        const ageInMilliseconds = today - date;
-                        const ageInYears = ageInMilliseconds / (1000 * 60 * 60 * 24 * 365.25);
-                        
-                        if (ageInYears <= 5) {
-                            dataCounts['Hasta 5 años']++;
-                        } else if (ageInYears > 5 && ageInYears <= 10) {
-                            dataCounts['Mayor a 5 y hasta 10 años']++;
-                        } else if (ageInYears > 10 && ageInYears <= 20) {
-                            dataCounts['Mayor a 10 y hasta 20 años']++;
-                        } else if (ageInYears > 20) {
-                            dataCounts['Más de 20 años']++;
-                        }
-                    });
+            // Evento para el botón de Aceptar
+            acceptBtn.addEventListener('click', () => {
+                // Aquí podrías agregar la lógica para guardar cambios, etc.
+                console.log("¡Aceptar presionado! Lógica de guardado iría aquí.");
+                hideModal();
+            });
 
-                    const labels = Object.keys(dataCounts);
-                    const data = Object.values(dataCounts);
-                    const total = data.reduce((acc, val) => acc + val, 0);
 
-                    const backgroundColors = [
-                        '#4041C2',
-                        '#7aebbc',
-                        '#D61336',
-                        '#dbeb7a'
-                    ];
-
-                    const ctx = document.getElementById('barChart').getContext('2d');
-                    
-                    new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                data: data,
-                                backgroundColor: backgroundColors,
-                                borderColor: backgroundColors,
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            indexAxis: 'y', // Hace el gráfico horizontal
-                            plugins: {
-                                legend: {
-                                    display: false
-                                },
-                                datalabels: {
-                                    anchor: 'end',
-                                    align: 'end',
-                                    formatter: (value) => {
-                                        return value;
-                                    },
-                                    color: '#FFFFFF'
-                                },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            const value = context.parsed.x;
-                                            const percentage = ((value / total) * 100).toFixed(2);
-                                            return `${value} (${percentage}%)`;
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                x: {
-                                    stacked: true,
-                                    ticks: {
-                                        color: 'var(--text-color)'
-                                    },
-                                    grid: {
-                                        color: 'rgba(255, 255, 255, 0.1)'
-                                    },
-                                    title: {
-                                        display: true,
-                                        text: 'Número de empleados',
-                                        color: 'var(--text-color)'
-                                    }
-                                },
-                                y: {
-                                    stacked: true,
-                                    ticks: {
-                                        color: 'var(--text-color)'
-                                    },
-                                    grid: {
-                                        color: 'rgba(255, 255, 255, 0.1)'
-                                    }
-                                }
-                            }
-                        },
-                        plugins: [ChartDataLabels]
-                    });
-                } catch (error) {
-                    console.error("Error al cargar o procesar los datos del CSV:", error);
-                    const dashboard = document.getElementById('dashboard-section').querySelector('.p-1');
-                    dashboard.innerHTML = '<p class="text-center text-red-500">Error al cargar los datos del gráfico.</p>';
-                }
-            };
-            
-            // Cargar el gráfico cuando la página se carga
-            loadDoughnutChart();
-            loadBarChart();
+            // Llama a la función para iniciar la carga de datos al cargar la página
+            loadPersonData();
         });
     </script>
 </body>
