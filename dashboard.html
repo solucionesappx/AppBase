@@ -294,7 +294,6 @@
             transition: background-color 0.2s ease;
             font-weight: 600;
         }
-
     </style>
     <!-- Media query para ocultar la aplicación en pantallas de más de 450px -->
     <style>
@@ -330,7 +329,7 @@
     </header>
 
     <!-- Contenedor principal que se estira para llenar el espacio disponible -->
-    <div class="w-full max-w-lg mx-auto p-5 rounded-xl container relative mt-20 flex-grow flex flex-col">
+    <div class="w-full max-w-lg mx-auto p-5 rounded-xl container relative mt-20 mb-20 flex-grow flex flex-col">
         <!-- Loader visual -->
         <div id="loader" class="hidden absolute inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50 rounded-xl">
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
@@ -349,7 +348,7 @@
             </button>
         </div>
 
-        <!-- Contenedor de la tabla, ahora se estira para llenar el espacio restante, max-h-[420px] limita la cantidad de filas a mostrar en la tabla -->
+        <!-- Contenedor de la tabla, ahora se estira para llenar el espacio restante -->
         <div class="data-table-container flex-grow max-h-[420px]">
             <table id="Data-grid" class="data-table">
                 <thead>
@@ -448,6 +447,29 @@
             </div>
         </div>
     </div>
+
+    <!-- 2. Barra de Navegación Fija (Footer) -->
+    <footer class="fixed bottom-0 left-0 w-full header-bg box-shadow z-50 transition-colors">
+        <div class="container max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- Ejemplo de links de navegación -->
+            <div class="flex-row space-x-4">
+                <button class="nav-link text-xl" aria-label="Inicio">
+                    <i class="fa-solid fa-house" style="color: var(--text-color);"></i>
+                </button>
+                <button class="nav-link text-xl" aria-label="Reportes">
+                    <i class="fa-solid fa-chart-column" style="color: var(--text-color);"></i>
+                </button>
+            </div>
+            <div class="flex-row space-x-4">
+                <button class="nav-link text-xl" aria-label="Ajustes">
+                    <i class="fa-solid fa-gear" style="color: var(--text-color);"></i>
+                </button>
+                <button class="nav-link text-xl" aria-label="Ayuda">
+                    <i class="fa-solid fa-circle-info" style="color: var(--text-color);"></i>
+                </button>
+            </div>
+        </div>
+    </footer>
 
     <script>
         const themeToggle = document.getElementById('theme-toggle');
@@ -631,7 +653,7 @@
                 const fieldsToShow = pageMapping[currentPage];
                 fieldsToShow.forEach(key => {
                     let value = selectedPerson[key] || '';
-                    if (key === 'INGRESO') {
+                    if (key === 'Ingreso') {
                         value = formatDate(value);
                     }
                     modalFieldsMap[key].textContent = value;
