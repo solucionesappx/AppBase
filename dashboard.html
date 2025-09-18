@@ -22,6 +22,7 @@
             --accent-color-1: #4041C2;
             --accent-color-2: #7aebbc;
             --box-shadow-color: rgba(0,0,0,0.2);
+            --selected-header-color: rgba(64, 65, 194, 0.2);
         }
 
         /* Variables para el tema oscuro */
@@ -34,6 +35,7 @@
             --accent-color-1: #4041C2;
             --accent-color-2: #dbeb7a;
             --box-shadow-color: rgba(255,255,255,0.15);
+            --selected-header-color: rgba(122, 235, 188, 0.2);
         }
 
         body {
@@ -140,6 +142,17 @@
         .data-table th {
             font-weight: 600;
             text-align: center;
+        }
+        
+        /* Nuevo estilo para el encabezado de la columna seleccionada */
+        .data-table th.selected-sort-header {
+            background-color: var(--selected-header-color);
+            border-bottom: 2px solid #5ab6a5;
+        }
+        
+        /* Estilo para el hover de los encabezados (cursor de puntero) */
+        .data-table th[data-sort-key] {
+            cursor: pointer;
         }
 
         .data-table tbody tr {
@@ -406,15 +419,15 @@
                 <thead>
                     <tr>
                         <th class="text-right">ID</th>
-                        <th>Empresa</th>
-                        <th>Apellidos</th>
-                        <th>Nombres</th>
-                        <th class="text-right">Cédula</th>
-                        <th>Nómina</th>
-                        <th>Cargo</th>
-                        <th class="text-right">Ingreso</th>
-                        <th>Sector</th>
-                        <th>Perfil</th>
+                        <th data-sort-key="EMPRESA">Empresa</th>
+                        <th data-sort-key="APELLIDOS" class="selected-sort-header">Apellidos</th>
+                        <th data-sort-key="NOMBRES">Nombres</th>
+                        <th class="text-right" data-sort-key="CÉDULA">Cédula</th>
+                        <th data-sort-key="NOMINA">Nómina</th>
+                        <th data-sort-key="CARGO">Cargo</th>
+                        <th class="text-right" data-sort-key="INGRESO">Ingreso</th>
+                        <th data-sort-key="SECTOR">Sector</th>
+                        <th data-sort-key="PERFIL">Perfil</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -690,6 +703,7 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             const DataGridBody = document.querySelector('#Data-grid tbody');
+            const dataTableHeaders = document.querySelectorAll('#Data-grid thead th[data-sort-key]');
             const loader = document.getElementById('loader');
             const searchInput = document.getElementById('searchInput');
             const cancelButton = document.getElementById('cancelButton');
@@ -715,6 +729,10 @@
             const maxDetailsPages = 2;
             let currentEditPage = 1;
             const maxEditPages = 2;
+            
+            // Estado de la ordenación
+            let selectedSortKey = 'APELLIDOS';
+            let sortDirection = 'asc';
 
             function showMessage(message, duration = 3000, isError = true) {
                 const messageBox = document.getElementById('messageBox');
@@ -744,7 +762,8 @@
                     }
 
                     allPersonData = result.data;
-                    renderTable(allPersonData);
+                    // Ordena por "Apellidos" por defecto la primera vez
+                    sortTable(selectedSortKey, sortDirection);
                     console.log("Datos cargados correctamente.");
                 } catch (error) {
                     DataGridBody.innerHTML = `<tr><td colspan="10" class="text-center text-red-600">No se pudo conectar con el script. Por favor, asegúrese de que la URL sea correcta.</td></tr>`;
@@ -796,6 +815,21 @@
                     DataGridBody.appendChild(tableRow);
                 });
             }
+            
+            function sortTable(key, direction) {
+                allPersonData.sort((a, b) => {
+                    const valA = String(a[key]).toLowerCase();
+                    const valB = String(b[key]).toLowerCase();
+                    if (valA < valB) {
+                        return direction === 'asc' ? -1 : 1;
+                    }
+                    if (valA > valB) {
+                        return direction === 'asc' ? 1 : -1;
+                    }
+                    return 0;
+                });
+                renderTable(allPersonData);
+            }
 
             function filterTable() {
                 const query = searchInput.value.toLowerCase();
@@ -807,24 +841,61 @@
                 renderTable(filteredData);
             }
 
-            function sortData() {
-                allPersonData.sort((a, b) => {
-                    const apellidoA = a.APELLIDOS.toLowerCase();
-                    const apellidoB = b.APELLIDOS.toLowerCase();
-                    if (apellidoA < apellidoB) { return -1; }
-                    if (apellidoA > apellidoB) { return 1; }
-                    return 0;
-                });
-                renderTable(allPersonData);
-            }
+            // Maneja la ordenación al hacer clic en el botón
+            sortButton.addEventListener('click', () => {
+                if (sortDirection === 'asc') {
+                    sortDirection = 'desc';
+                    sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-z-a"></i>';
+                } else {
+                    sortDirection = 'asc';
+                    sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i>';
+                }
+                sortTable(selectedSortKey, sortDirection);
+            });
             
+            // Maneja la selección de encabezados
+            dataTableHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const newSortKey = header.dataset.sortKey;
+
+                    // Remueve la clase de todos los encabezados
+                    dataTableHeaders.forEach(th => th.classList.remove('selected-sort-header'));
+
+                    // Si el nuevo encabezado es el mismo que el actual, solo cambia la dirección
+                    if (newSortKey === selectedSortKey) {
+                        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        // Si es un nuevo encabezado, establece la dirección a ascendente por defecto
+                        selectedSortKey = newSortKey;
+                        sortDirection = 'asc';
+                    }
+
+                    // Actualiza el ícono del botón de ordenar
+                    if (sortDirection === 'asc') {
+                        sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i>';
+                    } else {
+                        sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-z-a"></i>';
+                    }
+                    
+                    // Añade la clase al encabezado seleccionado
+                    header.classList.add('selected-sort-header');
+                    
+                    // Ordena la tabla
+                    sortTable(selectedSortKey, sortDirection);
+                });
+            });
+
             searchInput.addEventListener('input', filterTable);
+            
             cancelButton.addEventListener('click', () => {
                 searchInput.value = '';
                 selectedRowIndex = -1;
+                selectedSortKey = 'APELLIDOS';
+                sortDirection = 'asc';
+                sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i>';
+                dataTableHeaders.forEach(th => th.classList.remove('selected-sort-header'));
                 loadPersonData();
             });
-            sortButton.addEventListener('click', sortData);
 
             // --- Lógica del Modal de Detalles (Visualizar) ---
             const detailsModal = document.getElementById('detailsModal');
