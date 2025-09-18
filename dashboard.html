@@ -102,7 +102,7 @@
             max-height: 450px;
             overflow-y: auto;
             overflow-x: auto;
-            width: 100%;
+            width: 80%;
             border: 1px solid var(--border-color);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
@@ -297,6 +297,14 @@
         }
 
     </style>
+    <!-- Media query para ocultar la aplicación en pantallas de más de 450px -->
+    <style>
+        @media (min-width: 451px) {
+            body {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body class="dark-mode">
     <!-- 1. Cintillo Fijo (Header) -->
@@ -304,7 +312,7 @@
         <div class="container max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
             <!-- Mensaje de Bienvenida (Asume que el usuario está logueado) -->
             <div class="flex-row space-x-2">
-                <span class="text-sm font-semibold">¡Hola, Usuario!</span>
+                <span class="text-2xl font-semibold">¡Hola, Usuario!</span>
             </div>
 
             <div class="flex-row space-x-4 flex items-center">
@@ -336,6 +344,7 @@
         
         <!-- Contenedor de búsqueda y ordenación -->
         <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2 mb-2">
+            <!-- Se reduce el ancho del campo de búsqueda de `w-full` a `w-4/5` para que no ocupe todo el espacio. -->
             <input type="text" id="searchInput" placeholder="Buscar..." class="w-full sm:w-auto flex-grow p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" autocomplete="off">
             <button id="sortButton" class="text-3xl bg-transparent hover:text-blue-600 text-blue-500 font-bold py-2 px-4 rounded transition-colors duration-300 ease-in-out" aria-label="Ordenar por Apellidos">
                 <i class="fa-solid fa-arrow-down-a-z"></i>
@@ -446,6 +455,9 @@
     </div>
 
     <script>
+        // Este código detecta si el dispositivo es móvil. Sin embargo, para esta solicitud,
+        // la media query CSS es la mejor solución para ocultar la app en pantallas grandes.
+        // Si quisieras cambiar el comportamiento dinámicamente, podrías usar esto:
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
 
