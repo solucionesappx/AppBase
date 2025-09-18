@@ -99,12 +99,13 @@
         /* Estilos de la tabla */
         .data-table-container {
             /* La altura actual es de 450px; ajústala para mostrar aproximadamente 20 filas. Considera que la altura de cada fila puede variar según el tamaño de fuente y el padding. */
-            max-height: 50px;
+            max-height: 50vh;
             overflow-y: auto;
             overflow-x: auto;
             width: 100%;
             border: 1px solid var(--border-color);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: block; /* Aseguramos que sea un bloque para que las propiedades de altura funcionen correctamente */
         }
 
         .data-table {
