@@ -329,7 +329,7 @@
     </header>
 
     <!-- Contenedor principal que se estira para llenar el espacio disponible -->
-    <div class="w-full max-w-lg mx-auto p-5 rounded-xl container relative mt-20 mb-20 flex-grow flex flex-col">
+    <div class="w-full max-w-lg mx-auto p-5 rounded-xl container relative mt-20 mb-28 flex-grow flex flex-col">
         <!-- Loader visual -->
         <div id="loader" class="hidden absolute inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50 rounded-xl">
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
@@ -448,23 +448,38 @@
         </div>
     </div>
 
-    <!-- 2. Barra de Navegación Fija (Footer) -->
+    <!-- Barra de Navegación Fija (Footer) -->
     <footer class="fixed bottom-0 left-0 w-full header-bg box-shadow z-50 transition-colors">
-        <div class="container max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-            <!-- Ejemplo de links de navegación -->
-            <div class="flex-row space-x-4">
-                <button class="nav-link text-xl" aria-label="Inicio">
-                    <i class="fa-solid fa-house" style="color: var(--text-color);"></i>
+        <div class="container max-w-lg mx-auto px-4 py-3 flex items-end justify-between relative">
+            <!-- Sección Izquierda -->
+            <div class="flex flex-row space-x-8">
+                <button class="nav-link text-2xl" aria-label="Editar">
+                    <i class="fa-solid fa-pen-to-square" style="color: var(--text-color);"></i>
                 </button>
                 <button class="nav-link text-xl" aria-label="Reportes">
                     <i class="fa-solid fa-chart-column" style="color: var(--text-color);"></i>
                 </button>
             </div>
-            <div class="flex-row space-x-4">
-                <button class="nav-link text-xl" aria-label="Ajustes">
+            <!-- Sección Central (Botón de Inicio) -->
+            <div class="absolute left-1/2 -translate-x-1/2">
+                <button class="nav-link text-4xl bg-blue-600 text-white p-3 rounded-full shadow-lg -translate-y-5" aria-label="Inicio">
+                    <i class="fa-solid fa-house"></i>
+                </button>
+            </div>
+            <!-- Sección Derecha -->
+            <div class="flex flex-row space-x-4">
+                <div class="relative">
+                    <button class="nav-link text-2xl" aria-label="Notificaciones">
+                        <i class="fa-solid fa-bell" style="color: var(--text-color);"></i>
+                    </button>
+                    <span class="absolute top-0 right-[-1rem] text-xs font-bold px-2 py-0.5 rounded-full bg-red-600 text-white leading-none">
+                        (3)
+                    </span>
+                </div>
+                <button class="nav-link text-2xl" aria-label="Ajustes">
                     <i class="fa-solid fa-gear" style="color: var(--text-color);"></i>
                 </button>
-                <button class="nav-link text-xl" aria-label="Ayuda">
+                <button class="nav-link text-2xl" aria-label="Ayuda">
                     <i class="fa-solid fa-circle-info" style="color: var(--text-color);"></i>
                 </button>
             </div>
