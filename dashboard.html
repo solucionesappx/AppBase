@@ -420,7 +420,7 @@
                     <tr>
                         <th class="text-right">ID</th>
                         <th data-sort-key="EMPRESA">Empresa</th>
-                        <th data-sort-key="APELLIDOS" class="selected-sort-header">Apellidos</th>
+                        <th data-sort-key="APELLIDOS">Apellidos</th>
                         <th data-sort-key="NOMBRES">Nombres</th>
                         <th class="text-right" data-sort-key="CÉDULA">Cédula</th>
                         <th data-sort-key="NOMINA">Nómina</th>
@@ -731,7 +731,7 @@
             const maxEditPages = 2;
             
             // Estado de la ordenación
-            let selectedSortKey = 'APELLIDOS';
+            let selectedSortKey = null; // Inicialmente no hay una columna seleccionada
             let sortDirection = 'asc';
 
             function showMessage(message, duration = 3000, isError = true) {
@@ -762,8 +762,7 @@
                     }
 
                     allPersonData = result.data;
-                    // Ordena por "Apellidos" por defecto la primera vez
-                    sortTable(selectedSortKey, sortDirection);
+                    renderTable(allPersonData); // Carga la tabla sin ordenar
                     console.log("Datos cargados correctamente.");
                 } catch (error) {
                     DataGridBody.innerHTML = `<tr><td colspan="10" class="text-center text-red-600">No se pudo conectar con el script. Por favor, asegúrese de que la URL sea correcta.</td></tr>`;
@@ -843,12 +842,22 @@
 
             // Maneja la ordenación al hacer clic en el botón
             sortButton.addEventListener('click', () => {
-                if (sortDirection === 'asc') {
-                    sortDirection = 'desc';
-                    sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-z-a"></i>';
-                } else {
+                // Si no se ha seleccionado una columna, usa 'APELLIDOS' por defecto
+                if (!selectedSortKey) {
+                    selectedSortKey = 'APELLIDOS';
                     sortDirection = 'asc';
+                    const apellidosHeader = document.querySelector('th[data-sort-key="APELLIDOS"]');
+                    apellidosHeader.classList.add('selected-sort-header');
                     sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i>';
+                } else {
+                    // Si ya hay una columna seleccionada, simplemente invierte la dirección
+                    if (sortDirection === 'asc') {
+                        sortDirection = 'desc';
+                        sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-z-a"></i>';
+                    } else {
+                        sortDirection = 'asc';
+                        sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i>';
+                    }
                 }
                 sortTable(selectedSortKey, sortDirection);
             });
@@ -865,7 +874,7 @@
                     if (newSortKey === selectedSortKey) {
                         sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
                     } else {
-                        // Si es un nuevo encabezado, establece la dirección a ascendente por defecto
+                        // Si es una columna nueva, el primer ordenamiento siempre es ascendente.
                         selectedSortKey = newSortKey;
                         sortDirection = 'asc';
                     }
@@ -890,11 +899,11 @@
             cancelButton.addEventListener('click', () => {
                 searchInput.value = '';
                 selectedRowIndex = -1;
-                selectedSortKey = 'APELLIDOS';
+                selectedSortKey = null; // Reinicia la clave de ordenamiento
                 sortDirection = 'asc';
                 sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i>';
                 dataTableHeaders.forEach(th => th.classList.remove('selected-sort-header'));
-                loadPersonData();
+                loadPersonData(); // Vuelve a cargar los datos en su orden original
             });
 
             // --- Lógica del Modal de Detalles (Visualizar) ---
