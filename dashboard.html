@@ -254,8 +254,10 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
+            padding-top: 0.5rem;
+            padding-right: 2.5rem; /* Ajuste para el botón de cierre que está fuera */
         }
-
+        
         .modal-field {
             /* Se reduce el margen inferior del campo para acercar los elementos */
             margin-bottom: 0.5rem;
@@ -291,7 +293,7 @@
 
         .modal-footer {
             display: flex;
-            justify-content: center;
+            justify-content: space-between; /* Alineación de los botones */
             align-items: center;
             padding-top: 1rem;
         }
@@ -440,23 +442,14 @@
     <!-- Contenedor del Modal de Detalles (Visualizar) -->
     <div id="detailsModal" class="modal-container hidden">
         <div class="modal-content relative">
-            <!-- Botón de cerrar reubicado -->
             <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-
             <div class="modal-header">
-                <div class="flex items-center space-x-4">
-                    <h3 class="text-xl font-bold">Detalles</h3>
-                    <div class="flex space-x-2">
-                        <button id="prevPageBtnDetails" class="modal-nav-button" disabled>
-                            <i class="fa-solid fa-angle-left"></i>
-                        </button>
-                        <button id="nextPageBtnDetails" class="modal-nav-button">
-                            <i class="fa-solid fa-angle-right"></i>
-                        </button>
-                    </div>
-                </div>
+                <h3 class="text-xl font-bold">Detalles</h3>
+                <button id="openVacationModalBtn" class="nav-link text-xl text-[var(--text-color)] hover:text-blue-500 transition-colors">
+                    <i class="fa-solid fa-calendar-alt" style="font-size: 2.5rem"></i>
+                </button>
             </div>
             
             <!-- Contenido del modal (páginas de datos) -->
@@ -507,7 +500,17 @@
             </div>
 
             <!-- Navegación del Modal -->
-            <div class="modal-footer">
+            <div class="modal-footer flex items-center justify-between">
+                <!-- Contenedor para botones de navegación -->
+                <div class="flex space-x-2">
+                    <button id="prevPageBtnDetails" class="modal-nav-button" disabled>
+                        <i class="fa-solid fa-angle-left"></i>
+                    </button>
+                    <button id="nextPageBtnDetails" class="modal-nav-button">
+                        <i class="fa-solid fa-angle-right"></i>
+                    </button>
+                </div>
+                <!-- Botón de acción principal -->
                 <button class="modal-action-button close-modal-btn">Aceptar</button>
             </div>
         </div>
@@ -539,19 +542,11 @@
             <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-
             <div class="modal-header">
-                <div class="flex items-center space-x-4">
-                    <h3 class="text-xl font-bold">Editar</h3>
-                    <div class="flex space-x-2">
-                        <button id="prevPageBtnEdit" class="modal-nav-button" disabled>
-                            <i class="fa-solid fa-angle-left"></i>
-                        </button>
-                        <button id="nextPageBtnEdit" class="modal-nav-button">
-                            <i class="fa-solid fa-angle-right"></i>
-                        </button>
-                    </div>
-                </div>
+                <h3 class="text-xl font-bold">Editar</h3>
+                <button id="openVacationModalEditBtn" class="nav-link text-xl text-[var(--text-color)] hover:text-blue-500 transition-colors">
+                    <i class="fa-solid fa-calendar-alt" style="font-size: 2.5rem"></i>
+                </button>
             </div>
 
             <!-- Contenido del modal (páginas de edición) -->
@@ -601,9 +596,18 @@
                 </div>
             </div>
             
-            <div class="modal-footer flex space-x-4">
+            <div class="modal-footer flex items-center justify-between">
+                <!-- Contenedor para botones de navegación -->
+                <div class="flex space-x-2">
+                    <button id="prevPageBtnEdit" class="modal-nav-button" disabled>
+                        <i class="fa-solid fa-angle-left"></i>
+                    </button>
+                    <button id="nextPageBtnEdit" class="modal-nav-button">
+                        <i class="fa-solid fa-angle-right"></i>
+                    </button>
+                </div>
+                <!-- Botón de acción principal -->
                 <button id="saveBtn" class="modal-action-button bg-green-600 hover:bg-green-700">Guardar</button>
-                <button class="modal-action-button bg-red-600 hover:bg-red-700 close-modal-btn">Cancelar</button>
             </div>
         </div>
     </div>
@@ -630,6 +634,20 @@
             </button>
             <h3 class="text-xl font-bold mb-4">Ayuda e Información</h3>
             <p>Este es el modal de ayuda e información.</p>
+            <div class="modal-footer">
+                <button class="modal-action-button mt-4 close-modal-btn">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nuevo Modal: Datos de Vacaciones -->
+    <div id="vacationModal" class="modal-container hidden">
+        <div class="modal-content relative text-center">
+            <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-xl font-bold mb-4">Datos de Vacaciones</h3>
+            <p>Aquí se mostrarán los datos de vacaciones del empleado.</p>
             <div class="modal-footer">
                 <button class="modal-action-button mt-4 close-modal-btn">Cerrar</button>
             </div>
@@ -910,6 +928,7 @@
             const detailsModal = document.getElementById('detailsModal');
             const prevPageBtnDetails = document.getElementById('prevPageBtnDetails');
             const nextPageBtnDetails = document.getElementById('nextPageBtnDetails');
+            const openVacationModalBtn = document.getElementById('openVacationModalBtn');
             let selectedPerson = null;
 
             const detailsFieldsMap = {
@@ -1002,6 +1021,7 @@
             const editModal = document.getElementById('editModal');
             const settingsModal = document.getElementById('settingsModal');
             const helpModal = document.getElementById('helpModal');
+            const vacationModal = document.getElementById('vacationModal');
 
             // Función genérica para mostrar un modal
             function showModal(modalElement) {
@@ -1033,6 +1053,7 @@
             const saveBtn = document.getElementById('saveBtn');
             const prevPageBtnEdit = document.getElementById('prevPageBtnEdit');
             const nextPageBtnEdit = document.getElementById('nextPageBtnEdit');
+            const openVacationModalEditBtn = document.getElementById('openVacationModalEditBtn');
             
             const editFieldsMap = {
                 'APELLIDOS': document.getElementById('field-apellidos-edit'),
@@ -1086,6 +1107,14 @@
                 }
             });
             
+            openVacationModalBtn.addEventListener('click', () => {
+                showModal(vacationModal);
+            });
+
+            openVacationModalEditBtn.addEventListener('click', () => {
+                showModal(vacationModal);
+            });
+
             // --- Lógica de selección de archivos en el modal de carga ---
             const fileInput = document.getElementById('fileInput');
             const uploadFileBtn = document.getElementById('uploadFileBtn');
@@ -1133,6 +1162,7 @@
                 const personData = allPersonData[selectedRowIndex];
                 if (personData) {
                     showEditModal(personData);
+                    hideModal(detailsModal);
                 }
             });
 
