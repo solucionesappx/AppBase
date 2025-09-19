@@ -943,7 +943,7 @@
                 const fieldsToShow = pageMapping[currentDetailsPage];
                 fieldsToShow.forEach(key => {
                     let value = selectedPerson[key] || '';
-                    if (key === 'Ingreso') {
+                    if (key === 'INGRESO') {
                         value = formatDate(value);
                     }
                     detailsFieldsMap[key].textContent = value;
@@ -1059,7 +1059,7 @@
                 const fieldsToShow = pageMapping[currentEditPage];
                 fieldsToShow.forEach(key => {
                     let value = selectedPerson[key] || '';
-                    if (key === 'Ingreso') {
+                    if (key === 'INGRESO') {
                         value = formatDate(value);
                     }
                     editFieldsMap[key].value = value;
