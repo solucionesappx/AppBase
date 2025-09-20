@@ -68,7 +68,7 @@
 
         /* Estilos para el footer con sombra superior */
         .box-shadow-up {
-            box-shadow: 0 -4px 6px -1px var(--box-shadow-color), 0 -2px 4px -1px var(--box-shadow-color);
+            box-shadow: 0 -4px 6px -1- var(--box-shadow-color), 0 -2px 4px -1px var(--box-shadow-color);
         }
 
         /* Estilo para el toggle switch */
@@ -657,12 +657,30 @@
 
     <!-- Nuevo Modal: Datos de Vacaciones -->
     <div id="vacationModal" class="modal-container hidden">
-        <div class="modal-content relative text-center">
+        <div class="modal-content relative">
             <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            <h3 class="text-xl font-bold mb-4">Datos de Vacaciones</h3>
-            <p>Aquí se mostrarán los datos de vacaciones del empleado.</p>
+            <div class="modal-header">
+                <h3 class="text-xl font-bold" id="vacationModalTitle">Vacaciones</h3>
+            </div>
+            <!-- Contenedor de la tabla de vacaciones -->
+            <div class="data-table-container max-h-[300px] mb-4">
+                <table id="vacation-grid" class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="text-right">ID</th>
+                            <th>PERIODO</th>
+                            <th>DESCRIPCIÓN_CONCEPTO</th>
+                            <th class="text-right">DIAS_VACACIONES</th>
+                            <th class="text-right">BONO_VACACIONAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se renderizarán aquí con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
             <div class="modal-footer">
                 <button class="modal-action-button mt-4 close-modal-btn">Cerrar</button>
             </div>
@@ -742,6 +760,7 @@
             const cancelButton = document.getElementById('cancelButton');
             const sortButton = document.getElementById('sortButton');
             
+            // Usamos el mismo URL base para todas las llamadas API
             const GAS_URL = 'https://script.google.com/macros/s/AKfycbx87WvxA9ca1KyGMA1wsw1npZw5vPtjoItomhF823BICXScNrWGFh5m0Dj6Veb24CtHXQ/exec';
 
             const headerMapping = {
@@ -786,7 +805,7 @@
                 loader.classList.remove('hidden');
                 
                 try {
-                    const response = await fetch(`${GAS_URL}?sheet=V¿BD_Personal`);
+                    const response = await fetch(`${GAS_URL}?sheet=BD_Personal`);
                     const result = await response.json();
 
                     if (result.error) {
@@ -1163,12 +1182,92 @@
                 }
             });
             
+            // --- NUEVA LÓGICA PARA EL MODAL DE VACACIONES ---
+            const vacationGridBody = document.querySelector('#vacation-grid tbody');
+            const vacationModalTitle = document.getElementById('vacationModalTitle');
+            const vacationHeaderMapping = {
+                'PERIODO': 'PERIODO',
+                'DESCRIPCIÓN_CONCEPTO': 'DESCRIPCIÓN_CONCEPTO',
+                'DIAS_VACACIONES': 'DIAS_VACACIONES',
+                'BONO_VACACIONAL': 'BONO_VACACIONAL'
+            };
+
+            async function loadVacationData(cedula) {
+                if (!cedula) {
+                    showMessage("No se ha proporcionado una cédula para buscar datos de vacaciones.", 3000, true);
+                    return;
+                }
+                loader.classList.remove('hidden');
+                vacationGridBody.innerHTML = '';
+                try {
+                    // Llamar a la API con el nombre de la hoja y el parámetro de cédula
+                    const response = await fetch(`${GAS_URL}?sheet=Vacaciones&cedula=${cedula}`);
+                    const result = await response.json();
+
+                    if (result.error) {
+                        vacationGridBody.innerHTML = `<tr><td colspan="5" class="text-center text-red-600">Error: ${result.error}</td></tr>`;
+                        console.error('GAS API Error:', result.error);
+                        return;
+                    }
+                    
+                    const filteredData = result.data.filter(row => String(row['CÉDULA']).trim() === String(cedula).trim());
+                    
+                    renderVacationTable(filteredData);
+                    vacationModalTitle.textContent = `Vacaciones - Cédula: ${cedula}`;
+                    console.log("Datos de vacaciones cargados correctamente.");
+
+                } catch (error) {
+                    vacationGridBody.innerHTML = `<tr><td colspan="5" class="text-center text-red-600">No se pudo conectar con el script.</td></tr>`;
+                    console.error('Fetch Error:', error);
+                } finally {
+                    loader.classList.add('hidden');
+                }
+            }
+
+            function renderVacationTable(data) {
+                vacationGridBody.innerHTML = '';
+                if (!data || data.length === 0) {
+                    const noDataRow = document.createElement('tr');
+                    noDataRow.innerHTML = '<td colspan="5" class="text-center">No hay datos de vacaciones para mostrar.</td>';
+                    vacationGridBody.appendChild(noDataRow);
+                    return;
+                }
+                data.forEach((row, index) => {
+                    const tableRow = document.createElement('tr');
+                    const idCell = document.createElement('td');
+                    idCell.textContent = (index + 1);
+                    idCell.classList.add('text-right');
+                    tableRow.appendChild(idCell);
+                    Object.keys(vacationHeaderMapping).forEach((key) => {
+                        const cell = document.createElement('td');
+                        const jsonKey = vacationHeaderMapping[key];
+                        let cellContent = row[jsonKey] || '';
+                        cell.textContent = cellContent;
+                        if (key === 'DIAS_VACACIONES' || key === 'BONO_VACACIONAL') {
+                            cell.classList.add('text-right');
+                        }
+                        tableRow.appendChild(cell);
+                    });
+                    vacationGridBody.appendChild(tableRow);
+                });
+            }
+
             openVacationModalBtn.addEventListener('click', () => {
-                showModal(vacationModal);
+                if (selectedPerson && selectedPerson['CÉDULA']) {
+                    loadVacationData(selectedPerson['CÉDULA']);
+                    showModal(vacationModal);
+                } else {
+                    showMessage("Por favor, selecciona una fila para ver los datos de vacaciones.");
+                }
             });
 
             openVacationModalEditBtn.addEventListener('click', () => {
-                showModal(vacationModal);
+                if (selectedPerson && selectedPerson['CÉDULA']) {
+                    loadVacationData(selectedPerson['CÉDULA']);
+                    showModal(vacationModal);
+                } else {
+                    showMessage("Por favor, selecciona una fila para ver los datos de vacaciones.");
+                }
             });
 
             // --- Lógica de selección de archivos en el modal de carga ---
