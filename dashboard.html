@@ -209,6 +209,10 @@
             background-color: #5ab6a5 !important;
         }
 
+        /* Estilo para las filas con la nota no vacía */
+        .data-table .note-row-highlight td {
+            color: red !important;
+        }
 
         /* Regla para el resaltado de la primera columna durante el hover */
         .data-table tbody tr:hover td:first-child {
@@ -430,6 +434,7 @@
                         <th class="text-right" data-sort-key="INGRESO">Ingreso</th>
                         <th data-sort-key="SECTOR">Sector</th>
                         <th data-sort-key="PERFIL">Perfil</th>
+                        <th data-sort-key="NOTA">Nota</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -478,7 +483,7 @@
                     </div>
                 </div>
 
-                <!-- Página 2: Campos Cargo, Ingreso, Sector, Perfil -->
+                <!-- Página 2: Campos Cargo, Ingreso, Sector, Perfil, Nota -->
                 <div id="modal-page-2-details" class="modal-page hidden">
                     <div class="modal-field">
                         <label>Cargo:</label>
@@ -495,6 +500,11 @@
                     <div class="modal-field">
                         <label>Perfil:</label>
                         <span id="field-perfil-details"></span>
+                    </div>
+                    <!-- El campo Nota ahora se mostrará u ocultará con JS -->
+                    <div class="modal-field" id="nota-details-field">
+                        <label>Nota:</label>
+                        <span id="field-nota-details"></span>
                     </div>
                 </div>
             </div>
@@ -592,6 +602,11 @@
                     <div class="modal-field">
                         <label>Perfil:</label>
                         <input id="field-perfil-edit" type="text" class="text-color" />
+                    </div>
+                    <!-- El campo Nota ahora se mostrará u ocultará con JS -->
+                    <div class="modal-field" id="nota-edit-field">
+                        <label>Nota:</label>
+                        <input id="field-nota-edit" type="text" class="text-color" />
                     </div>
                 </div>
             </div>
@@ -738,7 +753,8 @@
                 'Cargo': 'CARGO',
                 'Ingreso': 'INGRESO',
                 'Sector': 'SECTOR',
-                'Perfil': 'PERFIL'
+                'Perfil': 'PERFIL',
+                'Nota': 'CTRL1'
             };
 
             let allPersonData = [];
@@ -811,6 +827,10 @@
                     tableRow.dataset.index = allPersonData.indexOf(row);
                     if (allPersonData.indexOf(row) === selectedRowIndex) {
                         tableRow.classList.add('selected');
+                    }
+                    // Aplica la clase si la columna "Nota" tiene un valor
+                    if (row['CTRL1'] && row['CTRL1'].trim() !== '') {
+                        tableRow.classList.add('note-row-highlight');
                     }
                     const idCell = document.createElement('td');
                     idCell.textContent = (allPersonData.indexOf(row) + 1);
@@ -929,6 +949,7 @@
             const prevPageBtnDetails = document.getElementById('prevPageBtnDetails');
             const nextPageBtnDetails = document.getElementById('nextPageBtnDetails');
             const openVacationModalBtn = document.getElementById('openVacationModalBtn');
+            const notaDetailsField = document.getElementById('nota-details-field');
             let selectedPerson = null;
 
             const detailsFieldsMap = {
@@ -940,12 +961,13 @@
                 'NOMINA': document.getElementById('field-nomina-details'),
                 'NOMBRES': document.getElementById('field-nombres-details'),
                 'PERFIL': document.getElementById('field-perfil-details'),
-                'SECTOR': document.getElementById('field-sector-details')
+                'SECTOR': document.getElementById('field-sector-details'),
+                'CTRL1': document.getElementById('field-nota-details') 
             };
 
             const pageMapping = {
                 1: ['EMPRESA', 'NOMINA', 'APELLIDOS', 'NOMBRES', 'CÉDULA'],
-                2: ['CARGO', 'INGRESO', 'SECTOR', 'PERFIL']
+                2: ['CARGO', 'INGRESO', 'SECTOR', 'PERFIL', 'CTRL1']
             };
 
             function showDetailsModal(personData) {
@@ -959,14 +981,30 @@
             function updateDetailsModalContent() {
                 document.querySelectorAll('#detailsModal .modal-page').forEach(page => page.classList.add('hidden'));
                 document.getElementById(`modal-page-${currentDetailsPage}-details`).classList.remove('hidden');
+
+                // Ocultar el campo de nota si está vacío en la página 2
+                if (currentDetailsPage === 2) {
+                    const notaValue = selectedPerson['CTRL1'] || '';
+                    if (notaValue.trim() === '') {
+                        notaDetailsField.style.display = 'none';
+                    } else {
+                        notaDetailsField.style.display = 'block';
+                    }
+                } else {
+                    notaDetailsField.style.display = 'block';
+                }
+
                 const fieldsToShow = pageMapping[currentDetailsPage];
                 fieldsToShow.forEach(key => {
                     let value = selectedPerson[key] || '';
                     if (key === 'INGRESO') {
                         value = formatDate(value);
                     }
-                    detailsFieldsMap[key].textContent = value;
+                    if (detailsFieldsMap[key]) {
+                        detailsFieldsMap[key].textContent = value;
+                    }
                 });
+                
                 prevPageBtnDetails.disabled = currentDetailsPage === 1;
                 nextPageBtnDetails.disabled = currentDetailsPage === maxDetailsPages;
             }
@@ -1054,6 +1092,7 @@
             const prevPageBtnEdit = document.getElementById('prevPageBtnEdit');
             const nextPageBtnEdit = document.getElementById('nextPageBtnEdit');
             const openVacationModalEditBtn = document.getElementById('openVacationModalEditBtn');
+            const notaEditField = document.getElementById('nota-edit-field');
             
             const editFieldsMap = {
                 'APELLIDOS': document.getElementById('field-apellidos-edit'),
@@ -1064,7 +1103,8 @@
                 'NOMINA': document.getElementById('field-nomina-edit'),
                 'NOMBRES': document.getElementById('field-nombres-edit'),
                 'PERFIL': document.getElementById('field-perfil-edit'),
-                'SECTOR': document.getElementById('field-sector-edit')
+                'SECTOR': document.getElementById('field-sector-edit'),
+                'CTRL1': document.getElementById('field-nota-edit') 
             };
 
             function showEditModal(personData) {
@@ -1077,14 +1117,30 @@
             function updateEditModalContent() {
                 document.querySelectorAll('#editModal .modal-page').forEach(page => page.classList.add('hidden'));
                 document.getElementById(`modal-page-${currentEditPage}-edit`).classList.remove('hidden');
+                
+                // Ocultar el campo de nota si está vacío en la página 2
+                if (currentEditPage === 2) {
+                    const notaValue = selectedPerson['CTRL1'] || '';
+                    if (notaValue.trim() === '') {
+                        notaEditField.style.display = 'none';
+                    } else {
+                        notaEditField.style.display = 'block';
+                    }
+                } else {
+                    notaEditField.style.display = 'block';
+                }
+
                 const fieldsToShow = pageMapping[currentEditPage];
                 fieldsToShow.forEach(key => {
                     let value = selectedPerson[key] || '';
                     if (key === 'INGRESO') {
                         value = formatDate(value);
                     }
-                    editFieldsMap[key].value = value;
+                    if (editFieldsMap[key]) {
+                        editFieldsMap[key].value = value;
+                    }
                 });
+                
                 prevPageBtnEdit.disabled = currentEditPage === 1;
                 nextPageBtnEdit.disabled = currentEditPage === maxEditPages;
             }
