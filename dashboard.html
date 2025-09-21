@@ -463,7 +463,6 @@
                         <th data-sort-key="SECTOR">Sector</th>
                         <th data-sort-key="PERFIL">Perfil</th>
                         <th data-sort-key="NOTA">Nota</th>
-                        <th data-sort-key="VACACIONES">Días</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -535,9 +534,10 @@
                         <label>Nota:</label>
                         <span id="field-nota-details"></span>
                     </div>
-                    <div class="modal-field" id="nota-details-field">
+                    <!-- Se ha corregido este div para que sea único y muestre el campo 'Días' (CTRL2) -->
+                    <div class="modal-field" id="dias-details-field">
                         <label>Días:</label>
-                        <span id="field-nota-details"></span>
+                        <span id="field-dias-details"></span>
                     </div>
                 </div>
             </div>
@@ -878,7 +878,7 @@
                 'Sector': 'SECTOR',
                 'Perfil': 'PERFIL',
                 'Nota': 'CTRL1',
-                'Dias': 'CTRL2'
+                // Removimos 'Dias' de este mapeo para que no se muestre en la tabla
             };
 
             let allPersonData = [];
@@ -1074,8 +1074,12 @@
             const nextPageBtnDetails = document.getElementById('nextPageBtnDetails');
             const openVacationModalBtn = document.getElementById('openVacationModalBtn');
             const notaDetailsField = document.getElementById('nota-details-field');
+            // Se ha agregado la referencia al nuevo campo 'Días' en el HTML
+            const diasDetailsField = document.getElementById('dias-details-field');
+
             let selectedPerson = null;
 
+            // Se ha añadido la clave 'CTRL2' al mapeo
             const detailsFieldsMap = {
                 'APELLIDOS': document.getElementById('field-apellidos-details'),
                 'CARGO': document.getElementById('field-cargo-details'),
@@ -1086,12 +1090,14 @@
                 'NOMBRES': document.getElementById('field-nombres-details'),
                 'PERFIL': document.getElementById('field-perfil-details'),
                 'SECTOR': document.getElementById('field-sector-details'),
-                'CTRL1': document.getElementById('field-nota-details') 
+                'CTRL1': document.getElementById('field-nota-details'),
+                'CTRL2': document.getElementById('field-dias-details') // Nueva entrada para el campo 'Días'
             };
 
             const pageMapping = {
                 1: ['EMPRESA', 'NOMINA', 'APELLIDOS', 'NOMBRES', 'CÉDULA'],
-                2: ['CARGO', 'INGRESO', 'SECTOR', 'PERFIL', 'CTRL1']
+                // Se ha añadido la clave 'CTRL2' a la lista de campos de la página 2
+                2: ['CARGO', 'INGRESO', 'SECTOR', 'PERFIL', 'CTRL1', 'CTRL2']
             };
 
             function showDetailsModal(personData) {
@@ -1116,6 +1122,19 @@
                     }
                 } else {
                     notaDetailsField.style.display = 'block';
+                }
+                
+                // Ocultar el campo de días si está vacío o es 0 en la página 2
+                if (currentDetailsPage === 2) {
+                    const diasValue = selectedPerson['CTRL2'];
+                    // Se ha corregido la lógica aquí: convierte a string antes de usar trim() y compara con una cadena vacía
+                    if (diasValue === null || String(diasValue).trim() === '' || diasValue === 0) {
+                        diasDetailsField.style.display = 'none';
+                    } else {
+                        diasDetailsField.style.display = 'block';
+                    }
+                } else {
+                    diasDetailsField.style.display = 'block';
                 }
 
                 const fieldsToShow = pageMapping[currentDetailsPage];
