@@ -388,6 +388,27 @@
             align-items: center;
             border-radius: 0.5rem; /* El mismo border-radius que el modal */
         }
+        
+        /* Nuevo estilo para el total de días con colores de alto contraste */
+        .total-vacation-days-container {
+            background-color: #1a202c; /* Fondo oscuro */
+            color: #e2e8f0; /* Texto claro */
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .total-vacation-days-container .total-label {
+            font-weight: bold;
+            font-size: 1.125rem;
+        }
+        .total-vacation-days-container .total-value {
+            font-weight: bold;
+            font-size: 1.125rem;
+            color: #63b3ed; /* Color de acento para el valor */
+        }
     </style>
     <!-- Media query para ocultar la aplicación en pantallas de más de 450px -->
     <style>
@@ -463,6 +484,7 @@
                         <th data-sort-key="SECTOR">Sector</th>
                         <th data-sort-key="PERFIL">Perfil</th>
                         <th data-sort-key="NOTA">Nota</th>
+                        
                     </tr>
                 </thead>
                 <tbody>
@@ -536,7 +558,7 @@
                     </div>
                     <!-- Se ha corregido este div para que sea único y muestre el campo 'Días' (CTRL2) -->
                     <div class="modal-field" id="dias-details-field">
-                        <label>Días:</label>
+                        <label>Días de Vacaciones:</label>
                         <span id="field-dias-details"></span>
                     </div>
                 </div>
@@ -641,6 +663,11 @@
                         <label>Nota:</label>
                         <input id="field-nota-edit" type="text" class="text-color" />
                     </div>
+                    <!-- NUEVO CAMPO AGREGADO -->
+                    <div class="modal-field" id="dias-edit-field">
+                        <label>Días de Vacaciones:</label>
+                        <input id="field-dias-edit" type="text" class="text-color" />
+                    </div>
                 </div>
             </div>
             
@@ -703,9 +730,15 @@
                 <h3 class="text-xl font-bold" id="vacationModalTitle">Detalles de Absentismos</h3>
             </div>
             
+            <!-- NUEVO CÓDIGO: Sección para la sumatoria antes del buscador -->
+            <div class="total-vacation-days-container">
+                <span class="total-label">Total de Días Acumulados:</span>
+                <span id="totalVacationDays" class="total-value">0</span>
+            </div>
+
             <!-- Buscador para la tabla de vacaciones -->
             <!-- Se ajusta el buscador para que el botón esté a la derecha -->
-            <div class="flex flex-row items-center space-x-2 mb-2">
+            <div class="flex flex-row items-center space-x-2 my-4">
                 <input type="text" id="vacationSearchInput" placeholder="Buscar..." class="flex-grow p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" autocomplete="off">
                 <button id="vacationCancelButton" class="text-3xl text-red-600 hover:text-red-700 bg-transparent transition-colors focus:outline-none focus:ring-0">
                     <i class="fa-solid fa-xmark"></i>
@@ -730,6 +763,7 @@
                     </tbody>
                 </table>
             </div>
+
             <div class="modal-footer">
                 <button class="modal-action-button mt-4 close-modal-btn">Cerrar</button>
             </div>
@@ -1237,7 +1271,9 @@
             const nextPageBtnEdit = document.getElementById('nextPageBtnEdit');
             const openVacationModalEditBtn = document.getElementById('openVacationModalEditBtn');
             const notaEditField = document.getElementById('nota-edit-field');
-            
+            // NUEVA LÍNEA: Obtener referencia al nuevo campo de edición de Días
+            const diasEditField = document.getElementById('dias-edit-field');
+
             const editFieldsMap = {
                 'APELLIDOS': document.getElementById('field-apellidos-edit'),
                 'CARGO': document.getElementById('field-cargo-edit'),
@@ -1248,7 +1284,9 @@
                 'NOMBRES': document.getElementById('field-nombres-edit'),
                 'PERFIL': document.getElementById('field-perfil-edit'),
                 'SECTOR': document.getElementById('field-sector-edit'),
-                'CTRL1': document.getElementById('field-nota-edit') 
+                'CTRL1': document.getElementById('field-nota-edit'),
+                // NUEVA LÍNEA: Agregar el mapeo para el campo de Días
+                'CTRL2': document.getElementById('field-dias-edit')
             };
 
             function showEditModal(personData) {
@@ -1272,6 +1310,18 @@
                     }
                 } else {
                     notaEditField.style.display = 'block';
+                }
+
+                // NUEVA LÓGICA: Ocultar el campo de días si está vacío o es 0 en la página 2
+                if (currentEditPage === 2) {
+                    const diasValue = selectedPerson['CTRL2'];
+                    if (diasValue === null || String(diasValue).trim() === '' || diasValue === 0) {
+                        diasEditField.style.display = 'none';
+                    } else {
+                        diasEditField.style.display = 'block';
+                    }
+                } else {
+                    diasEditField.style.display = 'block';
                 }
 
                 const fieldsToShow = pageMapping[currentEditPage];
@@ -1319,6 +1369,9 @@
             let selectedVacationIndex = -1; // Índice del registro de vacaciones seleccionado
             let vacationSortKey = 'PERIODO'; // Clave de ordenación por defecto
             let vacationSortDirection = 'desc'; // Dirección de ordenación por defecto
+
+            // NUEVA LÍNEA: Referencia al elemento que mostrará el total de días
+            const totalVacationDaysEl = document.getElementById('totalVacationDays');
 
             const vacationHeaderMapping = {
                 'CÉDULA': 'CÉDULA',
@@ -1380,6 +1433,13 @@
                     
                     // Ordena los datos de vacaciones por defecto
                     sortVacationTable(vacationSortKey, vacationSortDirection);
+                    
+                    // NUEVO CÓDIGO: Lógica de sumatoria de días de vacaciones
+                    const totalDays = allVacationData.reduce((sum, row) => {
+                        const dias = parseFloat(row['DIAS_VACACIONES']);
+                        return sum + (isNaN(dias) ? 0 : dias);
+                    }, 0);
+                    totalVacationDaysEl.textContent = totalDays;
 
                     // Actualiza el título con el nombre y apellido formateados
                     const formattedNombres = formatNameForModal(nombres);
