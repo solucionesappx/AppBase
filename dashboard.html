@@ -235,6 +235,12 @@
             backdrop-filter: blur(5px);
             transition: all 0.3s ease;
         }
+        
+        /* Ajuste de posición para el modal de vacaciones */
+        #vacationModal.modal-container {
+            padding-top: 2rem; /* Mueve el modal 2rem (32px) más arriba */
+        }
+
 
         .modal-content {
             background-color: var(--box-color);
@@ -435,7 +441,7 @@
         </div>
 
         <!-- Contenedor de la tabla, ahora se estira para llenar el espacio restante -->
-        <div class="data-table-container flex-grow max-h-[320px]">
+        <div class="data-table-container flex-grow max-h-[420px]">
             <table id="Data-grid" class="data-table">
                 <thead>
                     <tr>
@@ -696,7 +702,7 @@
 
             <!-- Contenedor de la tabla de vacaciones -->
             <!-- Se ajusta la altura máxima para mostrar más celdas -->
-            <div class="data-table-container max-h-[420px] mb-4">
+            <div class="data-table-container flex-grow max-h-[320px] mb-4">
                 <table id="vacation-grid" class="data-table">
                     <thead>
                         <tr>
