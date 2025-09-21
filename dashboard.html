@@ -463,6 +463,7 @@
                         <th data-sort-key="SECTOR">Sector</th>
                         <th data-sort-key="PERFIL">Perfil</th>
                         <th data-sort-key="NOTA">Nota</th>
+                        <th data-sort-key="VACACIONES">Días</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -532,6 +533,10 @@
                     <!-- El campo Nota ahora se mostrará u ocultará con JS -->
                     <div class="modal-field" id="nota-details-field">
                         <label>Nota:</label>
+                        <span id="field-nota-details"></span>
+                    </div>
+                    <div class="modal-field" id="nota-details-field">
+                        <label>Días:</label>
                         <span id="field-nota-details"></span>
                     </div>
                 </div>
@@ -695,9 +700,9 @@
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <div class="modal-header">
-                <h3 class="text-sm font-bold" id="vacationModalTitle">Detalles de Absentismos</h3>
+                <h3 class="text-xl font-bold" id="vacationModalTitle">Detalles de Absentismos</h3>
             </div>
-
+            
             <!-- Buscador para la tabla de vacaciones -->
             <!-- Se ajusta el buscador para que el botón esté a la derecha -->
             <div class="flex flex-row items-center space-x-2 mb-2">
@@ -714,10 +719,10 @@
                     <thead>
                         <tr>
                             <th class="text-right">ID</th>
-                            <th>PERIODO</th>
-                            <th>DESCRIPCIÓN_CONCEPTO</th>
-                            <th class="text-right">DIAS_VACACIONES</th>
-                            <th class="text-right">BONO_VACACIONAL</th>
+                            <th data-sort-key="PERIODO">PERIODO</th>
+                            <th data-sort-key="DESCRIPCIÓN_CONCEPTO">DESCRIPCIÓN_CONCEPTO</th>
+                            <th class="text-right" data-sort-key="DIAS_VACACIONES">DIAS_VACACIONES</th>
+                            <th class="text-right" data-sort-key="BONO_VACACIONAL">BONO_VACACIONAL</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -872,7 +877,8 @@
                 'Ingreso': 'INGRESO',
                 'Sector': 'SECTOR',
                 'Perfil': 'PERFIL',
-                'Nota': 'CTRL1'
+                'Nota': 'CTRL1',
+                'Dias': 'CTRL2'
             };
 
             let allPersonData = [];
@@ -1284,6 +1290,7 @@
             
             // --- NUEVA LÓGICA PARA EL MODAL DE VACACIONES ---
             const vacationGridBody = document.querySelector('#vacation-grid tbody');
+            const vacationTableHeaders = document.querySelectorAll('#vacation-grid thead th[data-sort-key]');
             const vacationModalTitle = document.getElementById('vacationModalTitle');
             const vacationLoader = document.getElementById('vacation-loader'); // Nuevo loader para el modal
             const vacationSearchInput = document.getElementById('vacationSearchInput'); // Buscador
@@ -1291,6 +1298,8 @@
             
             let allVacationData = []; // Variable para almacenar todos los datos de vacaciones
             let selectedVacationIndex = -1; // Índice del registro de vacaciones seleccionado
+            let vacationSortKey = 'PERIODO'; // Clave de ordenación por defecto
+            let vacationSortDirection = 'desc'; // Dirección de ordenación por defecto
 
             const vacationHeaderMapping = {
                 'CÉDULA': 'CÉDULA',
@@ -1342,19 +1351,28 @@
                         return;
                     }
                     
-                    // Lógica de filtrado mejorada
+                    // Lógica de filtrado mejorada: por cédula y por la columna de días de vacaciones que sean números
                     allVacationData = result.data.filter(row => {
                         const rowCedula = String(row['CÉDULA']).trim();
                         const personalCedula = String(cedula).trim();
-                        return rowCedula === personalCedula;
+                        const diasVacaciones = parseFloat(row['DIAS_VACACIONES']);
+                        return rowCedula === personalCedula && !isNaN(diasVacaciones);
                     });
                     
-                    renderVacationTable(allVacationData);
+                    // Ordena los datos de vacaciones por defecto
+                    sortVacationTable(vacationSortKey, vacationSortDirection);
+
                     // Actualiza el título con el nombre y apellido formateados
                     const formattedNombres = formatNameForModal(nombres);
                     const formattedApellidos = formatApellidosForModal(apellidos);
                     // Actualiza el título para que muestre el nombre/apellido en una línea y la cédula en otra.
-                    vacationModalTitle.innerHTML = `${formattedApellidos} ${formattedNombres}<br>CI: ${cedula}`;
+                    vacationModalTitle.innerHTML = `${formattedNombres} ${formattedApellidos}<br>CI: ${cedula}`;
+                    
+                    // Remueve la clase 'selected-sort-header' de todos los encabezados
+                    vacationTableHeaders.forEach(th => th.classList.remove('selected-sort-header'));
+                    // Añade la clase al encabezado de la columna de ordenación por defecto
+                    document.querySelector(`th[data-sort-key="${vacationSortKey}"]`).classList.add('selected-sort-header');
+
                 } catch (error) {
                     vacationGridBody.innerHTML = `<tr><td colspan="5" class="text-center text-red-600">No se pudo conectar con el script.</td></tr>`;
                     console.error('Fetch Error:', error);
@@ -1396,6 +1414,41 @@
                 });
             }
             
+            // Función de ordenación para la tabla de vacaciones
+            function sortVacationTable(key, direction) {
+                allVacationData.sort((a, b) => {
+                    const valA = String(a[key]).toLowerCase();
+                    const valB = String(b[key]).toLowerCase();
+                    if (valA < valB) {
+                        return direction === 'asc' ? -1 : 1;
+                    }
+                    if (valA > valB) {
+                        return direction === 'asc' ? 1 : -1;
+                    }
+                    return 0;
+                });
+                renderVacationTable(allVacationData);
+            }
+
+            vacationTableHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const newSortKey = header.dataset.sortKey;
+
+                    // Remueve la clase de todos los encabezados
+                    vacationTableHeaders.forEach(th => th.classList.remove('selected-sort-header'));
+
+                    if (newSortKey === vacationSortKey) {
+                        vacationSortDirection = vacationSortDirection === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        vacationSortKey = newSortKey;
+                        vacationSortDirection = 'asc';
+                    }
+
+                    header.classList.add('selected-sort-header');
+                    sortVacationTable(vacationSortKey, vacationSortDirection);
+                });
+            });
+
             function filterVacationTable() {
                 const query = vacationSearchInput.value.toLowerCase();
                 const filteredData = allVacationData.filter(row => {
