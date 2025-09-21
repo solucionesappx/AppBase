@@ -740,8 +740,9 @@
             <div class="modal-header">
                 <h3 class="text-xl font-bold">Detalles de Vacaciones</h3>
             </div>
-            <!-- Contenido del modal (campos de datos) -->
+           <!-- Contenido del modal (campos de datos) -->
             <div id="modal-pages-container-vacation-details">
+                <!-- Se ha añadido un campo para mostrar el ID autogenerado -->
                 <div class="modal-field">
                     <label>ID:</label>
                     <span id="field-id-vacation-details"></span>
@@ -761,25 +762,25 @@
                 <div class="modal-field">
                     <label>BONO_VACACIONAL:</label>
                     <span id="field-bono-vacacional-vacation-details"></span>
-                </div>
+            </div>
+            <!-- Nuevo elemento para mostrar la posición del registro -->
+            <!-- Elemento de posición del registro con un borde -->
+            <p id="vacationRecordPosition" class="text-xl text-center font-semibold mt-4 border border-gray-400 rounded-md px-4 py-2"></p>
+            
             </div>
             <!-- Navegación del Modal -->
-            <div class="modal-footer flex flex-col items-center">
-                <!-- Indicador de registro -->
-                <p id="vacationRecordIndicator" class="text-center text-sm text-gray-400 mb-2"></p>
-                <div class="flex items-center justify-between w-full">
-                    <!-- Contenedor para botones de navegación -->
-                    <div class="flex space-x-2">
-                        <button id="prevPageBtnVacationDetails" class="modal-nav-button" disabled>
-                            <i class="fa-solid fa-angle-left"></i>
-                        </button>
-                        <button id="nextPageBtnVacationDetails" class="modal-nav-button">
-                            <i class="fa-solid fa-angle-right"></i>
-                        </button>
-                    </div>
-                    <!-- Botón de acción principal -->
-                    <button class="modal-action-button close-modal-btn">Aceptar</button>
+            <div class="modal-footer flex items-center justify-between">
+                <!-- Contenedor para botones de navegación -->
+                <div class="flex space-x-2">
+                    <button id="prevPageBtnVacationDetails" class="modal-nav-button" disabled>
+                        <i class="fa-solid fa-angle-left"></i>
+                    </button>
+                    <button id="nextPageBtnVacationDetails" class="modal-nav-button">
+                        <i class="fa-solid fa-angle-right"></i>
+                    </button>
                 </div>
+                <!-- Botón de acción principal -->
+                <button class="modal-action-button close-modal-btn">Aceptar</button>
             </div>
         </div>
     </div>
@@ -1004,7 +1005,7 @@
                     apellidosHeader.classList.add('selected-sort-header');
                     sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i>';
                 } else {
-                    // Si ya hay una columna seleccionada, solo cambia la dirección
+                    // Si ya hay una columna seleccionada, simplemente invierte la dirección
                     if (sortDirection === 'asc') {
                         sortDirection = 'desc';
                         sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-z-a"></i>';
@@ -1291,7 +1292,6 @@
             let selectedVacationIndex = -1; // Índice del registro de vacaciones seleccionado
 
             const vacationHeaderMapping = {
-                'ID': 'ID',
                 'CÉDULA': 'CÉDULA',
                 'PERIODO': 'PERIODO',
                 'DESCRIPCIÓN_CONCEPTO': 'DESCRIPCIÓN_CONCEPTO',
@@ -1354,16 +1354,15 @@
                     const tableRow = document.createElement('tr');
                     tableRow.dataset.index = index; // Guarda el índice del array filtrado
                     const idCell = document.createElement('td');
-                    // El ID se obtiene del campo 'ID' del objeto `row` y no del índice del array filtrado
-                    idCell.textContent = row['ID'] || ''; 
+                    idCell.textContent = (index + 1);
                     idCell.classList.add('text-right');
                     tableRow.appendChild(idCell);
                     Object.keys(vacationHeaderMapping).forEach((key) => {
                         const cell = document.createElement('td');
                         const jsonKey = vacationHeaderMapping[key];
                         let cellContent = row[jsonKey] || '';
-                        // Se omite la columna CÉDULA y el ID que ya se incluyó
-                        if (jsonKey === 'CÉDULA' || jsonKey === 'ID') {
+                        // Se omite la columna CÉDULA para que no se muestre en la tabla
+                        if (jsonKey === 'CÉDULA') {
                             return;
                         }
                         cell.textContent = cellContent;
@@ -1396,6 +1395,7 @@
             openVacationModalBtn.addEventListener('click', () => {
                 if (selectedPerson && selectedPerson['CÉDULA']) {
                     loadVacationData(selectedPerson['CÉDULA']);
+                    hideModal(detailsModal); // Ocultar el modal de detalles antes de abrir el de vacaciones
                     showModal(vacationModal);
                 } else {
                     showMessage("Por favor, selecciona una fila para ver los datos de vacaciones.");
@@ -1405,6 +1405,7 @@
             openVacationModalEditBtn.addEventListener('click', () => {
                 if (selectedPerson && selectedPerson['CÉDULA']) {
                     loadVacationData(selectedPerson['CÉDULA']);
+                    hideModal(editModal); // Ocultar el modal de editar antes de abrir el de vacaciones
                     showModal(vacationModal);
                 } else {
                     showMessage("Por favor, selecciona una fila para ver los datos de vacaciones.");
@@ -1413,7 +1414,7 @@
 
             // --- Lógica del nuevo modal de detalles de vacaciones ---
             const vacationDetailsModalEl = document.getElementById('vacationDetailsModal');
-            const vacationRecordIndicator = document.getElementById('vacationRecordIndicator');
+            const vacationRecordPositionEl = document.getElementById('vacationRecordPosition');
             const vacationDetailsFields = {
                 'ID': document.getElementById('field-id-vacation-details'),
                 'PERIODO': document.getElementById('field-periodo-vacation-details'),
@@ -1425,33 +1426,27 @@
             const prevPageBtnVacationDetails = document.getElementById('prevPageBtnVacationDetails');
             const nextPageBtnVacationDetails = document.getElementById('nextPageBtnVacationDetails');
 
-            function showVacationDetailsModal(record) {
+            function showVacationDetailsModal(record, index) {
                 // Actualiza los campos del modal
-                vacationDetailsFields['ID'].textContent = record['ID'] || '';
+                vacationDetailsFields['ID'].textContent = index + 1;
                 vacationDetailsFields['PERIODO'].textContent = record['PERIODO'] || '';
                 vacationDetailsFields['DESCRIPCIÓN_CONCEPTO'].textContent = record['DESCRIPCIÓN_CONCEPTO'] || '';
                 vacationDetailsFields['DIAS_VACACIONES'].textContent = record['DIAS_VACACIONES'] || '';
                 vacationDetailsFields['BONO_VACACIONAL'].textContent = record['BONO_VACACIONAL'] || '';
                 
+                // Actualiza el texto de la posición del registro
+                vacationRecordPositionEl.textContent = `Registro ${index + 1} de ${allVacationData.length}`;
+                
                 // Muestra el modal
                 showModal(vacationDetailsModalEl);
                 
-                // Actualiza el estado de los botones de navegación y el indicador de progreso
+                // Actualiza el estado de los botones de navegación
                 updateVacationDetailsNavButtons();
-                updateVacationRecordIndicator();
             }
 
             function updateVacationDetailsNavButtons() {
                 prevPageBtnVacationDetails.disabled = selectedVacationIndex <= 0;
                 nextPageBtnVacationDetails.disabled = selectedVacationIndex >= allVacationData.length - 1;
-            }
-
-            function updateVacationRecordIndicator() {
-                if (allVacationData.length > 0) {
-                    vacationRecordIndicator.textContent = `Registro ${selectedVacationIndex + 1} de ${allVacationData.length}`;
-                } else {
-                    vacationRecordIndicator.textContent = 'No hay registros';
-                }
             }
 
             vacationGridBody.addEventListener('click', (event) => {
@@ -1475,7 +1470,7 @@
                     const vacationData = allVacationData[index];
                     if (vacationData) {
                         selectedVacationIndex = index;
-                        showVacationDetailsModal(vacationData);
+                        showVacationDetailsModal(vacationData, index);
                     }
                 }
             });
@@ -1483,14 +1478,14 @@
             prevPageBtnVacationDetails.addEventListener('click', () => {
                 if (selectedVacationIndex > 0) {
                     selectedVacationIndex--;
-                    showVacationDetailsModal(allVacationData[selectedVacationIndex]);
+                    showVacationDetailsModal(allVacationData[selectedVacationIndex], selectedVacationIndex);
                 }
             });
 
             nextPageBtnVacationDetails.addEventListener('click', () => {
                 if (selectedVacationIndex < allVacationData.length - 1) {
                     selectedVacationIndex++;
-                    showVacationDetailsModal(allVacationData[selectedVacationIndex]);
+                    showVacationDetailsModal(allVacationData[selectedVacationIndex], selectedVacationIndex);
                 }
             });
 
