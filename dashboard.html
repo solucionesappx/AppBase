@@ -168,7 +168,7 @@
             background-color: rgba(255, 255, 255, 0.05);
         }
         
-        /* Estilos para el encabezado y las celdas de la primera columna (ID) */
+        /* Estilo para el encabezado y las celdas de la primera columna (ID) */
         .data-table th:first-child, .data-table td:first-child {
             position: sticky;
             left: 0;
@@ -359,6 +359,21 @@
 
         .file-upload-label:hover {
             background-color: #45a049;
+        }
+
+        /* Estilo para el loader en el modal de vacaciones */
+        .vacation-loader {
+            position: absolute;
+            top: 0; /* Se ajusta el top a 0% */
+            left: 0; /* Se ajusta el left a 0% */
+            width: 100%;
+            height: 100%;
+            z-index: 110; /* Mayor que el modal-content */
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0.5rem; /* El mismo border-radius que el modal */
         }
     </style>
     <!-- Media query para ocultar la aplicación en pantallas de más de 450px -->
@@ -658,14 +673,30 @@
     <!-- Nuevo Modal: Datos de Vacaciones -->
     <div id="vacationModal" class="modal-container hidden">
         <div class="modal-content relative">
+            <!-- Loader para este modal -->
+            <div id="vacation-loader" class="vacation-loader hidden">
+                <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
+            </div>
+
             <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <div class="modal-header">
                 <h3 class="text-xl font-bold" id="vacationModalTitle">Vacaciones</h3>
             </div>
+            
+            <!-- Buscador para la tabla de vacaciones -->
+            <!-- Se ajusta el buscador para que el botón esté a la derecha -->
+            <div class="flex flex-row items-center space-x-2 mb-2">
+                <input type="text" id="vacationSearchInput" placeholder="Buscar..." class="flex-grow p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" autocomplete="off">
+                <button id="vacationCancelButton" class="text-3xl text-red-600 hover:text-red-700 bg-transparent transition-colors focus:outline-none focus:ring-0">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
             <!-- Contenedor de la tabla de vacaciones -->
-            <div class="data-table-container max-h-[300px] mb-4">
+            <!-- Se ajusta la altura máxima para mostrar más celdas -->
+            <div class="data-table-container max-h-[420px] mb-4">
                 <table id="vacation-grid" class="data-table">
                     <thead>
                         <tr>
@@ -1185,7 +1216,14 @@
             // --- NUEVA LÓGICA PARA EL MODAL DE VACACIONES ---
             const vacationGridBody = document.querySelector('#vacation-grid tbody');
             const vacationModalTitle = document.getElementById('vacationModalTitle');
+            const vacationLoader = document.getElementById('vacation-loader'); // Nuevo loader para el modal
+            const vacationSearchInput = document.getElementById('vacationSearchInput'); // Buscador
+            const vacationCancelButton = document.getElementById('vacationCancelButton'); // Botón de cancelar
+            
+            let allVacationData = []; // Variable para almacenar todos los datos de vacaciones
+
             const vacationHeaderMapping = {
+                'CÉDULA': 'CÉDULA',
                 'PERIODO': 'PERIODO',
                 'DESCRIPCIÓN_CONCEPTO': 'DESCRIPCIÓN_CONCEPTO',
                 'DIAS_VACACIONES': 'DIAS_VACACIONES',
@@ -1197,12 +1235,15 @@
                     showMessage("No se ha proporcionado una cédula para buscar datos de vacaciones.", 3000, true);
                     return;
                 }
-                loader.classList.remove('hidden');
+                vacationLoader.classList.remove('hidden'); // Muestra el loader
                 vacationGridBody.innerHTML = '';
                 try {
-                    // Llamar a la API con el nombre de la hoja y el parámetro de cédula
-                    const response = await fetch(`${GAS_URL}?sheet=Vacaciones&cedula=${cedula}`);
+                    // Llama a la API con el nombre de la hoja
+                    const response = await fetch(`${GAS_URL}?sheet=Vacaciones`);
                     const result = await response.json();
+
+                    // Validamos la respuesta aquí y mostramos los datos en la consola
+                    console.log('Respuesta completa de la API para Vacaciones:', result);
 
                     if (result.error) {
                         vacationGridBody.innerHTML = `<tr><td colspan="5" class="text-center text-red-600">Error: ${result.error}</td></tr>`;
@@ -1210,17 +1251,25 @@
                         return;
                     }
                     
-                    const filteredData = result.data.filter(row => String(row['CÉDULA']).trim() === String(cedula).trim());
+                    // Lógica de filtrado mejorada
+                    allVacationData = result.data.filter(row => {
+                        const rowCedula = String(row['CÉDULA']).trim();
+                        const personalCedula = String(cedula).trim();
+                        return rowCedula === personalCedula;
+                    });
                     
-                    renderVacationTable(filteredData);
-                    vacationModalTitle.textContent = `Vacaciones - Cédula: ${cedula}`;
+                    // Validamos los datos filtrados en la consola
+                    console.log('Datos de vacaciones filtrados por CÉDULA:', allVacationData);
+
+                    renderVacationTable(allVacationData);
+                    vacationModalTitle.textContent = `ID: ${cedula}`;
                     console.log("Datos de vacaciones cargados correctamente.");
 
                 } catch (error) {
                     vacationGridBody.innerHTML = `<tr><td colspan="5" class="text-center text-red-600">No se pudo conectar con el script.</td></tr>`;
                     console.error('Fetch Error:', error);
                 } finally {
-                    loader.classList.add('hidden');
+                    vacationLoader.classList.add('hidden'); // Oculta el loader
                 }
             }
 
@@ -1242,6 +1291,10 @@
                         const cell = document.createElement('td');
                         const jsonKey = vacationHeaderMapping[key];
                         let cellContent = row[jsonKey] || '';
+                        // Se omite la columna CÉDULA para que no se muestre en la tabla
+                        if (jsonKey === 'CÉDULA') {
+                            return;
+                        }
                         cell.textContent = cellContent;
                         if (key === 'DIAS_VACACIONES' || key === 'BONO_VACACIONAL') {
                             cell.classList.add('text-right');
@@ -1251,6 +1304,23 @@
                     vacationGridBody.appendChild(tableRow);
                 });
             }
+            
+            function filterVacationTable() {
+                const query = vacationSearchInput.value.toLowerCase();
+                const filteredData = allVacationData.filter(row => {
+                    return Object.values(row).some(value => {
+                        return String(value).toLowerCase().includes(query);
+                    });
+                });
+                renderVacationTable(filteredData);
+            }
+
+            vacationSearchInput.addEventListener('input', filterVacationTable);
+
+            vacationCancelButton.addEventListener('click', () => {
+                vacationSearchInput.value = '';
+                renderVacationTable(allVacationData);
+            });
 
             openVacationModalBtn.addEventListener('click', () => {
                 if (selectedPerson && selectedPerson['CÉDULA']) {
