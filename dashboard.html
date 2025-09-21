@@ -255,6 +255,13 @@
             transition: transform 0.3s ease;
         }
 
+        /* Regla para definir el tamaño del modal de vacaciones */
+        #vacationModal .modal-content {
+            max-height: 90vh; /* Altura máxima del 90% del viewport */
+            overflow-y: auto; /* Permite desplazamiento si el contenido excede la altura */
+        }
+
+        
         .modal-container.active .modal-content {
             transform: scale(1);
         }
