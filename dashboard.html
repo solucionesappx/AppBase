@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App JAL</title>
+    <title>App JAL5</title>
     <!-- Incluye el CDN de Tailwind CSS para un estilo rápido y moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Incluye la librería de iconos Font Awesome -->
@@ -695,9 +695,9 @@
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <div class="modal-header">
-                <h3 class="text-xl font-bold" id="vacationModalTitle">Vacaciones</h3>
+                <h3 class="text-sm font-bold" id="vacationModalTitle">Detalles de Absentismos</h3>
             </div>
-            
+
             <!-- Buscador para la tabla de vacaciones -->
             <!-- Se ajusta el buscador para que el botón esté a la derecha -->
             <div class="flex flex-row items-center space-x-2 mb-2">
@@ -1300,7 +1300,31 @@
                 'BONO_VACACIONAL': 'BONO_VACACIONAL'
             };
 
-            async function loadVacationData(cedula) {
+            // Función para formatear el nombre con iniciales
+            function formatNameForModal(name) {
+                if (!name) return '';
+                const parts = name.trim().split(/\s+/);
+                if (parts.length > 1) {
+                    const firstPart = parts[0];
+                    const secondInitial = parts[1].charAt(0).toUpperCase();
+                    return `${firstPart} ${secondInitial}.`;
+                }
+                return name;
+            }
+            
+            // Función para formatear los apellidos con iniciales
+            function formatApellidosForModal(apellidos) {
+                if (!apellidos) return '';
+                const parts = apellidos.trim().split(/\s+/);
+                if (parts.length > 1) {
+                    const firstPart = parts[0];
+                    const secondInitial = parts[1].charAt(0).toUpperCase();
+                    return `${firstPart} ${secondInitial}.`;
+                }
+                return apellidos;
+            }
+
+            async function loadVacationData(cedula, nombres, apellidos) {
                 if (!cedula) {
                     showMessage("No se ha proporcionado una cédula para buscar datos de vacaciones.", 3000, true);
                     return;
@@ -1326,8 +1350,11 @@
                     });
                     
                     renderVacationTable(allVacationData);
-                    vacationModalTitle.textContent = `ID: ${cedula}`;
-
+                    // Actualiza el título con el nombre y apellido formateados
+                    const formattedNombres = formatNameForModal(nombres);
+                    const formattedApellidos = formatApellidosForModal(apellidos);
+                    // Actualiza el título para que muestre el nombre/apellido en una línea y la cédula en otra.
+                    vacationModalTitle.innerHTML = `${formattedApellidos} ${formattedNombres}<br>CI: ${cedula}`;
                 } catch (error) {
                     vacationGridBody.innerHTML = `<tr><td colspan="5" class="text-center text-red-600">No se pudo conectar con el script.</td></tr>`;
                     console.error('Fetch Error:', error);
@@ -1388,7 +1415,7 @@
 
             openVacationModalBtn.addEventListener('click', () => {
                 if (selectedPerson && selectedPerson['CÉDULA']) {
-                    loadVacationData(selectedPerson['CÉDULA']);
+                    loadVacationData(selectedPerson['CÉDULA'], selectedPerson['NOMBRES'], selectedPerson['APELLIDOS']);
                     hideModal(detailsModal); // Ocultar el modal de detalles antes de abrir el de vacaciones
                     showModal(vacationModal);
                 } else {
@@ -1398,7 +1425,7 @@
 
             openVacationModalEditBtn.addEventListener('click', () => {
                 if (selectedPerson && selectedPerson['CÉDULA']) {
-                    loadVacationData(selectedPerson['CÉDULA']);
+                    loadVacationData(selectedPerson['CÉDULA'], selectedPerson['NOMBRES'], selectedPerson['APELLIDOS']);
                     hideModal(editModal); // Ocultar el modal de editar antes de abrir el de vacaciones
                     showModal(vacationModal);
                 } else {
