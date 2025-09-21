@@ -731,6 +731,59 @@
         </div>
     </div>
 
+    <!-- Nuevo Modal: Detalles de Vacaciones -->
+    <div id="vacationDetailsModal" class="modal-container hidden">
+        <div class="modal-content relative">
+            <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="modal-header">
+                <h3 class="text-xl font-bold">Detalles de Vacaciones</h3>
+            </div>
+            <!-- Contenido del modal (campos de datos) -->
+            <div id="modal-pages-container-vacation-details">
+                <div class="modal-field">
+                    <label>ID:</label>
+                    <span id="field-id-vacation-details"></span>
+                </div>
+                <div class="modal-field">
+                    <label>PERIODO:</label>
+                    <span id="field-periodo-vacation-details"></span>
+                </div>
+                <div class="modal-field">
+                    <label>DESCRIPCIÓN_CONCEPTO:</label>
+                    <span id="field-descripcion-vacation-details"></span>
+                </div>
+                <div class="modal-field">
+                    <label>DIAS_VACACIONES:</label>
+                    <span id="field-dias-vacaciones-vacation-details"></span>
+                </div>
+                <div class="modal-field">
+                    <label>BONO_VACACIONAL:</label>
+                    <span id="field-bono-vacacional-vacation-details"></span>
+                </div>
+            </div>
+            <!-- Navegación del Modal -->
+            <div class="modal-footer flex flex-col items-center">
+                <!-- Indicador de registro -->
+                <p id="vacationRecordIndicator" class="text-center text-sm text-gray-400 mb-2"></p>
+                <div class="flex items-center justify-between w-full">
+                    <!-- Contenedor para botones de navegación -->
+                    <div class="flex space-x-2">
+                        <button id="prevPageBtnVacationDetails" class="modal-nav-button" disabled>
+                            <i class="fa-solid fa-angle-left"></i>
+                        </button>
+                        <button id="nextPageBtnVacationDetails" class="modal-nav-button">
+                            <i class="fa-solid fa-angle-right"></i>
+                        </button>
+                    </div>
+                    <!-- Botón de acción principal -->
+                    <button class="modal-action-button close-modal-btn">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Barra de Navegación Fija (Footer) -->
     <footer class="fixed bottom-0 left-0 w-full header-bg box-shadow-up z-50 transition-colors">
         <div class="container max-w-lg mx-auto px-4 py-3 flex items-end justify-between relative">
@@ -951,7 +1004,7 @@
                     apellidosHeader.classList.add('selected-sort-header');
                     sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i>';
                 } else {
-                    // Si ya hay una columna seleccionada, simplemente invierte la dirección
+                    // Si ya hay una columna seleccionada, solo cambia la dirección
                     if (sortDirection === 'asc') {
                         sortDirection = 'desc';
                         sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-z-a"></i>';
@@ -1123,6 +1176,7 @@
             const settingsModal = document.getElementById('settingsModal');
             const helpModal = document.getElementById('helpModal');
             const vacationModal = document.getElementById('vacationModal');
+            const vacationDetailsModal = document.getElementById('vacationDetailsModal'); // Nuevo modal de detalles de vacaciones
 
             // Función genérica para mostrar un modal
             function showModal(modalElement) {
@@ -1234,8 +1288,10 @@
             const vacationCancelButton = document.getElementById('vacationCancelButton'); // Botón de cancelar
             
             let allVacationData = []; // Variable para almacenar todos los datos de vacaciones
+            let selectedVacationIndex = -1; // Índice del registro de vacaciones seleccionado
 
             const vacationHeaderMapping = {
+                'ID': 'ID',
                 'CÉDULA': 'CÉDULA',
                 'PERIODO': 'PERIODO',
                 'DESCRIPCIÓN_CONCEPTO': 'DESCRIPCIÓN_CONCEPTO',
@@ -1296,16 +1352,18 @@
                 }
                 data.forEach((row, index) => {
                     const tableRow = document.createElement('tr');
+                    tableRow.dataset.index = index; // Guarda el índice del array filtrado
                     const idCell = document.createElement('td');
-                    idCell.textContent = (index + 1);
+                    // El ID se obtiene del campo 'ID' del objeto `row` y no del índice del array filtrado
+                    idCell.textContent = row['ID'] || ''; 
                     idCell.classList.add('text-right');
                     tableRow.appendChild(idCell);
                     Object.keys(vacationHeaderMapping).forEach((key) => {
                         const cell = document.createElement('td');
                         const jsonKey = vacationHeaderMapping[key];
                         let cellContent = row[jsonKey] || '';
-                        // Se omite la columna CÉDULA para que no se muestre en la tabla
-                        if (jsonKey === 'CÉDULA') {
+                        // Se omite la columna CÉDULA y el ID que ya se incluyó
+                        if (jsonKey === 'CÉDULA' || jsonKey === 'ID') {
                             return;
                         }
                         cell.textContent = cellContent;
@@ -1350,6 +1408,89 @@
                     showModal(vacationModal);
                 } else {
                     showMessage("Por favor, selecciona una fila para ver los datos de vacaciones.");
+                }
+            });
+
+            // --- Lógica del nuevo modal de detalles de vacaciones ---
+            const vacationDetailsModalEl = document.getElementById('vacationDetailsModal');
+            const vacationRecordIndicator = document.getElementById('vacationRecordIndicator');
+            const vacationDetailsFields = {
+                'ID': document.getElementById('field-id-vacation-details'),
+                'PERIODO': document.getElementById('field-periodo-vacation-details'),
+                'DESCRIPCIÓN_CONCEPTO': document.getElementById('field-descripcion-vacation-details'),
+                'DIAS_VACACIONES': document.getElementById('field-dias-vacaciones-vacation-details'),
+                'BONO_VACACIONAL': document.getElementById('field-bono-vacacional-vacation-details')
+            };
+
+            const prevPageBtnVacationDetails = document.getElementById('prevPageBtnVacationDetails');
+            const nextPageBtnVacationDetails = document.getElementById('nextPageBtnVacationDetails');
+
+            function showVacationDetailsModal(record) {
+                // Actualiza los campos del modal
+                vacationDetailsFields['ID'].textContent = record['ID'] || '';
+                vacationDetailsFields['PERIODO'].textContent = record['PERIODO'] || '';
+                vacationDetailsFields['DESCRIPCIÓN_CONCEPTO'].textContent = record['DESCRIPCIÓN_CONCEPTO'] || '';
+                vacationDetailsFields['DIAS_VACACIONES'].textContent = record['DIAS_VACACIONES'] || '';
+                vacationDetailsFields['BONO_VACACIONAL'].textContent = record['BONO_VACACIONAL'] || '';
+                
+                // Muestra el modal
+                showModal(vacationDetailsModalEl);
+                
+                // Actualiza el estado de los botones de navegación y el indicador de progreso
+                updateVacationDetailsNavButtons();
+                updateVacationRecordIndicator();
+            }
+
+            function updateVacationDetailsNavButtons() {
+                prevPageBtnVacationDetails.disabled = selectedVacationIndex <= 0;
+                nextPageBtnVacationDetails.disabled = selectedVacationIndex >= allVacationData.length - 1;
+            }
+
+            function updateVacationRecordIndicator() {
+                if (allVacationData.length > 0) {
+                    vacationRecordIndicator.textContent = `Registro ${selectedVacationIndex + 1} de ${allVacationData.length}`;
+                } else {
+                    vacationRecordIndicator.textContent = 'No hay registros';
+                }
+            }
+
+            vacationGridBody.addEventListener('click', (event) => {
+                const clickedRow = event.target.closest('tr');
+                if (clickedRow) {
+                    // Remueve la clase 'selected' de todas las filas en la tabla de vacaciones
+                    document.querySelectorAll('#vacation-grid tbody tr').forEach(row => {
+                        row.classList.remove('selected');
+                    });
+                    // Añade la clase 'selected' a la fila clicada
+                    clickedRow.classList.add('selected');
+                    // Guarda el índice del registro seleccionado
+                    selectedVacationIndex = parseInt(clickedRow.dataset.index);
+                }
+            });
+
+            vacationGridBody.addEventListener('dblclick', (event) => {
+                const clickedRow = event.target.closest('tr');
+                if (clickedRow) {
+                    const index = parseInt(clickedRow.dataset.index);
+                    const vacationData = allVacationData[index];
+                    if (vacationData) {
+                        selectedVacationIndex = index;
+                        showVacationDetailsModal(vacationData);
+                    }
+                }
+            });
+
+            prevPageBtnVacationDetails.addEventListener('click', () => {
+                if (selectedVacationIndex > 0) {
+                    selectedVacationIndex--;
+                    showVacationDetailsModal(allVacationData[selectedVacationIndex]);
+                }
+            });
+
+            nextPageBtnVacationDetails.addEventListener('click', () => {
+                if (selectedVacationIndex < allVacationData.length - 1) {
+                    selectedVacationIndex++;
+                    showVacationDetailsModal(allVacationData[selectedVacationIndex]);
                 }
             });
 
