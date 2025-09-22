@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App JAL</title>
+    <title>App JAL5</title>
     <!-- Incluye el CDN de Tailwind CSS para un estilo rápido y moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Incluye la librería de iconos Font Awesome -->
@@ -312,7 +312,7 @@
             display: flex;
             justify-content: space-between; /* Alineación de los botones */
             align-items: center;
-            padding-top: 1rem;
+            padding-top: 0rem;
         }
 
         .modal-nav-button {
@@ -394,7 +394,7 @@
             background-color: #1a202c; /* Fondo oscuro */
             color: #e2e8f0; /* Texto claro */
             border-radius: 0.5rem;
-            padding: 0.5rem;
+            padding: 0.75rem;
             margin-top: 1rem;
             display: flex;
             justify-content: space-between;
@@ -469,7 +469,7 @@
         </div>
 
         <!-- Contenedor de la tabla, ahora se estira para llenar el espacio restante -->
-        <div class="data-table-container flex-grow max-h-[460px]">
+        <div class="data-table-container flex-grow max-h-[480px]">
             <table id="Data-grid" class="data-table">
                 <thead>
                     <tr>
@@ -484,7 +484,6 @@
                         <th data-sort-key="SECTOR">Sector</th>
                         <th data-sort-key="PERFIL">Perfil</th>
                         <th data-sort-key="NOTA">Nota</th>
-                        <th data-sort-key="VACACIONES">Días</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -747,7 +746,7 @@
 
             <!-- Contenedor de la tabla de vacaciones -->
             <!-- Se ajusta la altura máxima para mostrar más celdas -->
-            <div class="data-table-container flex-grow max-h-[400px] mb-4">
+            <div class="data-table-container flex-grow max-h-[420px] mb-4">
                 <table id="vacation-grid" class="data-table">
                     <thead>
                         <tr>
@@ -765,7 +764,7 @@
             </div>
 
             <div class="modal-footer">
-                <button class="modal-action-button mt-4 close-modal-btn">Cerrar</button>
+                <button class="modal-action-button mt-0 close-modal-btn">Cerrar</button>
             </div>
         </div>
     </div>
@@ -912,7 +911,7 @@
                 'Sector': 'SECTOR',
                 'Perfil': 'PERFIL',
                 'Nota': 'CTRL1',
-                'Días': 'CTRL2' // Se incluye 'Dias' de este mapeo para que se muestre en la tabla
+                // Removimos 'Dias' de este mapeo para que no se muestre en la tabla
             };
 
             let allPersonData = [];
@@ -1406,12 +1405,30 @@
             }
 
             async function loadVacationData(cedula, nombres, apellidos) {
+                // CORRECCIÓN: Limpiar el título y resetear los campos antes de cargar los datos
+                vacationModalTitle.innerHTML = '';
+                vacationGridBody.innerHTML = '';
+                totalVacationDaysEl.textContent = '0';
+                vacationSearchInput.value = '';
+                allVacationData = [];
+                selectedVacationIndex = -1;
+                vacationSortKey = 'PERIODO';
+                vacationSortDirection = 'desc';
+                vacationTableHeaders.forEach(th => th.classList.remove('selected-sort-header'));
+                document.querySelector(`th[data-sort-key="${vacationSortKey}"]`).classList.add('selected-sort-header');
+
                 if (!cedula) {
                     showMessage("No se ha proporcionado una cédula para buscar datos de vacaciones.", 3000, true);
                     return;
                 }
+                
+                // Actualiza el título con el nombre y apellido formateados antes de mostrar el loader
+                const formattedNombres = formatNameForModal(nombres);
+                const formattedApellidos = formatApellidosForModal(apellidos);
+                vacationModalTitle.innerHTML = `${formattedNombres} ${formattedApellidos}<br>CI: ${cedula}`;
+
                 vacationLoader.classList.remove('hidden'); // Muestra el loader
-                vacationGridBody.innerHTML = '';
+                
                 try {
                     // Llama a la API con el nombre de la hoja
                     const response = await fetch(`${GAS_URL}?sheet=Vacaciones`);
@@ -1440,18 +1457,7 @@
                         return sum + (isNaN(dias) ? 0 : dias);
                     }, 0);
                     totalVacationDaysEl.textContent = totalDays;
-
-                    // Actualiza el título con el nombre y apellido formateados
-                    const formattedNombres = formatNameForModal(nombres);
-                    const formattedApellidos = formatApellidosForModal(apellidos);
-                    // Actualiza el título para que muestre el nombre/apellido en una línea y la cédula en otra.
-                    vacationModalTitle.innerHTML = `${formattedNombres} ${formattedApellidos}<br>CI: ${cedula}`;
                     
-                    // Remueve la clase 'selected-sort-header' de todos los encabezados
-                    vacationTableHeaders.forEach(th => th.classList.remove('selected-sort-header'));
-                    // Añade la clase al encabezado de la columna de ordenación por defecto
-                    document.querySelector(`th[data-sort-key="${vacationSortKey}"]`).classList.add('selected-sort-header');
-
                 } catch (error) {
                     vacationGridBody.innerHTML = `<tr><td colspan="5" class="text-center text-red-600">No se pudo conectar con el script.</td></tr>`;
                     console.error('Fetch Error:', error);
@@ -1459,7 +1465,7 @@
                     vacationLoader.classList.add('hidden'); // Oculta el loader
                 }
             }
-
+            
             function renderVacationTable(data) {
                 vacationGridBody.innerHTML = '';
                 if (!data || data.length === 0) {
@@ -1491,6 +1497,17 @@
                     });
                     vacationGridBody.appendChild(tableRow);
                 });
+            }
+
+            // Mueve la función de filtrado al ámbito global para que sea accesible
+            function filterVacationTable() {
+                const query = vacationSearchInput.value.toLowerCase();
+                const filteredData = allVacationData.filter(row => {
+                    return Object.values(row).some(value => {
+                        return String(value).toLowerCase().includes(query);
+                    });
+                });
+                renderVacationTable(filteredData);
             }
             
             // Función de ordenación para la tabla de vacaciones
@@ -1528,21 +1545,11 @@
                 });
             });
 
-            function filterVacationTable() {
-                const query = vacationSearchInput.value.toLowerCase();
-                const filteredData = allVacationData.filter(row => {
-                    return Object.values(row).some(value => {
-                        return String(value).toLowerCase().includes(query);
-                    });
-                });
-                renderVacationTable(filteredData);
-            }
-
             vacationSearchInput.addEventListener('input', filterVacationTable);
 
             vacationCancelButton.addEventListener('click', () => {
                 vacationSearchInput.value = '';
-                renderVacationTable(allVacationData);
+                renderVacationTable(allVacationData); // Muestra los datos sin filtrar
             });
 
             openVacationModalBtn.addEventListener('click', () => {
