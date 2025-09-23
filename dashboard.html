@@ -1315,7 +1315,7 @@
                 // NUEVA LÓGICA: Ocultar el campo de días si está vacío o es 0 en la página 2
                 if (currentEditPage === 2) {
                     const diasValue = selectedPerson['CTRL2'];
-                    if (diasValue === null || String(diasValue).trim() === '') {
+                    if (diasValue === null || String(diasValue).trim() === '' || diasValue === 0) {
                         diasEditField.style.display = 'none';
                     } else {
                         diasEditField.style.display = 'block';
