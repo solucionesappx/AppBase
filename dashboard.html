@@ -997,12 +997,26 @@
                     Object.keys(headerMapping).forEach((key) => {
                         const cell = document.createElement('td');
                         const jsonKey = headerMapping[key];
-                        let cellContent = row[jsonKey] || '';
-                        if (key === 'Ingreso') {
-                            cellContent = formatDate(cellContent);
+                        let cellContent = '';
+                        
+                        // Lógica para mostrar 0 en la tabla principal si el valor es 0, null o undefined
+                        if (jsonKey === 'CTRL2') {
+                            const diasValue = row[jsonKey];
+                            if (diasValue === null || diasValue === undefined || String(diasValue).trim() === '') {
+                                cellContent = '0';
+                            } else {
+                                cellContent = diasValue;
+                            }
+                        } else {
+                            // Para las otras columnas, se mantiene la lógica existente
+                            cellContent = row[jsonKey] || '';
+                            if (key === 'Ingreso') {
+                                cellContent = formatDate(cellContent);
+                            }
                         }
+
                         cell.textContent = cellContent;
-                        if (key === 'Cédula' || key === 'Ingreso') {
+                        if (key === 'Cédula' || key === 'Ingreso' || key === 'Días') { // Añadimos 'Días'
                             cell.classList.add('text-right');
                         }
                         tableRow.appendChild(cell);
