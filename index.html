@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -305,7 +306,7 @@
             </form>
         </div>
     </div>
-
+    
     <!-- MODAL PARA INGRESO MANUAL DE CONTRASEÑA -->
     <div id="generate-password-modal" class="modal">
         <div class="modal-content">
@@ -381,16 +382,6 @@
         
         // Variable para almacenar el correo del usuario
         let userEmailToUpdate = '';
-        
-        // --- NUEVO: Comprobación de sesión al cargar ---
-        document.addEventListener("DOMContentLoaded", () => {
-            const userData = JSON.parse(localStorage.getItem('userData'));
-            // Si hay sesión activa, redirige inmediatamente al dashboard
-            if (userData && userData.username) {
-                window.location.href = 'dashboard.html';
-            }
-        });
-
 
         // Lógica del tema
         const currentTheme = localStorage.getItem('theme');
@@ -422,15 +413,14 @@
         // Lógica para mostrar y ocultar modales y loaders
         function showLoader() {
             loader.classList.remove('hidden');
-            // Deshabilitar solo botones y inputs no relacionados con el loader
-            const elementsToDisable = document.querySelectorAll('button:not(#loader button), input:not(#loader input)');
-            elementsToDisable.forEach(el => el.disabled = true);
+            document.querySelectorAll('button').forEach(btn => btn.disabled = true);
+            document.querySelectorAll('input').forEach(input => input.disabled = true);
         }
 
         function hideLoader() {
             loader.classList.add('hidden');
-            const elementsToDisable = document.querySelectorAll('button:not(#loader button), input:not(#loader input)');
-            elementsToDisable.forEach(el => el.disabled = false);
+            document.querySelectorAll('button').forEach(btn => btn.disabled = false);
+            document.querySelectorAll('input').forEach(input => input.disabled = false);
         }
 
         // Función de modal personalizada mejorada para mostrar la contraseña
@@ -489,28 +479,13 @@
                     const result = await response.json();
 
                     if (result.success) {
-                        // --- INICIO: LÓGICA AGREGADA PARA GUARDAR SESIÓN Y NOMBRE DE USUARIO ---
-                        
-                        // Simulación de que el servidor devuelve el nombre del usuario
-                        // En una app real, result.username vendría de la respuesta del servidor.
-                        const userName = result.username || userEmailLogin.split('@')[0]; 
-                        
-                        const userData = {
-                            username: userName,
-                            // Puedes añadir más datos aquí si los devuelve el servidor
-                        };
-                        
-                        localStorage.setItem('userData', JSON.stringify(userData));
-                        // --- FIN: LÓGICA AGREGADA ---
-
                         loginForm.reset();
-                        // Redireccionamiento a dashboard.html al cerrar el modal de éxito
+                        // Redireccionamiento directo a dashboard.html al cerrar el modal de éxito
                         showCustomModal("¡Inicio de sesión exitoso!", null, 'dashboard.html');
                     } else {
                         showCustomModal(result.message || "Credenciales incorrectas. Por favor, inténtalo de nuevo.");
                     }
                 } catch (error) {
-                    console.error('Error de red/API:', error);
                     showCustomModal("Ocurrió un error al intentar iniciar sesión. Por favor, inténtalo de nuevo.");
                 } finally {
                     hideLoader();
@@ -556,7 +531,6 @@
                         showCustomModal(result.message || "No se pudo recuperar la contraseña. Verifica los datos.");
                     }
                 } catch (error) {
-                    console.error('Error de red/API:', error);
                     showCustomModal("Ocurrió un error al intentar recuperar la contraseña. Por favor, inténtalo de nuevo.");
                 } finally {
                     hideLoader();
@@ -592,7 +566,6 @@
                     showCustomModal(result.message || "Hubo un error al actualizar la contraseña.");
                 }
             } catch (error) {
-                console.error('Error de red/API:', error);
                 showCustomModal("Ocurrió un error de red al intentar actualizar la contraseña.");
             } finally {
                 hideLoader();
