@@ -944,7 +944,7 @@
             }
         });
 
-        document.addEventListener("DOMContentLoaded", () => {
+       document.addEventListener("DOMContentLoaded", () => {
             const DataGridBody = document.querySelector('#Data-grid tbody');
             const dataTableHeaders = document.querySelectorAll('#Data-grid thead th[data-sort-key]');
             const loader = document.getElementById('loader');
@@ -955,11 +955,14 @@
             const usuarioNombre = localStorage.getItem('Usuario_Nombre');
             const usuarioPerfil = localStorage.getItem('Usuario_Perfil');
             const usuarioIdx = localStorage.getItem('Usuario_Idx');
-            const usuarioprimerNombre = localStorage.getItem('Usuario_Primer_Nombre');
 
+            // Extraer el primer nombre
+            let primerNombre = '';
             if (usuarioNombre) {
-                document.querySelector('.text-2xl.font-semibold').textContent = `¡Hola, ${usuarioprimerNombre}!`;
+                primerNombre = usuarioNombre.trim().split(' ')[0];
+                document.querySelector('.text-2xl.font-semibold').textContent = `¡Hola, ${primerNombre}!`;
             }
+        });
             
             // Usamos el mismo URL base para todas las llamadas API
             const GAS_URL = 'https://script.google.com/macros/s/AKfycbx87WvxA9ca1KyGMA1wsw1npZw5vPtjoItomhF823BICXScNrWGFh5m0Dj6Veb24CtHXQ/exec';
