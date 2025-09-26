@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -955,12 +956,10 @@
             const usuarioNombre = localStorage.getItem('Usuario_Nombre');
             const usuarioPerfil = localStorage.getItem('Usuario_Perfil');
             const usuarioIdx = localStorage.getItem('Usuario_Idx');
-            const usuarioprimerNombre = localStorage.getItem('Usuario_Primer_Nombre');
 
             if (usuarioNombre) {
-                document.querySelector('.text-2xl.font-semibold').textContent = `¡Hola, ${usuarioprimerNombre}!`;
+                document.querySelector('.text-2xl.font-semibold').textContent = `¡Hola, ${usuarioNombre}!`;
             }
-        });
             
             // Usamos el mismo URL base para todas las llamadas API
             const GAS_URL = 'https://script.google.com/macros/s/AKfycbx87WvxA9ca1KyGMA1wsw1npZw5vPtjoItomhF823BICXScNrWGFh5m0Dj6Veb24CtHXQ/exec';
