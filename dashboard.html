@@ -154,6 +154,12 @@
         .data-table th[data-sort-key] {
             cursor: pointer;
         }
+        
+        /* Estilo para deshabilitar el cursor de los encabezados */
+        .data-table th.disabled-sort-header {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
 
         .data-table tbody tr {
             /* Transición para el efecto de hover */
@@ -273,6 +279,19 @@
             margin-bottom: 1rem;
             padding-top: 0.5rem;
             padding-right: 2.5rem; /* Ajuste para el botón de cierre que está fuera */
+        }
+        
+        /* Ajuste para el título del modal de vacaciones, permitiendo múltiples líneas */
+        #vacationModalTitle {
+            line-height: 1.2;
+            text-align: left;
+            margin-bottom: 0;
+        }
+        
+        /* Ajuste de tamaño de fuente para el título del modal de vacaciones en la segunda línea */
+        #vacationModalTitle br + br {
+            font-size: 0.8em;
+            font-weight: normal;
         }
         
         .modal-field {
@@ -757,6 +776,9 @@
             <!-- Buscador para la tabla de vacaciones -->
             <div class="flex flex-row items-center space-x-2 mb-2">
                 <input type="text" id="vacationSearchInput" placeholder="Buscar..." class="flex-grow p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" autocomplete="off">
+                <button id="vacationSortButton" class="text-3xl bg-transparent hover:text-blue-600 text-blue-500 font-bold py-2 px-4 rounded transition-colors duration-300 ease-in-out" aria-label="Ordenar">
+                    <i class="fa-solid fa-arrow-down-a-z"></i>
+                </button>
                 <button id="vacationCancelButton" class="text-3xl text-red-600 hover:text-red-700 bg-transparent transition-colors focus:outline-none focus:ring-0">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -1101,7 +1123,7 @@
                         sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i>';
                     }
                 }
-                sortTable(selectedSortKey, sortDirection);
+                sortTable(allPersonData, selectedSortKey, sortDirection);
             });
             
             // Maneja la selección de encabezados
@@ -1410,7 +1432,8 @@
             const vacationLoader = document.getElementById('vacation-loader');
             const vacationSearchInput = document.getElementById('vacationSearchInput');
             const vacationCancelButton = document.getElementById('vacationCancelButton');
-            const filterByPeriodCheckbox = document.getElementById('filterByPeriodCheckbox'); // NUEVO: Checkbox para filtrar por periodo
+            const vacationSortButton = document.getElementById('vacationSortButton');
+            const filterByPeriodCheckbox = document.getElementById('filterByPeriodCheckbox'); // Checkbox para filtrar por periodo
             
             let allVacationData = [];
             let selectedVacationIndex = -1;
@@ -1451,7 +1474,8 @@
                 return apellidos;
             }
 
-            async function loadVacationData(cedula, nombres, apellidos) {
+            // MODIFICACIÓN CRÍTICA: Se añade 'ingreso' a la firma de la función.
+            async function loadVacationData(cedula, nombres, apellidos, ingreso) {
                 vacationModalTitle.innerHTML = '';
                 vacationGridBody.innerHTML = '';
                 totalVacationDaysEl.textContent = '0';
@@ -1460,6 +1484,8 @@
                 vacationSearchInput.value = '';
                 filterByPeriodCheckbox.checked = false; // Reiniciar el checkbox
                 vacationSearchInput.placeholder = "Buscar..."; // Resetear el placeholder
+                vacationSortButton.style.display = 'block'; // Mostrar el botón de ordenación
+                enableVacationSorting(); // Habilitar la ordenación por defecto
                 allVacationData = [];
                 selectedVacationIndex = -1;
                 vacationSortKey = 'PERIODO';
@@ -1474,7 +1500,16 @@
                 
                 const formattedNombres = formatNameForModal(nombres);
                 const formattedApellidos = formatApellidosForModal(apellidos);
-                vacationModalTitle.innerHTML = `${formattedNombres} ${formattedApellidos}<br>CI: ${cedula}`;
+                
+                // NUEVO: Formatear la fecha de ingreso
+                const formattedIngreso = formatDate(ingreso);
+                
+                // ACTUALIZACIÓN: Se incluye la fecha de ingreso en el título
+                vacationModalTitle.innerHTML = `
+                    ${formattedNombres} ${formattedApellidos}<br>
+                    Cédula Identidad: ${cedula}<br>
+                    Fecha de Ingreso: ${formattedIngreso}
+                `;
 
                 vacationLoader.classList.remove('hidden');
                 
@@ -1558,10 +1593,29 @@
                 }, 0);
                 subtotalPositiveEl.textContent = subtotalPositive;
             }
+            
+            // Función para habilitar o deshabilitar la ordenación de la tabla de vacaciones
+            function toggleVacationSorting(enable) {
+                vacationTableHeaders.forEach(header => {
+                    if (header.dataset.sortKey) { // Se asegura de que solo los encabezados con data-sort-key sean afectados
+                        if (enable) {
+                            header.classList.remove('disabled-sort-header');
+                            header.style.pointerEvents = 'auto'; // Re-habilita los eventos de puntero
+                        } else {
+                            header.classList.add('disabled-sort-header');
+                            header.style.pointerEvents = 'none'; // Deshabilita los eventos de puntero
+                        }
+                    }
+                });
+                vacationSortButton.style.display = enable ? 'block' : 'none';
+            }
 
             function filterVacationTable() {
                 const query = vacationSearchInput.value.toLowerCase();
                 const filterByPeriod = filterByPeriodCheckbox.checked;
+                
+                // Desactiva la ordenación si el filtro por periodo está activo
+                toggleVacationSorting(!filterByPeriod);
 
                 const filteredData = allVacationData.filter(row => {
                     if (filterByPeriod) {
@@ -1591,22 +1645,59 @@
                 renderVacationTable(allVacationData);
                 updateVacationTotals(allVacationData);
             }
-
-            vacationTableHeaders.forEach(header => {
-                header.addEventListener('click', () => {
-                    const newSortKey = header.dataset.sortKey;
-                    vacationTableHeaders.forEach(th => th.classList.remove('selected-sort-header'));
-
-                    if (newSortKey === vacationSortKey) {
-                        vacationSortDirection = vacationSortDirection === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        vacationSortKey = newSortKey;
-                        vacationSortDirection = 'asc';
+            
+            function enableVacationSorting() {
+                vacationTableHeaders.forEach(header => {
+                    if (header.dataset.sortKey) {
+                        header.addEventListener('click', handleVacationSortClick);
+                        header.classList.remove('disabled-sort-header');
+                        header.style.pointerEvents = 'auto';
                     }
-
-                    header.classList.add('selected-sort-header');
-                    sortVacationTable(vacationSortKey, vacationSortDirection);
                 });
+            }
+
+            function disableVacationSorting() {
+                vacationTableHeaders.forEach(header => {
+                    header.removeEventListener('click', handleVacationSortClick);
+                    header.classList.add('disabled-sort-header');
+                    header.style.pointerEvents = 'none';
+                });
+            }
+            
+            function handleVacationSortClick(event) {
+                 const newSortKey = event.target.dataset.sortKey;
+                 vacationTableHeaders.forEach(th => th.classList.remove('selected-sort-header'));
+
+                 if (newSortKey === vacationSortKey) {
+                    vacationSortDirection = vacationSortDirection === 'asc' ? 'desc' : 'asc';
+                 } else {
+                    vacationSortKey = newSortKey;
+                    vacationSortDirection = 'asc';
+                 }
+
+                 event.target.classList.add('selected-sort-header');
+                 sortVacationTable(vacationSortKey, vacationSortDirection);
+            }
+            
+            vacationSortButton.addEventListener('click', () => {
+                // Si no se ha seleccionado una columna, usa 'PERIODO' por defecto
+                if (!vacationSortKey) {
+                    vacationSortKey = 'PERIODO';
+                    vacationSortDirection = 'asc';
+                    const periodoHeader = document.querySelector('#vacation-grid th[data-sort-key="PERIODO"]');
+                    periodoHeader.classList.add('selected-sort-header');
+                    vacationSortButton.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i>';
+                } else {
+                    // Si ya hay una columna seleccionada, simplemente invierte la dirección
+                    if (vacationSortDirection === 'asc') {
+                        vacationSortDirection = 'desc';
+                        vacationSortButton.innerHTML = '<i class="fa-solid fa-arrow-down-z-a"></i>';
+                    } else {
+                        vacationSortDirection = 'asc';
+                        vacationSortButton.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i>';
+                    }
+                }
+                sortVacationTable(vacationSortKey, vacationSortDirection);
             });
 
             vacationSearchInput.addEventListener('input', filterVacationTable);
@@ -1615,8 +1706,12 @@
             filterByPeriodCheckbox.addEventListener('change', () => {
                 if (filterByPeriodCheckbox.checked) {
                     vacationSearchInput.placeholder = "Buscar por Periodo...";
+                    disableVacationSorting();
+                    vacationSortButton.style.display = 'none';
                 } else {
                     vacationSearchInput.placeholder = "Buscar...";
+                    enableVacationSorting();
+                    vacationSortButton.style.display = 'block';
                 }
                 filterVacationTable();
             });
@@ -1626,9 +1721,15 @@
                 filterVacationTable();
             });
 
+            // MODIFICACIÓN CRÍTICA: Se añade el paso de selectedPerson['INGRESO']
             openVacationModalBtn.addEventListener('click', () => {
                 if (selectedPerson && selectedPerson['CÉDULA']) {
-                    loadVacationData(selectedPerson['CÉDULA'], selectedPerson['NOMBRES'], selectedPerson['APELLIDOS']);
+                    loadVacationData(
+                        selectedPerson['CÉDULA'], 
+                        selectedPerson['NOMBRES'], 
+                        selectedPerson['APELLIDOS'], 
+                        selectedPerson['INGRESO'] // Se pasa la fecha de ingreso
+                    );
                     hideModal(detailsModal);
                     showModal(vacationModal);
                 } else {
@@ -1636,9 +1737,15 @@
                 }
             });
 
+            // MODIFICACIÓN CRÍTICA: Se añade el paso de selectedPerson['INGRESO']
             openVacationModalEditBtn.addEventListener('click', () => {
                 if (selectedPerson && selectedPerson['CÉDULA']) {
-                    loadVacationData(selectedPerson['CÉDULA'], selectedPerson['NOMBRES'], selectedPerson['APELLIDOS']);
+                    loadVacationData(
+                        selectedPerson['CÉDULA'], 
+                        selectedPerson['NOMBRES'], 
+                        selectedPerson['APELLIDOS'],
+                        selectedPerson['INGRESO'] // Se pasa la fecha de ingreso
+                    );
                     hideModal(editModal);
                     showModal(vacationModal);
                 } else {
