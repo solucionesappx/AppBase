@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -9,7 +10,449 @@
     <!-- Incluye la librería de iconos Font Awesome -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
     <style>
-        /* ... (todo el CSS igual que antes) ... */
+        /* Importa la fuente Poppins de Google Fonts */
+        @import url("https://fonts.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap");
+
+        /* Definición de variables CSS para el tema claro */
+        :root {
+            --bg-color: #f0f2f5;
+            --box-color: #e9ecef;
+            --border-color: #000; /* Color de borde negro puro para el modo claro */
+            --text-color: #111;
+            --link-color: #D61336;
+            --accent-color-1: #4041C2;
+            --accent-color-2: #7aebbc;
+            --box-shadow-color: rgba(0,0,0,0.2);
+            --selected-header-color: rgba(64, 65, 194, 0.2);
+        }
+
+        /* Variables para el tema oscuro */
+        body.dark-mode {
+            --bg-color: #25252b;
+            --box-color: #3a3a45;
+            --border-color: #25252b;
+            --text-color: #fff;
+            --link-color: #4041C2;
+            --accent-color-1: #4041C2;
+            --accent-color-2: #dbeb7a;
+            --box-shadow-color: rgba(255,255,255,0.15);
+            --selected-header-color: rgba(122, 235, 188, 0.2);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            /* Evita el resaltado azul al hacer clic en dispositivos móviles */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            background-color: var(--box-color);
+            color: var(--text-color);
+            box-shadow: 0 4px 6px -1px var(--box-shadow-color), 0 2px 4px -1px var(--box-shadow-color);
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Estilos del header */
+        .header-bg {
+            background-color: var(--box-color);
+            color: var(--text-color);
+        }
+        .header-bg.dark-mode {
+            background-color: var(--box-color);
+        }
+        .box-shadow-down {
+            box-shadow: 0 4px 6px -1px var(--box-shadow-color), 0 2px 4px -1px var(--box-shadow-color);
+        }
+
+        /* Estilos para el footer con sombra superior */
+        .box-shadow-up {
+            box-shadow: 0 -4px 6px -1- var(--box-shadow-color), 0 -2px 4px -1px var(--box-shadow-color);
+        }
+
+        /* Estilo para el toggle switch */
+        .toggle-switch-container {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 24px;
+            border-radius: 30px;
+            background-color: #dcdcdc; /* Color directo para evitar conflictos con el borde de la tabla */
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .toggle-button {
+            position: absolute;
+            left: 4px;
+            top: 4px;
+            width: 15px;
+            height: 15px;
+            background-color: var(--text-color);
+            border-radius: 50%;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .toggle-switch-container.dark-mode {
+            background-color: #2D59A1;
+        }
+        
+        .toggle-switch-container.dark-mode .toggle-button {
+            transform: translateX(20px);
+            background-color: var(--box-color);
+        }
+
+        /* Estilos de la tabla */
+        .data-table-container {
+            overflow-y: auto;
+            overflow-x: auto;
+            width: 100%;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            /* La altura ahora es controlada por flexbox */
+        }
+
+        .data-table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: max-content;
+        }
+        
+        /* Estilo para anclar el encabezado de la tabla */
+        .data-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 30; /* Alto z-index para que la fila se mantenga sobre todo */
+            background-color: #2D59A1;
+            color: #fff; /* Se cambia el color de la fuente a blanco */
+            box-shadow: 0 2px 4px var(--box-shadow-color);
+        }
+
+        .data-table th, .data-table td {
+            padding: 0rem 0.6rem; /* El primer valor controla el espacio vertical, el segundo el horizontal. */
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            white-space: nowrap;
+            font-size: 0.875rem;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        .data-table th {
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        /* Nuevo estilo para el encabezado de la columna seleccionada */
+        .data-table th.selected-sort-header {
+            background-color: var(--selected-header-color);
+            border-bottom: 2px solid #5ab6a5;
+        }
+        
+        /* Estilo para el hover de los encabezados (cursor de puntero) */
+        .data-table th[data-sort-key] {
+            cursor: pointer;
+        }
+        
+        /* Estilo para deshabilitar el cursor de los encabezados */
+        .data-table th.disabled-sort-header {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .data-table tbody tr {
+            /* Transición para el efecto de hover */
+            transition: background-color 0.2s ease;
+        }
+
+        .data-table tbody tr:nth-child(odd) {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .data-table tbody tr:nth-child(odd) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Estilo para el encabezado y las celdas de la primera columna (ID) */
+        .data-table th:first-child, .data-table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 20; /* Z-index menor que el encabezado para que quede debajo de él */
+            background-color: #2D59A1;
+            color: #fff; /* Se cambia el color de la fuente a blanco */
+            font-weight: 600; /* Asegura el mismo peso de fuente */
+            box-shadow: 2px 0 4px var(--box-shadow-color);
+        }
+        
+        /* Asegura que la celda de la esquina se fije correctamente */
+        .data-table th:first-child {
+            z-index: 40;
+        }
+
+        .data-table th:last-child, .data-table td:last-child {
+            border-right: none;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+
+        /* Regla de resaltado con hover (efecto de ratón) y cursor de puntero */
+        .data-table tbody tr:hover {
+            background-color: rgba(122, 235, 188, 0.6) !important;
+            cursor: pointer;
+        }
+        
+        /* Estilo para la fila seleccionada */
+        .data-table tbody tr.selected {
+            background-color: #5ab6a5 !important;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .data-table tbody tr.selected td:first-child {
+            background-color: #5ab6a5 !important;
+        }
+
+        /* Estilo para las filas con la nota no vacía */
+        .data-table .note-row-highlight td {
+            color: red !important;
+        }
+
+        /* Regla para el resaltado de la primera columna durante el hover */
+        .data-table tbody tr:hover td:first-child {
+            background-color: rgba(122, 235, 188, 0.6) !important;
+        }
+
+        /* Estilos del modal */
+        .modal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Alinea el modal en la parte superior */
+            padding-top: 10rem; /* Agrega un poco de espacio en la parte superior */
+            z-index: 100;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+        
+        /* Ajuste de posición para el modal de vacaciones */
+        #vacationModal.modal-container {
+            padding-top: 2rem; /* Mueve el modal 2rem (32px) más arriba */
+        }
+
+
+        .modal-content {
+            background-color: var(--box-color);
+            color: var(--text-color);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        /* Regla para definir el tamaño del modal de vacaciones */
+        #vacationModal .modal-content {
+            max-height: 90vh; /* Altura máxima del 90% del viewport */
+            overflow-y: auto; /* Permite desplazamiento si el contenido excede la altura */
+        }
+
+        
+        .modal-container.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-top: 0.5rem;
+            padding-right: 2.5rem; /* Ajuste para el botón de cierre que está fuera */
+        }
+        
+        /* Ajuste para el título del modal de vacaciones, permitiendo múltiples líneas */
+        #vacationModalTitle {
+            line-height: 1.2;
+            text-align: left;
+            margin-bottom: 0;
+        }
+        
+        /* Ajuste de tamaño de fuente para el título del modal de vacaciones en la segunda línea */
+        #vacationModalTitle br + br {
+            font-size: 0.8em;
+            font-weight: normal;
+        }
+        
+        .modal-field {
+            /* Se reduce el margen inferior del campo para acercar los elementos */
+            margin-bottom: 0.5rem;
+        }
+        
+        .modal-field label {
+            font-weight: 600;
+            display: block;
+            /* Se reduce el margen inferior para acercar el título al campo de datos */
+            margin-bottom: 0.1rem;
+            font-size: 0.875rem; /* text-sm */
+            color: #3B82F6;
+        }
+        
+        /* Estilos para los campos de datos en el modal */
+        .modal-field span {
+            font-weight: 400;
+            background-color: var(--bg-color);
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            display: block;
+            width: 100%;
+        }
+
+        .modal-field input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            border-radius: 0.25rem;
+            color: var(--text-color);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: space-between; /* Alineación de los botones */
+            align-items: center;
+            padding-top: 1.5rem;
+        }
+
+        .modal-nav-button {
+            background-color: transparent;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--accent-color-1);
+            transition: color 0.2s ease;
+        }
+
+        .modal-nav-button:hover:not(:disabled) {
+            color: var(--accent-color-2);
+        }
+
+        .modal-nav-button:disabled {
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        /* Estilo para los botones de acción */
+        .modal-action-button {
+            padding: 0.5rem 1rem;
+            background-color: #2D59A1;
+            color: #fff;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-weight: 600;
+        }
+
+        /* Estilo para el botón de Inicio en el centro de la barra de navegación */
+        .nav-center-home {
+            width: 60px;
+            height: 60px;
+            background-color: #2D59A1;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px var(--box-shadow-color), 0 2px 4px -1px var(--box-shadow-color);
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .file-upload-label {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .file-upload-label:hover {
+            background-color: #45a049;
+        }
+
+        /* Estilo para el loader en el modal de vacaciones */
+        .vacation-loader {
+            position: absolute;
+            top: 0; /* Se ajusta el top a 0% */
+            left: 0; /* Se ajusta el left a 0% */
+            width: 100%;
+            height: 100%;
+            z-index: 110; /* Mayor que el modal-content */
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0.5rem; /* El mismo border-radius que el modal */
+        }
+        
+        /* Estilos para el total de días y subtotales */
+        .total-container {
+            background-color: #1a202c; /* Fondo oscuro */
+            color: #e2e8f0; /* Texto claro */
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .total-container .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .total-container .total-label {
+            font-weight: bold;
+            font-size: 1.125rem;
+        }
+        
+        .total-container .total-value {
+            font-weight: bold;
+            font-size: 1.125rem;
+            color: #63b3ed; /* Color de acento para el valor */
+        }
+        
+        .total-container .subtotal-label {
+            font-weight: normal;
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+        
+        .total-container .subtotal-value {
+            font-weight: normal;
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        /* Media query para ocultar la aplicación en pantallas de más de 450px */
+        @media (min-width: 451px) {
+            body {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body class="dark-mode min-h-screen flex flex-col">
@@ -36,7 +479,451 @@
         </div>
     </header>
 
-    <!-- ... (resto del HTML igual) ... -->
+    <!-- Contenedor principal que se estira para llenar el espacio disponible -->
+    <div class="w-full max-w-lg mx-auto p-5 rounded-xl container relative mt-20 mb-20 flex-grow flex flex-col">
+        <!-- Loader visual -->
+        <div id="loader" class="hidden absolute inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50 rounded-xl">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
+        </div>
+        <!-- Mensaje de notificación / error -->
+        <div id="messageBox" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-4 text-white rounded-md shadow-lg z-50">
+            <p id="messageText"></p>
+        </div>
+
+        <h1 class="text-2xl font-bold mb-2 text-center">Datos del Personal</h1>
+        <p class="text-sm mb-4 text-center">Tabla con datos cargados desde Google Apps Script.</p>
+        
+        <!-- Contenedor de búsqueda y ordenación, ahora siempre en una fila -->
+        <div class="flex flex-row items-center space-x-2 mb-2">
+            <input type="text" id="searchInput" placeholder="Buscar..." class="w-4/5 p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" autocomplete="off">
+            <button id="sortButton" class="text-3xl bg-transparent hover:text-blue-600 text-blue-500 font-bold py-2 px-4 rounded transition-colors duration-300 ease-in-out" aria-label="Ordenar por Apellidos">
+                <i class="fa-solid fa-arrow-down-a-z"></i>
+            </button>
+            <button id="cancelButton" class="text-3xl text-red-600 hover:text-red-700 bg-transparent transition-colors focus:outline-none focus:ring-0">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Contenedor de la tabla, ahora se estira para llenar el espacio restante -->
+        <div class="data-table-container flex-grow max-h-[480px]">
+            <table id="Data-grid" class="data-table">
+                <thead>
+                    <tr>
+                        <th class="text-right">ID</th>
+                        <th data-sort-key="EMPRESA">Empresa</th>
+                        <th data-sort-key="APELLIDOS">Apellidos</th>
+                        <th data-sort-key="NOMBRES">Nombres</th>
+                        <th class="text-right" data-sort-key="CÉDULA">Cédula</th>
+                        <th data-sort-key="NOMINA">Nómina</th>
+                        <th data-sort-key="CARGO">Cargo</th>
+                        <th class="text-right" data-sort-key="INGRESO">Ingreso</th>
+                        <th data-sort-key="SECTOR">Sector</th>
+                        <th data-sort-key="PERFIL">Perfil</th>
+                        <th data-sort-key="NOTA">Nota</th>
+                        <th data-sort-key="DIAS">Días</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los datos se renderizarán aquí con JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Contenedor del Modal de Detalles (Visualizar) -->
+    <div id="detailsModal" class="modal-container hidden">
+        <div class="modal-content relative">
+            <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="modal-header">
+                <h3 class="text-xl font-bold">Detalles</h3>
+                <button id="openVacationModalBtn" class="nav-link text-xl text-[var(--text-color)] hover:text-blue-500 transition-colors">
+                    <i class="fa-solid fa-calendar-alt" style="font-size: 2.5rem"></i>
+                </button>
+            </div>
+            
+            <!-- Contenido del modal (páginas de datos) -->
+            <div id="modal-pages-container-details">
+                <!-- Página 1: Campos Empresa, Nómina, Apellidos, Nombres, Cédula -->
+                <div id="modal-page-1-details" class="modal-page">
+                    <div class="modal-field">
+                        <label>Empresa:</label>
+                        <span id="field-empresa-details"></span>
+                    </div>
+                    <div class="modal-field">
+                        <label>Nómina:</label>
+                        <span id="field-nomina-details"></span>
+                    </div>
+                    <div class="modal-field">
+                        <label>Apellidos:</label>
+                        <span id="field-apellidos-details"></span>
+                    </div>
+                    <div class="modal-field">
+                        <label>Nombres:</label>
+                        <span id="field-nombres-details"></span>
+                    </div>
+                    <div class="modal-field">
+                        <label>Cédula:</label>
+                        <span id="field-cedula-details"></span>
+                    </div>
+                </div>
+
+                <!-- Página 2: Campos Cargo, Ingreso, Sector, Perfil, Nota -->
+                <div id="modal-page-2-details" class="modal-page hidden">
+                    <div class="modal-field">
+                        <label>Cargo:</label>
+                        <span id="field-cargo-details"></span>
+                    </div>
+                    <div class="modal-field">
+                        <label>Ingreso:</label>
+                        <span id="field-ingreso-details"></span>
+                    </div>
+                    <div class="modal-field">
+                        <label>Sector:</label>
+                        <span id="field-sector-details"></span>
+                    </div>
+                    <div class="modal-field">
+                        <label>Perfil:</label>
+                        <span id="field-perfil-details"></span>
+                    </div>
+                    <!-- El campo Nota ahora se mostrará u ocultará con JS -->
+                    <div class="modal-field" id="nota-details-field">
+                        <label>Nota:</label>
+                        <span id="field-nota-details"></span>
+                    </div>
+                    <!-- Se ha corregido este div para que sea único y muestre el campo 'Días' (CTRL2) -->
+                    <div class="modal-field" id="dias-details-field">
+                        <label>Días de Vacaciones:</label>
+                        <span id="field-dias-details"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navegación del Modal -->
+            <div class="modal-footer flex items-center justify-between">
+                <!-- Contenedor para botones de navegación -->
+                <div class="flex space-x-2">
+                    <button id="prevPageBtnDetails" class="modal-nav-button" disabled>
+                        <i class="fa-solid fa-angle-left"></i>
+                    </button>
+                    <button id="nextPageBtnDetails" class="modal-nav-button">
+                        <i class="fa-solid fa-angle-right"></i>
+                    </button>
+                </div>
+                <!-- Botón de acción principal -->
+                <button class="modal-action-button close-modal-btn">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nuevo Modal: Cargar Archivo -->
+    <div id="uploadModal" class="modal-container hidden">
+        <div class="modal-content relative text-center">
+            <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-xl font-bold mb-4">Cargar Archivo</h3>
+            <p id="upload-modal-text" class="text-center mb-4">Selecciona un archivo para subir.</p>
+            <label for="fileInput" class="file-upload-label">
+                <i class="fa-solid fa-upload"></i> Seleccionar Archivo
+            </label>
+            <input type="file" id="fileInput" class="hidden" />
+
+            <div class="modal-footer mt-4 space-x-4">
+                <button id="uploadFileBtn" class="modal-action-button bg-green-600 hover:bg-green-700" disabled>Subir</button>
+                <button class="modal-action-button bg-red-600 hover:bg-red-700 close-modal-btn">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nuevo Modal: Editar -->
+    <div id="editModal" class="modal-container hidden">
+        <div class="modal-content relative">
+            <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="modal-header">
+                <h3 class="text-xl font-bold">Editar</h3>
+                <button id="openVacationModalEditBtn" class="nav-link text-xl text-[var(--text-color)] hover:text-blue-500 transition-colors">
+                    <i class="fa-solid fa-calendar-alt" style="font-size: 2.5rem"></i>
+                </button>
+            </div>
+
+            <!-- Contenido del modal (páginas de edición) -->
+            <div id="modal-pages-container-edit">
+                <!-- Página 1: Campos Empresa, Nómina, Apellidos, Nombres, Cédula -->
+                <div id="modal-page-1-edit" class="modal-page">
+                    <div class="modal-field">
+                        <label>Empresa:</label>
+                        <input id="field-empresa-edit" type="text" class="text-color" />
+                    </div>
+                    <div class="modal-field">
+                        <label>Nómina:</label>
+                        <input id="field-nomina-edit" type="text" class="text-color" />
+                    </div>
+                    <div class="modal-field">
+                        <label>Apellidos:</label>
+                        <input id="field-apellidos-edit" type="text" class="text-color" />
+                    </div>
+                    <div class="modal-field">
+                        <label>Nombres:</label>
+                        <input id="field-nombres-edit" type="text" class="text-color" />
+                    </div>
+                    <div class="modal-field">
+                        <label>Cédula:</label>
+                        <input id="field-cedula-edit" type="text" class="text-color" />
+                    </div>
+                </div>
+
+                <!-- Página 2: Campos Cargo, Ingreso, Sector, Perfil -->
+                <div id="modal-page-2-edit" class="modal-page hidden">
+                    <div class="modal-field">
+                        <label>Cargo:</label>
+                        <input id="field-cargo-edit" type="text" class="text-color" />
+                    </div>
+                    <div class="modal-field">
+                        <label>Ingreso:</label>
+                        <input id="field-ingreso-edit" type="text" class="text-color" />
+                    </div>
+                    <div class="modal-field">
+                        <label>Sector:</label>
+                        <input id="field-sector-edit" type="text" class="text-color" />
+                    </div>
+                    <div class="modal-field">
+                        <label>Perfil:</label>
+                        <input id="field-perfil-edit" type="text" class="text-color" />
+                    </div>
+                    <!-- El campo Nota ahora se mostrará u ocultará con JS -->
+                    <div class="modal-field" id="nota-edit-field">
+                        <label>Nota:</label>
+                        <input id="field-nota-edit" type="text" class="text-color" />
+                    </div>
+                    <!-- NUEVO CAMPO AGREGADO -->
+                    <div class="modal-field" id="dias-edit-field">
+                        <label>Días de Vacaciones:</label>
+                        <input id="field-dias-edit" type="text" class="text-color" />
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer flex items-center justify-between">
+                <!-- Contenedor para botones de navegación -->
+                <div class="flex space-x-2">
+                    <button id="prevPageBtnEdit" class="modal-nav-button" disabled>
+                        <i class="fa-solid fa-angle-left"></i>
+                    </button>
+                    <button id="nextPageBtnEdit" class="modal-nav-button">
+                        <i class="fa-solid fa-angle-right"></i>
+                    </button>
+                </div>
+                <!-- Botón de acción principal -->
+                <button id="saveBtn" class="modal-action-button bg-green-600 hover:bg-green-700">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nuevo Modal: Ajustes -->
+    <div id="settingsModal" class="modal-container hidden">
+        <div class="modal-content relative text-center">
+            <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-xl font-bold mb-4">Ajustes</h3>
+            <p>Este es el modal de ajustes de la aplicación.</p>
+            <div class="modal-footer">
+                <button class="modal-action-button mt-4 close-modal-btn">Cerrar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Nuevo Modal: Ayuda -->
+    <div id="helpModal" class="modal-container hidden">
+        <div class="modal-content relative text-center">
+            <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-xl font-bold mb-4">Ayuda e Información</h3>
+            <p>Este es el modal de ayuda e información.</p>
+            <div class="modal-footer">
+                <button class="modal-action-button mt-4 close-modal-btn">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nuevo Modal: Datos de Vacaciones -->
+    <div id="vacationModal" class="modal-container hidden">
+        <div class="modal-content relative">
+            <!-- Loader para este modal -->
+            <div id="vacation-loader" class="vacation-loader hidden">
+                <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
+            </div>
+
+            <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="modal-header">
+                <h3 class="text-xl font-bold" id="vacationModalTitle">Detalles de Absentismos</h3>
+            </div>
+
+            <!-- Aquí se reordena el contenido del modal según tu solicitud -->
+
+            <!-- NUEVO: Casilla de verificación para filtrar por periodo -->
+            <div class="flex items-center space-x-2 mt-2 mb-2">
+                <input type="checkbox" id="filterByPeriodCheckbox" class="form-checkbox h-5 w-5 text-blue-600 rounded">
+                <label for="filterByPeriodCheckbox" class="text-sm cursor-pointer">Filtrar por periodo</label>
+            </div>
+            
+            <!-- Buscador para la tabla de vacaciones -->
+            <div class="flex flex-row items-center space-x-2 mb-2">
+                <input type="text" id="vacationSearchInput" placeholder="Buscar..." class="flex-grow p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" autocomplete="off">
+                <button id="vacationSortButton" class="text-3xl bg-transparent hover:text-blue-600 text-blue-500 font-bold py-2 px-4 rounded transition-colors duration-300 ease-in-out" aria-label="Ordenar">
+                    <i class="fa-solid fa-arrow-down-a-z"></i>
+                </button>
+                <button id="vacationCancelButton" class="text-3xl text-red-600 hover:text-red-700 bg-transparent transition-colors focus:outline-none focus:ring-0">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Contenedor para el total y los subtotales -->
+            <div class="total-container mb-2">
+                <div class="total-row">
+                    <span class="total-label">Total Días Acumulados:</span>
+                    <span id="totalVacationDays" class="total-value">0</span>
+                </div>
+                <div class="total-row">
+                    <span class="subtotal-label">Disfrutes Efectivos:</span>
+                    <span id="subtotalNegative" class="subtotal-value">0</span>
+                </div>
+                <div class="total-row">
+                    <span class="subtotal-label">Asignación Beneficio:</span>
+                    <span id="subtotalPositive" class="subtotal-value">0</span>
+                </div>
+            </div>
+            
+            <!-- Contenedor de la tabla de vacaciones -->
+            <div class="data-table-container flex-grow max-h-[420px] mb-4">
+                <table id="vacation-grid" class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="text-right">ID</th>
+                            <th data-sort-key="PERIODO">PERIODO</th>
+                            <th data-sort-key="DESCRIPCIÓN_CONCEPTO">DESCRIPCIÓN_CONCEPTO</th>
+                            <th class="text-right" data-sort-key="DIAS_VACACIONES">DIAS_VACACIONES</th>
+                            <th class="text-right" data-sort-key="BONO_VACACIONAL">BONO_VACACIONAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se renderizarán aquí con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="modal-footer">
+                <button class="modal-action-button mt-0 close-modal-btn">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Detalles de Vacaciones -->
+    <div id="vacationDetailsModal" class="modal-container hidden">
+        <div class="modal-content relative">
+            <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="modal-header">
+                <h3 class="text-xl font-bold">Detalles de Vacaciones</h3>
+            </div>
+           <!-- Contenido del modal (campos de datos) -->
+            <div id="modal-pages-container-vacation-details">
+                <!-- Se ha añadido un campo para mostrar el ID autogenerado -->
+                <div class="modal-field">
+                    <label>ID:</label>
+                    <span id="field-id-vacation-details"></span>
+                </div>
+                <div class="modal-field">
+                    <label>PERIODO:</label>
+                    <span id="field-periodo-vacation-details"></span>
+                </div>
+                <div class="modal-field">
+                    <label>DESCRIPCIÓN_CONCEPTO:</label>
+                    <span id="field-descripcion-vacation-details"></span>
+                </div>
+                <div class="modal-field">
+                    <label>DIAS_VACACIONES:</label>
+                    <span id="field-dias-vacaciones-vacation-details"></span>
+                </div>
+                <!-- Se añade un ID a este div para poder ocultarlo con JS -->
+                <div class="modal-field" id="bono-vacacional-field-details">
+                    <label>BONO_VACACIONAL:</label>
+                    <span id="field-bono-vacacional-vacation-details"></span>
+            </div>
+            <!-- Nuevo elemento para mostrar la posición del registro -->
+            <!-- Elemento de posición del registro con un borde -->
+            <p id="vacationRecordPosition" class="text-xl text-center font-semibold mt-4 border border-gray-400 rounded-md px-4 py-2"></p>
+            
+            </div>
+            <!-- Navegación del Modal -->
+            <div class="modal-footer flex items-center justify-between">
+                <!-- Contenedor para botones de navegación -->
+                <div class="flex space-x-2">
+                    <button id="prevPageBtnVacationDetails" class="modal-nav-button" disabled>
+                        <i class="fa-solid fa-angle-left"></i>
+                    </button>
+                    <button id="nextPageBtnVacationDetails" class="modal-nav-button">
+                        <i class="fa-solid fa-angle-right"></i>
+                    </button>
+                </div>
+                <!-- Botón de acción principal -->
+                <button class="modal-action-button close-modal-btn">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barra de Navegación Fija (Footer) -->
+    <footer class="fixed bottom-0 left-0 w-full header-bg box-shadow-up z-50 transition-colors">
+        <div class="container max-w-lg mx-auto px-4 py-3 flex items-end justify-between relative">
+            <!-- Contenedor izquierdo -->
+            <div class="flex flex-row space-x-8">
+                <!-- Ícono para agregar un nuevo archivo -->
+                <button id="uploadBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Agregar Archivo">
+                    <i class="fa-solid fa-file-circle-plus"></i>
+                </button>
+                <button id="editBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Editar">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button id="reportsBtn" class="nav-link text-xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Reportes">
+                    <i class="fa-solid fa-chart-column"></i>
+                </button>
+            </div>
+
+            <!-- Contenedor para el botón central de Inicio -->
+            <div class="nav-center-home">
+                <button id="homeBtn" class="nav-link text-3xl" aria-label="Inicio">
+                    <i class="fa-solid fa-house text-white hover:text-gray-300 transition-colors"></i>
+                </button>
+            </div>
+            
+            <!-- Contenedor derecho -->
+            <div class="flex flex-row space-x-8">
+                <div class="relative">
+                    <button id="notificationsBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Notificaciones">
+                        <i class="fa-solid fa-bell"></i>
+                    </button>
+                    <!-- Círculo de notificación corregido -->
+                    <span class="absolute -right-3 -top-2 w-6 h-6 text-xs font-bold rounded-full bg-red-600 text-white flex items-center justify-center">
+                        3
+                    </span>
+                </div>
+                <button id="settingsBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Ajustes">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+                <button id="helpBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Ayuda">
+                    <i class="fa-solid fa-circle-info"></i>
+                </button>
+            </div>
+        </div>
+    </footer>
 
     <script>
         const themeToggle = document.getElementById('theme-toggle');
@@ -59,7 +946,12 @@
         });
 
         document.addEventListener("DOMContentLoaded", () => {
-            // --- NUEVO: Validar y mostrar nombre de usuario ---
+            const DataGridBody = document.querySelector('#Data-grid tbody');
+            const dataTableHeaders = document.querySelectorAll('#Data-grid thead th[data-sort-key]');
+            const loader = document.getElementById('loader');
+            const searchInput = document.getElementById('searchInput');
+            const cancelButton = document.getElementById('cancelButton');
+            const sortButton = document.getElementById('sortButton');
             const userData = JSON.parse(localStorage.getItem('userData'));
             if (!userData) {
                 window.location.href = 'index.html';
@@ -70,25 +962,960 @@
             if (usuarioSpan && userData.username) {
                 usuarioSpan.textContent = `¡Hola, ${userData.username}!`;
             }
+            
+            // Usamos el mismo URL base para todas las llamadas API
+            const GAS_URL = 'https://script.google.com/macros/s/AKfycbx87WvxA9ca1KyGMA1wsw1npZw5vPtjoItomhF823BICXScNrWGFh5m0Dj6Veb24CtHXQ/exec';
 
-            // ... resto del contenido JS existente ...
-            const DataGridBody = document.querySelector('#Data-grid tbody');
-            // ... (todo el JS permanece igual) ...
+            const headerMapping = {
+                'Empresa': 'EMPRESA',
+                'Apellidos': 'APELLIDOS',
+                'Nombres': 'NOMBRES',
+                'Cédula': 'CÉDULA',
+                'Nómina': 'NOMINA',
+                'Cargo': 'CARGO',
+                'Ingreso': 'INGRESO',
+                'Sector': 'SECTOR',
+                'Perfil': 'PERFIL',
+                'Nota': 'CTRL1',
+                'Días': 'CTRL2', // Se incluye 'Dias' de este mapeo para que se muestre en la tabla
+            };
+
+            let allPersonData = [];
+            let selectedRowIndex = -1;
+            let currentDetailsPage = 1;
+            const maxDetailsPages = 2;
+            let currentEditPage = 1;
+            const maxEditPages = 2;
+            
+            // Estado de la ordenación
+            let selectedSortKey = null; // Inicialmente no hay una columna seleccionada
+            let sortDirection = 'asc';
+
+            function showMessage(message, duration = 3000, isError = true) {
+                const messageBox = document.getElementById('messageBox');
+                const messageText = document.getElementById('messageText');
+                messageText.textContent = message;
+                messageBox.classList.remove('hidden');
+                messageBox.classList.toggle('bg-red-500', isError);
+                messageBox.classList.toggle('bg-green-500', !isError);
+                
+                setTimeout(() => {
+                    messageBox.classList.add('hidden');
+                }, duration);
+            }
+
+            async function loadPersonData() {
+                console.log("Cargando datos...");
+                loader.classList.remove('hidden');
+                
+                try {
+                    const response = await fetch(`${GAS_URL}?sheet=BD_Personal`);
+                    const result = await response.json();
+
+                    if (result.error) {
+                        DataGridBody.innerHTML = `<tr><td colspan="10" class="text-center text-red-600">Error de la API: ${result.error}</td></tr>`;
+                        console.error('GAS API Error:', result.error);
+                        return;
+                    }
+
+                    allPersonData = result.data;
+                    renderTable(allPersonData); // Carga la tabla sin ordenar
+                    console.log("Datos cargados correctamente.");
+                } catch (error) {
+                    DataGridBody.innerHTML = `<tr><td colspan="10" class="text-center text-red-600">No se pudo conectar con el script. Por favor, asegúrese de que la URL sea correcta.</td></tr>`;
+                    console.error('Fetch Error:', error);
+                } finally {
+                    loader.classList.add('hidden');
+                }
+            }
+
+            function formatDate(date) {
+                const d = new Date(date);
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const year = d.getFullYear();
+                return `${day}/${month}/${year}`;
+            }
+
+            function renderTable(data) {
+                DataGridBody.innerHTML = '';
+                if (!data || data.length === 0) {
+                    const noDataRow = document.createElement('tr');
+                    noDataRow.innerHTML = '<td colspan="10" class="text-center">No hay datos para mostrar.</td>';
+                    DataGridBody.appendChild(noDataRow);
+                    return;
+                }
+                data.forEach((row, index) => {
+                    const tableRow = document.createElement('tr');
+                    tableRow.dataset.index = allPersonData.indexOf(row);
+                    if (allPersonData.indexOf(row) === selectedRowIndex) {
+                        tableRow.classList.add('selected');
+                    }
+                    // Aplica la clase si la columna "Nota" tiene un valor
+                    if (row['CTRL1'] && row['CTRL1'].trim() !== '') {
+                        tableRow.classList.add('note-row-highlight');
+                    }
+                    const idCell = document.createElement('td');
+                    idCell.textContent = (allPersonData.indexOf(row) + 1);
+                    idCell.classList.add('text-right');
+                    tableRow.appendChild(idCell);
+                    Object.keys(headerMapping).forEach((key) => {
+                        const cell = document.createElement('td');
+                        const jsonKey = headerMapping[key];
+                        let cellContent = '';
+                        
+                        // Lógica para mostrar 0 en la tabla principal si el valor es 0, null o undefined
+                        if (jsonKey === 'CTRL2') {
+                            const diasValue = row[jsonKey];
+                            if (diasValue === null || diasValue === undefined || String(diasValue).trim() === '') {
+                                cellContent = '0';
+                            } else {
+                                cellContent = diasValue;
+                            }
+                        } else {
+                            // Para las otras columnas, se mantiene la lógica existente
+                            cellContent = row[jsonKey] || '';
+                            if (key === 'Ingreso') {
+                                cellContent = formatDate(cellContent);
+                            }
+                        }
+
+                        cell.textContent = cellContent;
+                        if (key === 'Cédula' || key === 'Ingreso' || key === 'Días') { // Añadimos 'Días'
+                            cell.classList.add('text-right');
+                        }
+                        tableRow.appendChild(cell);
+                    });
+                    DataGridBody.appendChild(tableRow);
+                });
+            }
+            
+            function sortTable(key, direction) {
+                allPersonData.sort((a, b) => {
+                    const valA = String(a[key]).toLowerCase();
+                    const valB = String(b[key]).toLowerCase();
+                    if (valA < valB) {
+                        return direction === 'asc' ? -1 : 1;
+                    }
+                    if (valA > valB) {
+                        return direction === 'asc' ? 1 : -1;
+                    }
+                    return 0;
+                });
+                renderTable(allPersonData);
+            }
+
+            function filterTable() {
+                const query = searchInput.value.toLowerCase();
+                const filteredData = allPersonData.filter(row => {
+                    return Object.values(row).some(value => {
+                        return String(value).toLowerCase().includes(query);
+                    });
+                });
+                renderTable(filteredData);
+            }
+
+            // Maneja la ordenación al hacer clic en el botón
+            sortButton.addEventListener('click', () => {
+                // Si no se ha seleccionado una columna, usa 'APELLIDOS' por defecto
+                if (!selectedSortKey) {
+                    selectedSortKey = 'APELLIDOS';
+                    sortDirection = 'asc';
+                    const apellidosHeader = document.querySelector('th[data-sort-key="APELLIDOS"]');
+                    apellidosHeader.classList.add('selected-sort-header');
+                    sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i>';
+                } else {
+                    // Si ya hay una columna seleccionada, simplemente invierte la dirección
+                    if (sortDirection === 'asc') {
+                        sortDirection = 'desc';
+                        sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-z-a"></i>';
+                    } else {
+                        sortDirection = 'asc';
+                        sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i>';
+                    }
+                }
+                sortTable(allPersonData, selectedSortKey, sortDirection);
+            });
+            
+            // Maneja la selección de encabezados
+            dataTableHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const newSortKey = header.dataset.sortKey;
+
+                    // Remueve la clase de todos los encabezados
+                    dataTableHeaders.forEach(th => th.classList.remove('selected-sort-header'));
+
+                    // Si el nuevo encabezado es el mismo que el actual, solo cambia la dirección
+                    if (newSortKey === selectedSortKey) {
+                        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        // Si es una columna nueva, el primer ordenamiento siempre es ascendente.
+                        selectedSortKey = newSortKey;
+                        sortDirection = 'asc';
+                    }
+
+                    // Actualiza el ícono del botón de ordenar
+                    if (sortDirection === 'asc') {
+                        sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i>';
+                    } else {
+                        sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-z-a"></i>';
+                    }
+                    
+                    // Añade la clase al encabezado seleccionado
+                    header.classList.add('selected-sort-header');
+                    
+                    // Ordena la tabla
+                    sortTable(selectedSortKey, sortDirection);
+                });
+            });
+
+            searchInput.addEventListener('input', filterTable);
+            
+            cancelButton.addEventListener('click', () => {
+                searchInput.value = '';
+                selectedRowIndex = -1;
+                selectedSortKey = null; // Reinicia la clave de ordenamiento
+                sortDirection = 'asc';
+                sortButton.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i>';
+                dataTableHeaders.forEach(th => th.classList.remove('selected-sort-header'));
+                loadPersonData(); // Vuelve a cargar los datos en su orden original
+            });
+
+            // --- Lógica del Modal de Detalles (Visualizar) ---
+            const detailsModal = document.getElementById('detailsModal');
+            const prevPageBtnDetails = document.getElementById('prevPageBtnDetails');
+            const nextPageBtnDetails = document.getElementById('nextPageBtnDetails');
+            const openVacationModalBtn = document.getElementById('openVacationModalBtn');
+            const notaDetailsField = document.getElementById('nota-details-field');
+            // Se ha agregado la referencia al nuevo campo 'Días' en el HTML
+            const diasDetailsField = document.getElementById('dias-details-field');
+
+            let selectedPerson = null;
+
+            // Se ha añadido la clave 'CTRL2' al mapeo
+            const detailsFieldsMap = {
+                'APELLIDOS': document.getElementById('field-apellidos-details'),
+                'CARGO': document.getElementById('field-cargo-details'),
+                'CÉDULA': document.getElementById('field-cedula-details'),
+                'EMPRESA': document.getElementById('field-empresa-details'),
+                'INGRESO': document.getElementById('field-ingreso-details'),
+                'NOMINA': document.getElementById('field-nomina-details'),
+                'NOMBRES': document.getElementById('field-nombres-details'),
+                'PERFIL': document.getElementById('field-perfil-details'),
+                'SECTOR': document.getElementById('field-sector-details'),
+                'CTRL1': document.getElementById('field-nota-details'),
+                'CTRL2': document.getElementById('field-dias-details') // Nueva entrada para el campo 'Días'
+            };
+
+            const pageMapping = {
+                1: ['EMPRESA', 'NOMINA', 'APELLIDOS', 'NOMBRES', 'CÉDULA'],
+                // Se ha añadido la clave 'CTRL2' a la lista de campos de la página 2
+                2: ['CARGO', 'INGRESO', 'SECTOR', 'PERFIL', 'CTRL1', 'CTRL2']
+            };
+
+            function showDetailsModal(personData) {
+                selectedPerson = personData;
+                currentDetailsPage = 1;
+                updateDetailsModalContent();
+                detailsModal.classList.remove('hidden');
+                detailsModal.classList.add('active');
+            }
+
+            function updateDetailsModalContent() {
+                document.querySelectorAll('#detailsModal .modal-page').forEach(page => page.classList.add('hidden'));
+                document.getElementById(`modal-page-${currentDetailsPage}-details`).classList.remove('hidden');
+
+                // Ocultar el campo de nota si está vacío en la página 2
+                if (currentDetailsPage === 2) {
+                    const notaValue = selectedPerson['CTRL1'] || '';
+                    if (notaValue.trim() === '') {
+                        notaDetailsField.style.display = 'none';
+                    } else {
+                        notaDetailsField.style.display = 'block';
+                    }
+                } else {
+                    notaDetailsField.style.display = 'block';
+                }
+                
+                // Ocultar el campo de días si está vacío o es 0 en la página 2
+                if (currentDetailsPage === 2) {
+                    const diasValue = selectedPerson['CTRL2'];
+                    // Se ha corregido la lógica aquí: convierte a string antes de usar trim() y compara con una cadena vacía
+                    if (diasValue === null || String(diasValue).trim() === '' || diasValue === 0) {
+                        diasDetailsField.style.display = 'none';
+                    } else {
+                        diasDetailsField.style.display = 'block';
+                    }
+                } else {
+                    diasDetailsField.style.display = 'block';
+                }
+
+                const fieldsToShow = pageMapping[currentDetailsPage];
+                fieldsToShow.forEach(key => {
+                    let value = selectedPerson[key] || '';
+                    if (key === 'INGRESO') {
+                        value = formatDate(value);
+                    }
+                    if (detailsFieldsMap[key]) {
+                        detailsFieldsMap[key].textContent = value;
+                    }
+                });
+                
+                prevPageBtnDetails.disabled = currentDetailsPage === 1;
+                nextPageBtnDetails.disabled = currentDetailsPage === maxDetailsPages;
+            }
+
+            DataGridBody.addEventListener('dblclick', (event) => {
+                const clickedRow = event.target.closest('tr');
+                if (clickedRow) {
+                    const index = clickedRow.dataset.index;
+                    const personData = allPersonData[index];
+                    if (personData) {
+                        showDetailsModal(personData);
+                    }
+                }
+            });
+
+            DataGridBody.addEventListener('click', (event) => {
+                const clickedRow = event.target.closest('tr');
+                if (clickedRow) {
+                    document.querySelectorAll('#Data-grid tbody tr').forEach(row => {
+                        row.classList.remove('selected');
+                    });
+                    clickedRow.classList.add('selected');
+                    selectedRowIndex = parseInt(clickedRow.dataset.index);
+                }
+            });
+
+            nextPageBtnDetails.addEventListener('click', () => {
+                if (currentDetailsPage < maxDetailsPages) {
+                    currentDetailsPage++;
+                    updateDetailsModalContent();
+                }
+            });
+            prevPageBtnDetails.addEventListener('click', () => {
+                if (currentDetailsPage > 1) {
+                    currentDetailsPage--;
+                    updateDetailsModalContent();
+                }
+            });
 
             // --- Lógica de navegación y modales nuevos ---
+            
             const logoutBtn = document.getElementById('logoutBtn');
-            // ... (otros botones) ...
+            const uploadBtn = document.getElementById('uploadBtn');
+            const editBtn = document.getElementById('editBtn');
+            const reportsBtn = document.getElementById('reportsBtn');
+            const homeBtn = document.getElementById('homeBtn');
+            const notificationsBtn = document.getElementById('notificationsBtn');
+            const settingsBtn = document.getElementById('settingsBtn');
+            const helpBtn = document.getElementById('helpBtn');
 
-            // ... (funciones de mostrar/ocultar modales) ...
+            const uploadModal = document.getElementById('uploadModal');
+            const editModal = document.getElementById('editModal');
+            const settingsModal = document.getElementById('settingsModal');
+            const helpModal = document.getElementById('helpModal');
+            const vacationModal = document.getElementById('vacationModal');
+            const vacationDetailsModal = document.getElementById('vacationDetailsModal'); // Nuevo modal de detalles de vacaciones
+
+            // Función genérica para mostrar un modal
+            function showModal(modalElement) {
+                // Primero, oculta cualquier modal que esté visible
+                document.querySelectorAll('.modal-container').forEach(modal => {
+                    modal.classList.add('hidden');
+                });
+                modalElement.classList.remove('hidden');
+                modalElement.classList.add('active');
+            }
+
+            // Función genérica para ocultar un modal
+            function hideModal(modalElement) {
+                modalElement.classList.add('hidden');
+                modalElement.classList.remove('active');
+            }
+
+            // Agrega event listeners a los botones de cierre de todos los modales
+            document.querySelectorAll('.close-modal-btn').forEach(btn => {
+                btn.addEventListener('click', (event) => {
+                    const modalToClose = event.target.closest('.modal-container');
+                    if (modalToClose) {
+                        hideModal(modalToClose);
+                    }
+                });
+            });
+
+            // --- Lógica del nuevo Modal de Editar ---
+            const saveBtn = document.getElementById('saveBtn');
+            const prevPageBtnEdit = document.getElementById('prevPageBtnEdit');
+            const nextPageBtnEdit = document.getElementById('nextPageBtnEdit');
+            const openVacationModalEditBtn = document.getElementById('openVacationModalEditBtn');
+            const notaEditField = document.getElementById('nota-edit-field');
+            // NUEVA LÍNEA: Obtener referencia al nuevo campo de edición de Días
+            const diasEditField = document.getElementById('dias-edit-field');
+
+            const editFieldsMap = {
+                'APELLIDOS': document.getElementById('field-apellidos-edit'),
+                'CARGO': document.getElementById('field-cargo-edit'),
+                'CÉDULA': document.getElementById('field-cedula-edit'),
+                'EMPRESA': document.getElementById('field-empresa-edit'),
+                'INGRESO': document.getElementById('field-ingreso-edit'),
+                'NOMINA': document.getElementById('field-nomina-edit'),
+                'NOMBRES': document.getElementById('field-nombres-edit'),
+                'PERFIL': document.getElementById('field-perfil-edit'),
+                'SECTOR': document.getElementById('field-sector-edit'),
+                'CTRL1': document.getElementById('field-nota-edit'),
+                // NUEVA LÍNEA: Agregar el mapeo para el campo de Días
+                'CTRL2': document.getElementById('field-dias-edit')
+            };
+
+            function showEditModal(personData) {
+                selectedPerson = personData;
+                currentEditPage = 1;
+                updateEditModalContent();
+                showModal(editModal);
+            }
+
+            function updateEditModalContent() {
+                document.querySelectorAll('#editModal .modal-page').forEach(page => page.classList.add('hidden'));
+                document.getElementById(`modal-page-${currentEditPage}-edit`).classList.remove('hidden');
+                
+                // Ocultar el campo de nota si está vacío en la página 2
+                if (currentEditPage === 2) {
+                    const notaValue = selectedPerson['CTRL1'] || '';
+                    if (notaValue.trim() === '') {
+                        notaEditField.style.display = 'none';
+                    } else {
+                        notaEditField.style.display = 'block';
+                    }
+                } else {
+                    notaEditField.style.display = 'block';
+                }
+
+                // NUEVA LÓGICA: Ocultar el campo de días si está vacío o es 0 en la página 2
+                if (currentEditPage === 2) {
+                    const diasValue = selectedPerson['CTRL2'];
+                    if (diasValue === null || String(diasValue).trim() === '' || diasValue === 0) {
+                        diasEditField.style.display = 'none';
+                    } else {
+                        diasEditField.style.display = 'block';
+                    }
+                } else {
+                    diasEditField.style.display = 'block';
+                }
+
+                const fieldsToShow = pageMapping[currentEditPage];
+                fieldsToShow.forEach(key => {
+                    let value = selectedPerson[key] || '';
+                    if (key === 'INGRESO') {
+                        value = formatDate(value);
+                    }
+                    if (editFieldsMap[key]) {
+                        editFieldsMap[key].value = value;
+                    }
+                });
+                
+                prevPageBtnEdit.disabled = currentEditPage === 1;
+                nextPageBtnEdit.disabled = currentEditPage === maxEditPages;
+            }
+
+            // Agrega event listeners a los botones del modal de edición
+            saveBtn.addEventListener('click', () => {
+                console.log("Datos de edición guardados. (Lógica de guardado en la API iría aquí)");
+                hideModal(editModal);
+            });
+            nextPageBtnEdit.addEventListener('click', () => {
+                if (currentEditPage < maxEditPages) {
+                    currentEditPage++;
+                    updateEditModalContent();
+                }
+            });
+            prevPageBtnEdit.addEventListener('click', () => {
+                if (currentEditPage > 1) {
+                    currentEditPage--;
+                    updateEditModalContent();
+                }
+            });
+            
+            // --- Lógica para el Modal de Vacaciones y la nueva funcionalidad de filtro ---
+            const vacationGridBody = document.querySelector('#vacation-grid tbody');
+            const vacationTableHeaders = document.querySelectorAll('#vacation-grid thead th[data-sort-key]');
+            const vacationModalTitle = document.getElementById('vacationModalTitle');
+            const vacationLoader = document.getElementById('vacation-loader');
+            const vacationSearchInput = document.getElementById('vacationSearchInput');
+            const vacationCancelButton = document.getElementById('vacationCancelButton');
+            const vacationSortButton = document.getElementById('vacationSortButton');
+            const filterByPeriodCheckbox = document.getElementById('filterByPeriodCheckbox'); // Checkbox para filtrar por periodo
+            
+            let allVacationData = [];
+            let selectedVacationIndex = -1;
+            let vacationSortKey = 'PERIODO';
+            let vacationSortDirection = 'desc';
+
+            const totalVacationDaysEl = document.getElementById('totalVacationDays');
+            const subtotalNegativeEl = document.getElementById('subtotalNegative');
+            const subtotalPositiveEl = document.getElementById('subtotalPositive');
+
+            const vacationHeaderMapping = {
+                'CÉDULA': 'CÉDULA',
+                'PERIODO': 'PERIODO',
+                'DESCRIPCIÓN_CONCEPTO': 'DESCRIPCIÓN_CONCEPTO',
+                'DIAS_VACACIONES': 'DIAS_VACACIONES',
+                'BONO_VACACIONAL': 'BONO_VACACIONAL'
+            };
+
+            function formatNameForModal(name) {
+                if (!name) return '';
+                const parts = name.trim().split(/\s+/);
+                if (parts.length > 1) {
+                    const firstPart = parts[0];
+                    const secondInitial = parts[1].charAt(0).toUpperCase();
+                    return `${firstPart} ${secondInitial}.`;
+                }
+                return name;
+            }
+            
+            function formatApellidosForModal(apellidos) {
+                if (!apellidos) return '';
+                const parts = apellidos.trim().split(/\s+/);
+                if (parts.length > 1) {
+                    const firstPart = parts[0];
+                    const secondInitial = parts[1].charAt(0).toUpperCase();
+                    return `${firstPart} ${secondInitial}.`;
+                }
+                return apellidos;
+            }
+
+            // MODIFICACIÓN CRÍTICA: Se añade 'ingreso' a la firma de la función.
+            async function loadVacationData(cedula, nombres, apellidos, ingreso) {
+                vacationModalTitle.innerHTML = '';
+                vacationGridBody.innerHTML = '';
+                totalVacationDaysEl.textContent = '0';
+                subtotalNegativeEl.textContent = '0';
+                subtotalPositiveEl.textContent = '0';
+                vacationSearchInput.value = '';
+                filterByPeriodCheckbox.checked = false; // Reiniciar el checkbox
+                vacationSearchInput.placeholder = "Buscar..."; // Resetear el placeholder
+                vacationSortButton.style.display = 'block'; // Mostrar el botón de ordenación
+                enableVacationSorting(); // Habilitar la ordenación por defecto
+                allVacationData = [];
+                selectedVacationIndex = -1;
+                vacationSortKey = 'PERIODO';
+                vacationSortDirection = 'desc';
+                vacationTableHeaders.forEach(th => th.classList.remove('selected-sort-header'));
+                document.querySelector(`th[data-sort-key="${vacationSortKey}"]`).classList.add('selected-sort-header');
+
+                if (!cedula) {
+                    showMessage("No se ha proporcionado una cédula para buscar datos de vacaciones.", 3000, true);
+                    return;
+                }
+                
+                const formattedNombres = formatNameForModal(nombres);
+                const formattedApellidos = formatApellidosForModal(apellidos);
+                
+                // NUEVO: Formatear la fecha de ingreso
+                const formattedIngreso = formatDate(ingreso);
+                
+                // ACTUALIZACIÓN: Se incluye la fecha de ingreso en el título
+                vacationModalTitle.innerHTML = `
+                    ${formattedNombres} ${formattedApellidos}<br>
+                    Cédula Identidad: ${cedula}<br>
+                    Fecha de Ingreso: ${formattedIngreso}
+                `;
+
+                vacationLoader.classList.remove('hidden');
+                
+                try {
+                    const response = await fetch(`${GAS_URL}?sheet=Vacaciones`);
+                    const result = await response.json();
+
+                    if (result.error) {
+                        vacationGridBody.innerHTML = `<tr><td colspan="5" class="text-center text-red-600">Error: ${result.error}</td></tr>`;
+                        console.error('GAS API Error:', result.error);
+                        return;
+                    }
+                    
+                    allVacationData = result.data.filter(row => {
+                        const rowCedula = String(row['CÉDULA']).trim();
+                        const personalCedula = String(cedula).trim();
+                        const diasVacaciones = parseFloat(row['DIAS_VACACIONES']);
+                        return rowCedula === personalCedula && !isNaN(diasVacaciones);
+                    });
+                    
+                    sortVacationTable(vacationSortKey, vacationSortDirection);
+                    
+                    updateVacationTotals(allVacationData);
+                    
+                } catch (error) {
+                    vacationGridBody.innerHTML = `<tr><td colspan="5" class="text-center text-red-600">No se pudo conectar con el script.</td></tr>`;
+                    console.error('Fetch Error:', error);
+                } finally {
+                    vacationLoader.classList.add('hidden');
+                }
+            }
+            
+            function renderVacationTable(data) {
+                vacationGridBody.innerHTML = '';
+                if (!data || data.length === 0) {
+                    const noDataRow = document.createElement('tr');
+                    noDataRow.innerHTML = '<td colspan="5" class="text-center">No hay datos de vacaciones para mostrar.</td>';
+                    vacationGridBody.appendChild(noDataRow);
+                    return;
+                }
+                data.forEach((row, index) => {
+                    const tableRow = document.createElement('tr');
+                    tableRow.dataset.index = index;
+                    const idCell = document.createElement('td');
+                    idCell.textContent = (index + 1);
+                    idCell.classList.add('text-right');
+                    tableRow.appendChild(idCell);
+                    Object.keys(vacationHeaderMapping).forEach((key) => {
+                        const cell = document.createElement('td');
+                        const jsonKey = vacationHeaderMapping[key];
+                        let cellContent = row[jsonKey] || '';
+                        if (jsonKey === 'CÉDULA') {
+                            return;
+                        }
+                        cell.textContent = cellContent;
+                        if (key === 'DIAS_VACACIONES' || key === 'BONO_VACACIONAL') {
+                            cell.classList.add('text-right');
+                        }
+                        tableRow.appendChild(cell);
+                    });
+                    vacationGridBody.appendChild(tableRow);
+                });
+            }
+            
+            function updateVacationTotals(data) {
+                const totalDays = data.reduce((sum, row) => {
+                    const dias = parseFloat(row['DIAS_VACACIONES']);
+                    return sum + (isNaN(dias) ? 0 : dias);
+                }, 0);
+                totalVacationDaysEl.textContent = totalDays;
+                
+                const subtotalNegative = data.reduce((sum, row) => {
+                    const dias = parseFloat(row['DIAS_VACACIONES']);
+                    return sum + (dias < 0 ? dias : 0);
+                }, 0);
+                subtotalNegativeEl.textContent = subtotalNegative;
+                
+                const subtotalPositive = data.reduce((sum, row) => {
+                    const dias = parseFloat(row['DIAS_VACACIONES']);
+                    return sum + (dias >= 0 ? dias : 0);
+                }, 0);
+                subtotalPositiveEl.textContent = subtotalPositive;
+            }
+            
+            // Función para habilitar o deshabilitar la ordenación de la tabla de vacaciones
+            function toggleVacationSorting(enable) {
+                vacationTableHeaders.forEach(header => {
+                    if (header.dataset.sortKey) { // Se asegura de que solo los encabezados con data-sort-key sean afectados
+                        if (enable) {
+                            header.classList.remove('disabled-sort-header');
+                            header.style.pointerEvents = 'auto'; // Re-habilita los eventos de puntero
+                        } else {
+                            header.classList.add('disabled-sort-header');
+                            header.style.pointerEvents = 'none'; // Deshabilita los eventos de puntero
+                        }
+                    }
+                });
+                vacationSortButton.style.display = enable ? 'block' : 'none';
+            }
+
+            function filterVacationTable() {
+                const query = vacationSearchInput.value.toLowerCase();
+                const filterByPeriod = filterByPeriodCheckbox.checked;
+                
+                // Desactiva la ordenación si el filtro por periodo está activo
+                toggleVacationSorting(!filterByPeriod);
+
+                const filteredData = allVacationData.filter(row => {
+                    if (filterByPeriod) {
+                        return String(row['PERIODO']).toLowerCase().includes(query);
+                    } else {
+                        return Object.values(row).some(value => {
+                            return String(value).toLowerCase().includes(query);
+                        });
+                    }
+                });
+                renderVacationTable(filteredData);
+                updateVacationTotals(filteredData);
+            }
+            
+            function sortVacationTable(key, direction) {
+                allVacationData.sort((a, b) => {
+                    const valA = String(a[key]).toLowerCase();
+                    const valB = String(b[key]).toLowerCase();
+                    if (valA < valB) {
+                        return direction === 'asc' ? -1 : 1;
+                    }
+                    if (valA > valB) {
+                        return direction === 'asc' ? 1 : -1;
+                    }
+                    return 0;
+                });
+                renderVacationTable(allVacationData);
+                updateVacationTotals(allVacationData);
+            }
+            
+            function enableVacationSorting() {
+                vacationTableHeaders.forEach(header => {
+                    if (header.dataset.sortKey) {
+                        header.addEventListener('click', handleVacationSortClick);
+                        header.classList.remove('disabled-sort-header');
+                        header.style.pointerEvents = 'auto';
+                    }
+                });
+            }
+
+            function disableVacationSorting() {
+                vacationTableHeaders.forEach(header => {
+                    header.removeEventListener('click', handleVacationSortClick);
+                    header.classList.add('disabled-sort-header');
+                    header.style.pointerEvents = 'none';
+                });
+            }
+            
+            function handleVacationSortClick(event) {
+                 const newSortKey = event.target.dataset.sortKey;
+                 vacationTableHeaders.forEach(th => th.classList.remove('selected-sort-header'));
+
+                 if (newSortKey === vacationSortKey) {
+                    vacationSortDirection = vacationSortDirection === 'asc' ? 'desc' : 'asc';
+                 } else {
+                    vacationSortKey = newSortKey;
+                    vacationSortDirection = 'asc';
+                 }
+
+                 event.target.classList.add('selected-sort-header');
+                 sortVacationTable(vacationSortKey, vacationSortDirection);
+            }
+            
+            vacationSortButton.addEventListener('click', () => {
+                // Si no se ha seleccionado una columna, usa 'PERIODO' por defecto
+                if (!vacationSortKey) {
+                    vacationSortKey = 'PERIODO';
+                    vacationSortDirection = 'asc';
+                    const periodoHeader = document.querySelector('#vacation-grid th[data-sort-key="PERIODO"]');
+                    periodoHeader.classList.add('selected-sort-header');
+                    vacationSortButton.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i>';
+                } else {
+                    // Si ya hay una columna seleccionada, simplemente invierte la dirección
+                    if (vacationSortDirection === 'asc') {
+                        vacationSortDirection = 'desc';
+                        vacationSortButton.innerHTML = '<i class="fa-solid fa-arrow-down-z-a"></i>';
+                    } else {
+                        vacationSortDirection = 'asc';
+                        vacationSortButton.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i>';
+                    }
+                }
+                sortVacationTable(vacationSortKey, vacationSortDirection);
+            });
+
+            vacationSearchInput.addEventListener('input', filterVacationTable);
+            
+            // NUEVO: Lógica para cambiar el placeholder según el checkbox
+            filterByPeriodCheckbox.addEventListener('change', () => {
+                if (filterByPeriodCheckbox.checked) {
+                    vacationSearchInput.placeholder = "Buscar por Periodo...";
+                    disableVacationSorting();
+                    vacationSortButton.style.display = 'none';
+                } else {
+                    vacationSearchInput.placeholder = "Buscar...";
+                    enableVacationSorting();
+                    vacationSortButton.style.display = 'block';
+                }
+                filterVacationTable();
+            });
+
+            vacationCancelButton.addEventListener('click', () => {
+                vacationSearchInput.value = '';
+                filterVacationTable();
+            });
+
+            // MODIFICACIÓN CRÍTICA: Se añade el paso de selectedPerson['INGRESO']
+            openVacationModalBtn.addEventListener('click', () => {
+                if (selectedPerson && selectedPerson['CÉDULA']) {
+                    loadVacationData(
+                        selectedPerson['CÉDULA'], 
+                        selectedPerson['NOMBRES'], 
+                        selectedPerson['APELLIDOS'], 
+                        selectedPerson['INGRESO'] // Se pasa la fecha de ingreso
+                    );
+                    hideModal(detailsModal);
+                    showModal(vacationModal);
+                } else {
+                    showMessage("Por favor, selecciona una fila para ver los datos de vacaciones.");
+                }
+            });
+
+            // MODIFICACIÓN CRÍTICA: Se añade el paso de selectedPerson['INGRESO']
+            openVacationModalEditBtn.addEventListener('click', () => {
+                if (selectedPerson && selectedPerson['CÉDULA']) {
+                    loadVacationData(
+                        selectedPerson['CÉDULA'], 
+                        selectedPerson['NOMBRES'], 
+                        selectedPerson['APELLIDOS'],
+                        selectedPerson['INGRESO'] // Se pasa la fecha de ingreso
+                    );
+                    hideModal(editModal);
+                    showModal(vacationModal);
+                } else {
+                    showMessage("Por favor, selecciona una fila para ver los datos de vacaciones.");
+                }
+            });
+
+            // --- Lógica del nuevo modal de detalles de vacaciones ---
+            const vacationDetailsModalEl = document.getElementById('vacationDetailsModal');
+            const vacationRecordPositionEl = document.getElementById('vacationRecordPosition');
+            const bonoVacacionalFieldDetails = document.getElementById('bono-vacacional-field-details');
+            
+            const vacationDetailsFields = {
+                'ID': document.getElementById('field-id-vacation-details'),
+                'PERIODO': document.getElementById('field-periodo-vacation-details'),
+                'DESCRIPCIÓN_CONCEPTO': document.getElementById('field-descripcion-vacation-details'),
+                'DIAS_VACACIONES': document.getElementById('field-dias-vacaciones-vacation-details'),
+                'BONO_VACACIONAL': document.getElementById('field-bono-vacacional-vacation-details')
+            };
+
+            const prevPageBtnVacationDetails = document.getElementById('prevPageBtnVacationDetails');
+            const nextPageBtnVacationDetails = document.getElementById('nextPageBtnVacationDetails');
+
+            function showVacationDetailsModal(record, index) {
+                const bonoValue = record['BONO_VACACIONAL'] || '';
+                if (String(bonoValue).trim() === '') {
+                    bonoVacacionalFieldDetails.style.display = 'none';
+                } else {
+                    bonoVacacionalFieldDetails.style.display = 'block';
+                }
+
+                vacationDetailsFields['ID'].textContent = index + 1;
+                vacationDetailsFields['PERIODO'].textContent = record['PERIODO'] || '';
+                vacationDetailsFields['DESCRIPCIÓN_CONCEPTO'].textContent = record['DESCRIPCIÓN_CONCEPTO'] || '';
+                vacationDetailsFields['DIAS_VACACIONES'].textContent = record['DIAS_VACACIONES'] || '';
+                vacationDetailsFields['BONO_VACACIONAL'].textContent = bonoValue;
+                
+                vacationRecordPositionEl.textContent = `Registro ${index + 1} de ${allVacationData.length}`;
+                
+                showModal(vacationDetailsModalEl);
+                
+                updateVacationDetailsNavButtons();
+            }
+
+            function updateVacationDetailsNavButtons() {
+                prevPageBtnVacationDetails.disabled = selectedVacationIndex <= 0;
+                nextPageBtnVacationDetails.disabled = selectedVacationIndex >= allVacationData.length - 1;
+            }
+
+            vacationGridBody.addEventListener('click', (event) => {
+                const clickedRow = event.target.closest('tr');
+                if (clickedRow) {
+                    document.querySelectorAll('#vacation-grid tbody tr').forEach(row => {
+                        row.classList.remove('selected');
+                    });
+                    clickedRow.classList.add('selected');
+                    selectedVacationIndex = parseInt(clickedRow.dataset.index);
+                }
+            });
+
+            vacationGridBody.addEventListener('dblclick', (event) => {
+                const clickedRow = event.target.closest('tr');
+                if (clickedRow) {
+                    const index = parseInt(clickedRow.dataset.index);
+                    const vacationData = allVacationData[index];
+                    if (vacationData) {
+                        selectedVacationIndex = index;
+                        showVacationDetailsModal(vacationData, index);
+                    }
+                }
+            });
+
+            prevPageBtnVacationDetails.addEventListener('click', () => {
+                if (selectedVacationIndex > 0) {
+                    selectedVacationIndex--;
+                    showVacationDetailsModal(allVacationData[selectedVacationIndex], selectedVacationIndex);
+                }
+            });
+
+            nextPageBtnVacationDetails.addEventListener('click', () => {
+                if (selectedVacationIndex < allVacationData.length - 1) {
+                    selectedVacationIndex++;
+                    showVacationDetailsModal(allVacationData[selectedVacationIndex], selectedVacationIndex);
+                }
+            });
+
+            // --- Lógica de selección de archivos en el modal de carga ---
+            const fileInput = document.getElementById('fileInput');
+            const uploadFileBtn = document.getElementById('uploadFileBtn');
+            const uploadModalText = document.getElementById('upload-modal-text');
+
+            fileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    uploadModalText.textContent = `Archivo seleccionado: ${file.name}`;
+                    uploadFileBtn.disabled = false;
+                } else {
+                    uploadModalText.textContent = "Selecciona un archivo para subir.";
+                    uploadFileBtn.disabled = true;
+                }
+            });
+
+            uploadFileBtn.addEventListener('click', () => {
+                const file = fileInput.files[0];
+                if (file) {
+                    console.log(`Simulando la subida del archivo: ${file.name}`);
+                    showMessage(`¡Archivo "${file.name}" cargado con éxito!`, 3000, false);
+                    hideModal(uploadModal);
+                    // Resetear el input para permitir una nueva selección
+                    fileInput.value = '';
+                    uploadModalText.textContent = "Selecciona un archivo para subir.";
+                    uploadFileBtn.disabled = true;
+                }
+            });
 
             // Agrega event listeners a los botones de navegación
             logoutBtn.addEventListener('click', () => {
-                // Limpiar userData y simular la navegación a index.html
-                localStorage.removeItem('userData');
+                // Simula la navegación a index.html
                 window.location.href = 'index.html';
             });
+            
+            uploadBtn.addEventListener('click', () => {
+                showModal(uploadModal);
+            });
 
-            // ... (resto de los event listeners igual) ...
+            editBtn.addEventListener('click', () => {
+                if (selectedRowIndex === -1) {
+                    showMessage("Por favor, selecciona una fila para editar.");
+                    return;
+                }
+                const personData = allPersonData[selectedRowIndex];
+                if (personData) {
+                    showEditModal(personData);
+                    hideModal(detailsModal);
+                }
+            });
+
+            reportsBtn.addEventListener('click', () => {
+                // Simula la navegación a reportes.html
+                window.location.href = 'reportes.html';
+            });
+
+            homeBtn.addEventListener('click', () => {
+                // Simula la navegación a dashboard.html
+                window.location.href = 'dashboard.html';
+            });
+
+            notificationsBtn.addEventListener('click', () => {
+                // Simula la navegación a notificaciones.html
+                window.location.href = 'notificaciones.html';
+            });
+            
+            settingsBtn.addEventListener('click', () => {
+                showModal(settingsModal);
+            });
+
+            helpBtn.addEventListener('click', () => {
+                showModal(helpModal);
+            });
 
             loadPersonData();
         });
