@@ -382,15 +382,12 @@
         // Variable para almacenar el correo del usuario
         let userEmailToUpdate = '';
         
-        // --- Comprobación de sesión al cargar ---
+        // --- NUEVO: Comprobación de sesión al cargar ---
         document.addEventListener("DOMContentLoaded", () => {
             const userData = JSON.parse(localStorage.getItem('userData'));
-            // Si hay sesión activa (basado en la presencia de Usuario_Nombre), redirige
-            if (userData && userData.Usuario_Nombre) {
-                console.log('Sesión activa encontrada:', userData);
+            // Si hay sesión activa, redirige inmediatamente al dashboard
+            if (userData && userData.username) {
                 window.location.href = 'dashboard.html';
-            } else {
-                console.log('No se encontró sesión activa. Mostrando formulario de login.');
             }
         });
 
@@ -483,41 +480,37 @@
                     Usuario_Correo: userEmailLogin,
                     Usuario_Clave: password
                 };
-                
-                // --- LOGGING CLIENTE: Datos enviados ---
-                console.log('LOG (CLIENTE) - LOGIN: Datos a enviar:', requestData);
-                
+                console.log('Datos enviados:', requestData);
                 try {
                     const response = await fetch(GAS_SCRIPT_URL, {
                         method: 'POST',
                         body: new URLSearchParams(requestData)
                     });
                     const result = await response.json();
-                    
-                    // --- LOGGING CLIENTE: Respuesta recibida ---
-                    console.log('LOG (CLIENTE) - LOGIN: Respuesta recibida:', result);
 
                     if (result.success) {
-                        const userData = result.userData; 
+                        // --- INICIO: LÓGICA AGREGADA PARA GUARDAR SESIÓN Y NOMBRE DE USUARIO ---
                         
-                        if (userData && userData.Usuario_Nombre) {
-                            const sessionData = {
-                                Usuario_Tienda: userData.Usuario_Tienda,
-                                Usuario_Nombre: userData.Usuario_Nombre,
-                                Usuario_Idx: userData.Usuario_Idx,
-                                Usuario_Perfil: userData.Usuario_Perfil,
-                            };
-                            localStorage.setItem('userData', JSON.stringify(sessionData));
-                            console.log('LOG (CLIENTE) - LOGIN: Datos de sesión guardados:', sessionData);
-                        }
+                        // Simulación de que el servidor devuelve el nombre del usuario
+                        // En una app real, result.username vendría de la respuesta del servidor.
+                        const userName = result.username || userEmailLogin.split('@')[0]; 
+                        
+                        const userData = {
+                            username: userName,
+                            // Puedes añadir más datos aquí si los devuelve el servidor
+                        };
+                        
+                        localStorage.setItem('userData', JSON.stringify(userData));
+                        // --- FIN: LÓGICA AGREGADA ---
 
                         loginForm.reset();
+                        // Redireccionamiento a dashboard.html al cerrar el modal de éxito
                         showCustomModal("¡Inicio de sesión exitoso!", null, 'dashboard.html');
                     } else {
                         showCustomModal(result.message || "Credenciales incorrectas. Por favor, inténtalo de nuevo.");
                     }
                 } catch (error) {
-                    console.error('LOG (CLIENTE) - LOGIN: Error de red/API:', error);
+                    console.error('Error de red/API:', error);
                     showCustomModal("Ocurrió un error al intentar iniciar sesión. Por favor, inténtalo de nuevo.");
                 } finally {
                     hideLoader();
@@ -546,10 +539,7 @@
                     Usuario_Correo: userEmailRecuperar,
                     Usuario_Telefono: userTelefonoRecuperar
                 };
-                
-                // --- LOGGING CLIENTE: Datos enviados ---
-                console.log('LOG (CLIENTE) - FORGOT PASSWORD: Datos a enviar:', requestData);
-                
+                console.log('Datos enviados:', requestData);
                 try {
                     const response = await fetch(GAS_SCRIPT_URL, {
                         method: 'POST',
@@ -557,18 +547,16 @@
                     });
                     const result = await response.json();
 
-                    // --- LOGGING CLIENTE: Respuesta recibida ---
-                    console.log('LOG (CLIENTE) - FORGOT PASSWORD: Respuesta recibida:', result);
-
                     if (result.success) {
                         closeModal('recovery-modal');
                         forgotPasswordForm.reset();
+                        // Se muestra la contraseña en el modal con el ícono de copia
                         showCustomModal("Tu contraseña es:", result.newPassword);
                     } else {
                         showCustomModal(result.message || "No se pudo recuperar la contraseña. Verifica los datos.");
                     }
                 } catch (error) {
-                    console.error('LOG (CLIENTE) - FORGOT PASSWORD: Error de red/API:', error);
+                    console.error('Error de red/API:', error);
                     showCustomModal("Ocurrió un error al intentar recuperar la contraseña. Por favor, inténtalo de nuevo.");
                 } finally {
                     hideLoader();
@@ -585,43 +573,26 @@
                 Usuario_Correo: userEmailToUpdate,
                 newPassword: newPassword,
             };
-            
-            // --- LOGGING CLIENTE: Datos enviados ---
-            console.log('LOG (CLIENTE) - UPDATE PASSWORD: Datos a enviar:', requestData);
-
+            console.log('Datos enviados:', requestData);
             try {
                 const response = await fetch(GAS_SCRIPT_URL, {
                     method: 'POST',
                     body: new URLSearchParams(requestData),
                 });
                 const result = await response.json();
-                
-                // --- LOGGING CLIENTE: Respuesta recibida ---
-                console.log('LOG (CLIENTE) - UPDATE PASSWORD: Respuesta recibida:', result);
 
                 if (result.success) {
                     closeModal('generate-password-modal');
                     closeModal('recovery-modal');
+                    // Reiniciar el formulario después de un éxito
                     manualPasswordForm.reset();
-                    
-                    const userData = result.userData;
-                    if (userData && userData.Usuario_Nombre) {
-                        const sessionData = {
-                            Usuario_Tienda: userData.Usuario_Tienda,
-                            Usuario_Nombre: userData.Usuario_Nombre,
-                            Usuario_Idx: userData.Usuario_Idx,
-                            Usuario_Perfil: userData.Usuario_Perfil,
-                        };
-                        localStorage.setItem('userData', JSON.stringify(sessionData));
-                        console.log('LOG (CLIENTE) - UPDATE PASSWORD: Datos de sesión guardados (post-actualización):', sessionData);
-                    }
-
+                    // Se muestra la nueva contraseña
                     showCustomModal("¡Contraseña actualizada con éxito!", result.newPassword);
                 } else {
                     showCustomModal(result.message || "Hubo un error al actualizar la contraseña.");
                 }
             } catch (error) {
-                console.error('LOG (CLIENTE) - UPDATE PASSWORD: Error de red/API:', error);
+                console.error('Error de red/API:', error);
                 showCustomModal("Ocurrió un error de red al intentar actualizar la contraseña.");
             } finally {
                 hideLoader();
