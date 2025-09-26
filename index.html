@@ -478,13 +478,20 @@
                     });
                     const result = await response.json();
 
-                    if (result.success) {
-                        loginForm.reset();
-                        // Redireccionamiento directo a dashboard.html al cerrar el modal de éxito
-                        showCustomModal("¡Inicio de sesión exitoso!", null, 'dashboard.html');
-                    } else {
+                if (result.success) {
+                // Guarda los datos del usuario en localStorage
+                        if (result.userData) {
+                            localStorage.setItem('Usuario_Tienda', result.userData.Usuario_Tienda);
+                            localStorage.setItem('Usuario_Nombre', result.userData.Usuario_Nombre);
+                            localStorage.setItem('Usuario_Perfil', result.userData.Usuario_Perfil);
+                            localStorage.setItem('Usuario_Idx', result.userData.Usuario_Idx);
+                        }
+                            loginForm.reset();
+                            // Redireccionamiento directo a dashboard.html al cerrar el modal de éxito
+                            showCustomModal("¡Inicio de sesión exitoso!", null, 'dashboard.html');
+                        } else {
                         showCustomModal(result.message || "Credenciales incorrectas. Por favor, inténtalo de nuevo.");
-                    }
+                       }
                 } catch (error) {
                     showCustomModal("Ocurrió un error al intentar iniciar sesión. Por favor, inténtalo de nuevo.");
                 } finally {
