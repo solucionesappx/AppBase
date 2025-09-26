@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App JAL5</title>
+    <title>App JAL7</title>
     <!-- Incluye el CDN de Tailwind CSS para un estilo rápido y moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Incluye la librería de iconos Font Awesome -->
@@ -389,29 +389,45 @@
             border-radius: 0.5rem; /* El mismo border-radius que el modal */
         }
         
-        /* Nuevo estilo para el total de días con colores de alto contraste */
-        .total-vacation-days-container {
+        /* Estilos para el total de días y subtotales */
+        .total-container {
             background-color: #1a202c; /* Fondo oscuro */
             color: #e2e8f0; /* Texto claro */
             border-radius: 0.5rem;
             padding: 0.75rem;
-            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .total-container .total-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .total-vacation-days-container .total-label {
+        
+        .total-container .total-label {
             font-weight: bold;
             font-size: 1.125rem;
         }
-        .total-vacation-days-container .total-value {
+        
+        .total-container .total-value {
             font-weight: bold;
             font-size: 1.125rem;
             color: #63b3ed; /* Color de acento para el valor */
         }
-    </style>
-    <!-- Media query para ocultar la aplicación en pantallas de más de 450px -->
-    <style>
+        
+        .total-container .subtotal-label {
+            font-weight: normal;
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+        
+        .total-container .subtotal-value {
+            font-weight: normal;
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        /* Media query para ocultar la aplicación en pantallas de más de 450px */
         @media (min-width: 451px) {
             body {
                 display: none;
@@ -729,24 +745,40 @@
             <div class="modal-header">
                 <h3 class="text-xl font-bold" id="vacationModalTitle">Detalles de Absentismos</h3>
             </div>
-            
-            <!-- NUEVO CÓDIGO: Sección para la sumatoria antes del buscador -->
-            <div class="total-vacation-days-container">
-                <span class="total-label">Total de Días Acumulados:</span>
-                <span id="totalVacationDays" class="total-value">0</span>
-            </div>
 
+            <!-- Aquí se reordena el contenido del modal según tu solicitud -->
+
+            <!-- NUEVO: Casilla de verificación para filtrar por periodo -->
+            <div class="flex items-center space-x-2 mt-2 mb-2">
+                <input type="checkbox" id="filterByPeriodCheckbox" class="form-checkbox h-5 w-5 text-blue-600 rounded">
+                <label for="filterByPeriodCheckbox" class="text-sm cursor-pointer">Filtrar por periodo</label>
+            </div>
+            
             <!-- Buscador para la tabla de vacaciones -->
-            <!-- Se ajusta el buscador para que el botón esté a la derecha -->
-            <div class="flex flex-row items-center space-x-2 my-4">
+            <div class="flex flex-row items-center space-x-2 mb-2">
                 <input type="text" id="vacationSearchInput" placeholder="Buscar..." class="flex-grow p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" autocomplete="off">
                 <button id="vacationCancelButton" class="text-3xl text-red-600 hover:text-red-700 bg-transparent transition-colors focus:outline-none focus:ring-0">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
+            <!-- Contenedor para el total y los subtotales -->
+            <div class="total-container mb-2">
+                <div class="total-row">
+                    <span class="total-label">Total Días Acumulados:</span>
+                    <span id="totalVacationDays" class="total-value">0</span>
+                </div>
+                <div class="total-row">
+                    <span class="subtotal-label">Disfrutes Efectivos:</span>
+                    <span id="subtotalNegative" class="subtotal-value">0</span>
+                </div>
+                <div class="total-row">
+                    <span class="subtotal-label">Asignación Beneficio:</span>
+                    <span id="subtotalPositive" class="subtotal-value">0</span>
+                </div>
+            </div>
+            
             <!-- Contenedor de la tabla de vacaciones -->
-            <!-- Se ajusta la altura máxima para mostrar más celdas -->
             <div class="data-table-container flex-grow max-h-[420px] mb-4">
                 <table id="vacation-grid" class="data-table">
                     <thead>
@@ -770,7 +802,7 @@
         </div>
     </div>
 
-    <!-- Nuevo Modal: Detalles de Vacaciones -->
+    <!-- Modal: Detalles de Vacaciones -->
     <div id="vacationDetailsModal" class="modal-container hidden">
         <div class="modal-content relative">
             <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
@@ -1371,21 +1403,23 @@
                 }
             });
             
-            // --- NUEVA LÓGICA PARA EL MODAL DE VACACIONES ---
+            // --- Lógica para el Modal de Vacaciones y la nueva funcionalidad de filtro ---
             const vacationGridBody = document.querySelector('#vacation-grid tbody');
             const vacationTableHeaders = document.querySelectorAll('#vacation-grid thead th[data-sort-key]');
             const vacationModalTitle = document.getElementById('vacationModalTitle');
-            const vacationLoader = document.getElementById('vacation-loader'); // Nuevo loader para el modal
-            const vacationSearchInput = document.getElementById('vacationSearchInput'); // Buscador
-            const vacationCancelButton = document.getElementById('vacationCancelButton'); // Botón de cancelar
+            const vacationLoader = document.getElementById('vacation-loader');
+            const vacationSearchInput = document.getElementById('vacationSearchInput');
+            const vacationCancelButton = document.getElementById('vacationCancelButton');
+            const filterByPeriodCheckbox = document.getElementById('filterByPeriodCheckbox'); // NUEVO: Checkbox para filtrar por periodo
             
-            let allVacationData = []; // Variable para almacenar todos los datos de vacaciones
-            let selectedVacationIndex = -1; // Índice del registro de vacaciones seleccionado
-            let vacationSortKey = 'PERIODO'; // Clave de ordenación por defecto
-            let vacationSortDirection = 'desc'; // Dirección de ordenación por defecto
+            let allVacationData = [];
+            let selectedVacationIndex = -1;
+            let vacationSortKey = 'PERIODO';
+            let vacationSortDirection = 'desc';
 
-            // NUEVA LÍNEA: Referencia al elemento que mostrará el total de días
             const totalVacationDaysEl = document.getElementById('totalVacationDays');
+            const subtotalNegativeEl = document.getElementById('subtotalNegative');
+            const subtotalPositiveEl = document.getElementById('subtotalPositive');
 
             const vacationHeaderMapping = {
                 'CÉDULA': 'CÉDULA',
@@ -1395,7 +1429,6 @@
                 'BONO_VACACIONAL': 'BONO_VACACIONAL'
             };
 
-            // Función para formatear el nombre con iniciales
             function formatNameForModal(name) {
                 if (!name) return '';
                 const parts = name.trim().split(/\s+/);
@@ -1407,7 +1440,6 @@
                 return name;
             }
             
-            // Función para formatear los apellidos con iniciales
             function formatApellidosForModal(apellidos) {
                 if (!apellidos) return '';
                 const parts = apellidos.trim().split(/\s+/);
@@ -1420,11 +1452,14 @@
             }
 
             async function loadVacationData(cedula, nombres, apellidos) {
-                // CORRECCIÓN: Limpiar el título y resetear los campos antes de cargar los datos
                 vacationModalTitle.innerHTML = '';
                 vacationGridBody.innerHTML = '';
                 totalVacationDaysEl.textContent = '0';
+                subtotalNegativeEl.textContent = '0';
+                subtotalPositiveEl.textContent = '0';
                 vacationSearchInput.value = '';
+                filterByPeriodCheckbox.checked = false; // Reiniciar el checkbox
+                vacationSearchInput.placeholder = "Buscar..."; // Resetear el placeholder
                 allVacationData = [];
                 selectedVacationIndex = -1;
                 vacationSortKey = 'PERIODO';
@@ -1437,15 +1472,13 @@
                     return;
                 }
                 
-                // Actualiza el título con el nombre y apellido formateados antes de mostrar el loader
                 const formattedNombres = formatNameForModal(nombres);
                 const formattedApellidos = formatApellidosForModal(apellidos);
                 vacationModalTitle.innerHTML = `${formattedNombres} ${formattedApellidos}<br>CI: ${cedula}`;
 
-                vacationLoader.classList.remove('hidden'); // Muestra el loader
+                vacationLoader.classList.remove('hidden');
                 
                 try {
-                    // Llama a la API con el nombre de la hoja
                     const response = await fetch(`${GAS_URL}?sheet=Vacaciones`);
                     const result = await response.json();
 
@@ -1455,7 +1488,6 @@
                         return;
                     }
                     
-                    // Lógica de filtrado mejorada: por cédula y por la columna de días de vacaciones que sean números
                     allVacationData = result.data.filter(row => {
                         const rowCedula = String(row['CÉDULA']).trim();
                         const personalCedula = String(cedula).trim();
@@ -1463,21 +1495,15 @@
                         return rowCedula === personalCedula && !isNaN(diasVacaciones);
                     });
                     
-                    // Ordena los datos de vacaciones por defecto
                     sortVacationTable(vacationSortKey, vacationSortDirection);
                     
-                    // NUEVO CÓDIGO: Lógica de sumatoria de días de vacaciones
-                    const totalDays = allVacationData.reduce((sum, row) => {
-                        const dias = parseFloat(row['DIAS_VACACIONES']);
-                        return sum + (isNaN(dias) ? 0 : dias);
-                    }, 0);
-                    totalVacationDaysEl.textContent = totalDays;
+                    updateVacationTotals(allVacationData);
                     
                 } catch (error) {
                     vacationGridBody.innerHTML = `<tr><td colspan="5" class="text-center text-red-600">No se pudo conectar con el script.</td></tr>`;
                     console.error('Fetch Error:', error);
                 } finally {
-                    vacationLoader.classList.add('hidden'); // Oculta el loader
+                    vacationLoader.classList.add('hidden');
                 }
             }
             
@@ -1491,7 +1517,7 @@
                 }
                 data.forEach((row, index) => {
                     const tableRow = document.createElement('tr');
-                    tableRow.dataset.index = index; // Guarda el índice del array filtrado
+                    tableRow.dataset.index = index;
                     const idCell = document.createElement('td');
                     idCell.textContent = (index + 1);
                     idCell.classList.add('text-right');
@@ -1500,7 +1526,6 @@
                         const cell = document.createElement('td');
                         const jsonKey = vacationHeaderMapping[key];
                         let cellContent = row[jsonKey] || '';
-                        // Se omite la columna CÉDULA para que no se muestre en la tabla
                         if (jsonKey === 'CÉDULA') {
                             return;
                         }
@@ -1513,19 +1538,44 @@
                     vacationGridBody.appendChild(tableRow);
                 });
             }
+            
+            function updateVacationTotals(data) {
+                const totalDays = data.reduce((sum, row) => {
+                    const dias = parseFloat(row['DIAS_VACACIONES']);
+                    return sum + (isNaN(dias) ? 0 : dias);
+                }, 0);
+                totalVacationDaysEl.textContent = totalDays;
+                
+                const subtotalNegative = data.reduce((sum, row) => {
+                    const dias = parseFloat(row['DIAS_VACACIONES']);
+                    return sum + (dias < 0 ? dias : 0);
+                }, 0);
+                subtotalNegativeEl.textContent = subtotalNegative;
+                
+                const subtotalPositive = data.reduce((sum, row) => {
+                    const dias = parseFloat(row['DIAS_VACACIONES']);
+                    return sum + (dias >= 0 ? dias : 0);
+                }, 0);
+                subtotalPositiveEl.textContent = subtotalPositive;
+            }
 
-            // Mueve la función de filtrado al ámbito global para que sea accesible
             function filterVacationTable() {
                 const query = vacationSearchInput.value.toLowerCase();
+                const filterByPeriod = filterByPeriodCheckbox.checked;
+
                 const filteredData = allVacationData.filter(row => {
-                    return Object.values(row).some(value => {
-                        return String(value).toLowerCase().includes(query);
-                    });
+                    if (filterByPeriod) {
+                        return String(row['PERIODO']).toLowerCase().includes(query);
+                    } else {
+                        return Object.values(row).some(value => {
+                            return String(value).toLowerCase().includes(query);
+                        });
+                    }
                 });
                 renderVacationTable(filteredData);
+                updateVacationTotals(filteredData);
             }
             
-            // Función de ordenación para la tabla de vacaciones
             function sortVacationTable(key, direction) {
                 allVacationData.sort((a, b) => {
                     const valA = String(a[key]).toLowerCase();
@@ -1539,13 +1589,12 @@
                     return 0;
                 });
                 renderVacationTable(allVacationData);
+                updateVacationTotals(allVacationData);
             }
 
             vacationTableHeaders.forEach(header => {
                 header.addEventListener('click', () => {
                     const newSortKey = header.dataset.sortKey;
-
-                    // Remueve la clase de todos los encabezados
                     vacationTableHeaders.forEach(th => th.classList.remove('selected-sort-header'));
 
                     if (newSortKey === vacationSortKey) {
@@ -1561,16 +1610,26 @@
             });
 
             vacationSearchInput.addEventListener('input', filterVacationTable);
+            
+            // NUEVO: Lógica para cambiar el placeholder según el checkbox
+            filterByPeriodCheckbox.addEventListener('change', () => {
+                if (filterByPeriodCheckbox.checked) {
+                    vacationSearchInput.placeholder = "Buscar por Periodo...";
+                } else {
+                    vacationSearchInput.placeholder = "Buscar...";
+                }
+                filterVacationTable();
+            });
 
             vacationCancelButton.addEventListener('click', () => {
                 vacationSearchInput.value = '';
-                renderVacationTable(allVacationData); // Muestra los datos sin filtrar
+                filterVacationTable();
             });
 
             openVacationModalBtn.addEventListener('click', () => {
                 if (selectedPerson && selectedPerson['CÉDULA']) {
                     loadVacationData(selectedPerson['CÉDULA'], selectedPerson['NOMBRES'], selectedPerson['APELLIDOS']);
-                    hideModal(detailsModal); // Ocultar el modal de detalles antes de abrir el de vacaciones
+                    hideModal(detailsModal);
                     showModal(vacationModal);
                 } else {
                     showMessage("Por favor, selecciona una fila para ver los datos de vacaciones.");
@@ -1580,7 +1639,7 @@
             openVacationModalEditBtn.addEventListener('click', () => {
                 if (selectedPerson && selectedPerson['CÉDULA']) {
                     loadVacationData(selectedPerson['CÉDULA'], selectedPerson['NOMBRES'], selectedPerson['APELLIDOS']);
-                    hideModal(editModal); // Ocultar el modal de editar antes de abrir el de vacaciones
+                    hideModal(editModal);
                     showModal(vacationModal);
                 } else {
                     showMessage("Por favor, selecciona una fila para ver los datos de vacaciones.");
@@ -1590,7 +1649,7 @@
             // --- Lógica del nuevo modal de detalles de vacaciones ---
             const vacationDetailsModalEl = document.getElementById('vacationDetailsModal');
             const vacationRecordPositionEl = document.getElementById('vacationRecordPosition');
-            const bonoVacacionalFieldDetails = document.getElementById('bono-vacacional-field-details'); // Referencia al div del bono
+            const bonoVacacionalFieldDetails = document.getElementById('bono-vacacional-field-details');
             
             const vacationDetailsFields = {
                 'ID': document.getElementById('field-id-vacation-details'),
@@ -1604,7 +1663,6 @@
             const nextPageBtnVacationDetails = document.getElementById('nextPageBtnVacationDetails');
 
             function showVacationDetailsModal(record, index) {
-                // CORRECCIÓN: Convierte el valor a cadena de texto antes de usar .trim()
                 const bonoValue = record['BONO_VACACIONAL'] || '';
                 if (String(bonoValue).trim() === '') {
                     bonoVacacionalFieldDetails.style.display = 'none';
@@ -1612,20 +1670,16 @@
                     bonoVacacionalFieldDetails.style.display = 'block';
                 }
 
-                // Actualiza los campos del modal
                 vacationDetailsFields['ID'].textContent = index + 1;
                 vacationDetailsFields['PERIODO'].textContent = record['PERIODO'] || '';
                 vacationDetailsFields['DESCRIPCIÓN_CONCEPTO'].textContent = record['DESCRIPCIÓN_CONCEPTO'] || '';
                 vacationDetailsFields['DIAS_VACACIONES'].textContent = record['DIAS_VACACIONES'] || '';
                 vacationDetailsFields['BONO_VACACIONAL'].textContent = bonoValue;
                 
-                // Actualiza el texto de la posición del registro
                 vacationRecordPositionEl.textContent = `Registro ${index + 1} de ${allVacationData.length}`;
                 
-                // Muestra el modal
                 showModal(vacationDetailsModalEl);
                 
-                // Actualiza el estado de los botones de navegación
                 updateVacationDetailsNavButtons();
             }
 
@@ -1637,13 +1691,10 @@
             vacationGridBody.addEventListener('click', (event) => {
                 const clickedRow = event.target.closest('tr');
                 if (clickedRow) {
-                    // Remueve la clase 'selected' de todas las filas en la tabla de vacaciones
                     document.querySelectorAll('#vacation-grid tbody tr').forEach(row => {
                         row.classList.remove('selected');
                     });
-                    // Añade la clase 'selected' a la fila clicada
                     clickedRow.classList.add('selected');
-                    // Guarda el índice del registro seleccionado
                     selectedVacationIndex = parseInt(clickedRow.dataset.index);
                 }
             });
