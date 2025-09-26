@@ -958,10 +958,12 @@
             const usuarioIdx = localStorage.getItem('Usuario_Idx');
             const usuarioprimerNombre = localStorage.getItem('Usuario_Primer_Nombre');
 
-            if (usuarioprimerNombre) {
-                document.querySelector('.text-2xl.font-semibold').textContent = `¡Hola, ${usuarioprimerNombre}!`;
+            // Extraer el primer nombre
+            let primerNombre = '';
+            if (usuarioNombre) {
+                primerNombre = usuarioNombre.trim().split(' ')[0];
+                document.querySelector('.text-2xl.font-semibold').textContent = `¡Hola, ${primerNombre}!`;
             }
-
             
             
             // Usamos el mismo URL base para todas las llamadas API
