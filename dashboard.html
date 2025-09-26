@@ -952,6 +952,9 @@
             const cancelButton = document.getElementById('cancelButton');
             const sortButton = document.getElementById('sortButton');
             
+            // Simulación de datos del usuario logueado
+            const userData = { Usuario_Nombre: 'Jhon' };
+
             // Usamos el mismo URL base para todas las llamadas API
             const GAS_URL = 'https://script.google.com/macros/s/AKfycbx87WvxA9ca1KyGMA1wsw1npZw5vPtjoItomhF823BICXScNrWGFh5m0Dj6Veb24CtHXQ/exec';
 
@@ -1905,20 +1908,18 @@
             helpBtn.addEventListener('click', () => {
                 showModal(helpModal);
             });
+            
+            window.onload = function () {
+                const welcomeElement = document.getElementById('welcomeMessage');
+                if (welcomeElement && userData && userData.Usuario_Nombre) {
+                    welcomeElement.textContent = `¡Hola, ${userData.Usuario_Nombre}!`;
+                }
+            };
 
             loadPersonData();
         });
         
-        window.onload = function () {
-    // 1. Obtener el elemento del mensaje de bienvenida por su ID
-    const welcomeElement = document.getElementById('welcomeMessage');
-
-    // 2. Verificar si el elemento existe y si tenemos el nombre del usuario
-    if (welcomeElement && userData && userData.Usuario_Nombre) {
-        // 3. Actualizar el contenido del span con el nombre del usuario
-        welcomeElement.textContent = `¡Hola, ${userData.Usuario_Nombre}!`;
-    }
-};
     </script>
 </body>
 </html>
+
