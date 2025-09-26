@@ -460,7 +460,7 @@
         <div class="container max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
             <!-- Mensaje de Bienvenida (Asume que el usuario está logueado) -->
             <div class="flex-row space-x-2">
-                <span class="text-2xl font-semibold">¡Hola, Usuario!</span>
+                <span class="text-2xl font-semibold" id="welcomeMessage">¡Hola!</span>
             </div>
 
             <div class="flex-row space-x-4 flex items-center">
@@ -1908,6 +1908,17 @@
 
             loadPersonData();
         });
+        
+        window.onload = function () {
+    // 1. Obtener el elemento del mensaje de bienvenida por su ID
+    const welcomeElement = document.getElementById('welcomeMessage');
+
+    // 2. Verificar si el elemento existe y si tenemos el nombre del usuario
+    if (welcomeElement && userData && userData.Usuario_Nombre) {
+        // 3. Actualizar el contenido del span con el nombre del usuario
+        welcomeElement.textContent = `¡Hola, ${userData.Usuario_Nombre}!`;
+    }
+};
     </script>
 </body>
 </html>
