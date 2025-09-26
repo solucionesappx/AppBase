@@ -476,6 +476,9 @@
                         body: new URLSearchParams(requestData)
                     });
                     const result = await response.json();
+                    
+                    // AÑADIDO: Muestra la respuesta completa del backend en la consola
+                    console.log('Respuesta del Backend (Login):', result); 
 
                     if (result.success) {
                         loginForm.reset();
@@ -521,6 +524,9 @@
                     });
                     const result = await response.json();
 
+                    // AÑADIDO: Muestra la respuesta completa del backend en la consola
+                    console.log('Respuesta del Backend (Recuperación):', result); 
+
                     if (result.success) {
                         closeModal('recovery-modal');
                         forgotPasswordForm.reset();
@@ -553,6 +559,9 @@
                     body: new URLSearchParams(requestData),
                 });
                 const result = await response.json();
+
+                // AÑADIDO: Muestra la respuesta completa del backend en la consola
+                console.log('Respuesta del Backend (Actualizar Clave):', result); 
 
                 if (result.success) {
                     closeModal('generate-password-modal');
