@@ -460,7 +460,7 @@
         <div class="container max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
             <!-- Mensaje de Bienvenida (Asume que el usuario está logueado) -->
             <div class="flex-row space-x-2">
-                <span class="text-2xl font-semibold" id="welcomeMessage">¡Hola!</span>
+                <span class="text-2xl font-semibold">¡Hola, Usuario!</span>
             </div>
 
             <div class="flex-row space-x-4 flex items-center">
@@ -952,9 +952,6 @@
             const cancelButton = document.getElementById('cancelButton');
             const sortButton = document.getElementById('sortButton');
             
-            // Simulación de datos del usuario logueado
-            const userData = { Usuario_Nombre: 'Jhon' };
-
             // Usamos el mismo URL base para todas las llamadas API
             const GAS_URL = 'https://script.google.com/macros/s/AKfycbx87WvxA9ca1KyGMA1wsw1npZw5vPtjoItomhF823BICXScNrWGFh5m0Dj6Veb24CtHXQ/exec';
 
@@ -1908,18 +1905,9 @@
             helpBtn.addEventListener('click', () => {
                 showModal(helpModal);
             });
-            
-            window.onload = function () {
-                const welcomeElement = document.getElementById('welcomeMessage');
-                if (welcomeElement && userData && userData.Usuario_Nombre) {
-                    welcomeElement.textContent = `¡Hola, ${userData.Usuario_Nombre}!`;
-                }
-            };
 
             loadPersonData();
         });
-        
     </script>
 </body>
 </html>
-
