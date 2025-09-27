@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App JAL7</title>
+    <title>App JAL8</title>
     <!-- Incluye el CDN de Tailwind CSS para un estilo rápido y moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Incluye la librería de iconos Font Awesome -->
@@ -656,23 +655,23 @@
                 <div id="modal-page-1-edit" class="modal-page">
                     <div class="modal-field">
                         <label>Empresa:</label>
-                        <input id="field-empresa-edit" type="text" class="text-color" />
+                        <input id="field-empresa-edit" type="text" class="text-color" style="color: gray" readonly />
                     </div>
                     <div class="modal-field">
                         <label>Nómina:</label>
-                        <input id="field-nomina-edit" type="text" class="text-color" />
+                        <input id="field-nomina-edit" type="text" class="text-color" style="color: gray" readonly />
                     </div>
                     <div class="modal-field">
                         <label>Apellidos:</label>
-                        <input id="field-apellidos-edit" type="text" class="text-color" />
+                        <input id="field-apellidos-edit" type="text" class="text-color" style="color: gray" readonly />
                     </div>
                     <div class="modal-field">
                         <label>Nombres:</label>
-                        <input id="field-nombres-edit" type="text" class="text-color" />
+                        <input id="field-nombres-edit" type="text" class="text-color" style="color: gray" readonly />
                     </div>
                     <div class="modal-field">
                         <label>Cédula:</label>
-                        <input id="field-cedula-edit" type="text" class="text-color" />
+                        <input id="field-cedula-edit" type="text" class="text-color" style="color: gray" readonly />
                     </div>
                 </div>
 
@@ -680,29 +679,28 @@
                 <div id="modal-page-2-edit" class="modal-page hidden">
                     <div class="modal-field">
                         <label>Cargo:</label>
-                        <input id="field-cargo-edit" type="text" class="text-color" />
+                        <input id="field-cargo-edit" type="text" class="text-color" style="color: gray" readonly />
                     </div>
                     <div class="modal-field">
                         <label>Ingreso:</label>
-                        <input id="field-ingreso-edit" type="text" class="text-color" />
+                        <input id="field-ingreso-edit" type="text" class="text-color" style="color: gray" readonly />
                     </div>
                     <div class="modal-field">
                         <label>Sector:</label>
-                        <input id="field-sector-edit" type="text" class="text-color" />
+                        <input id="field-sector-edit" type="text" class="text-color" style="font-style: italic"/>
                     </div>
                     <div class="modal-field">
                         <label>Perfil:</label>
-                        <input id="field-perfil-edit" type="text" class="text-color" />
+                        <input id="field-perfil-edit" type="text" class="text-color" style="font-style: italic"/>
                     </div>
                     <!-- El campo Nota ahora se mostrará u ocultará con JS -->
                     <div class="modal-field" id="nota-edit-field">
                         <label>Nota:</label>
-                        <input id="field-nota-edit" type="text" class="text-color" />
+                        <input id="field-nota-edit" type="text" class="text-color" style="font-style: italic"/>
                     </div>
-                    <!-- NUEVO CAMPO AGREGADO -->
                     <div class="modal-field" id="dias-edit-field">
                         <label>Días de Vacaciones:</label>
-                        <input id="field-dias-edit" type="text" class="text-color" />
+                        <input id="field-dias-edit" type="text" class="text-color"  style="font-style: italic"/>
                     </div>
                 </div>
             </div>
@@ -1924,3 +1922,4 @@
     </script>
 </body>
 </html>
+
