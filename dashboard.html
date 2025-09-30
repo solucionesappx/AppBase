@@ -1939,7 +1939,7 @@
                 // 1. Verificar si hay una persona seleccionada en la tabla principal
                 if (selectedPerson && selectedPerson['CÉDULA']) {
                     // 2. Limpiar los campos de entrada y prellenar la cédula (lectura)
-                    cedulaVacationAddInput.value = selectedPerson['CÉDULA'];
+                    cedulaVacationAddInput.value = formatCedula(selectedPerson['CÉDULA']);
                     periodoVacationAddInput.value = '';
                     descripcionVacationAddInput.value = '';
                     diasVacacionesAddInput.value = '';
