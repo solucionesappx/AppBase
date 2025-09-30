@@ -241,7 +241,7 @@
         }
         
         /* Ajuste de posición para el modal de vacaciones */
-        #vacationModal.modal-container {
+        #vacationModal.modal-container, #addVacationModal.modal-container, #vacationDetailsModal.modal-container {
             padding-top: 2rem; /* Mueve el modal 2rem (32px) más arriba */
         }
 
@@ -796,7 +796,7 @@
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <div class="modal-header">
-                <h3 class="text-xl font-bold">Detalles de Registro de Vacaciones</h3>
+                <h3 class="text-xl font-bold">Detalle de Absentismo</h3>
             </div>
            <div id="modal-pages-container-vacation-details">
                 <div class="modal-field">
@@ -875,7 +875,7 @@
 
     <footer class="fixed bottom-0 left-0 w-full header-bg box-shadow-up z-50 transition-colors">
         <div class="container max-w-lg mx-auto px-4 py-3 flex items-end justify-between relative">
-            <div class="flex flex-row space-x-4"> <button id="uploadBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Agregar Archivo">
+            <div class="flex flex-row space-x-4"> <button id="uploadBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Agregar Archivo" hidden>
                     <i class="fa-solid fa-file-circle-plus"></i>
                 </button>
                 <button id="editBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Editar">
@@ -946,10 +946,7 @@
             const usuarioPerfil = localStorage.getItem('Usuario_Perfil');
             const usuarioIdx = localStorage.getItem('Usuario_Idx');
             const usuarioprimerNombre = localStorage.getItem('Usuario_Primer_Nombre');
-
-            // Simula el usuario logueado para fines de auditoría
-            const CURRENT_LOGGED_USER = "UsuarioPrueba@dominio.com"; 
-            
+          
             // Extraer el primer nombre
             let primerNombre = '';
             if (usuarioNombre) {
@@ -1031,6 +1028,31 @@
                 return `${day}/${month}/${year}`;
             }
 
+
+            function formatCedula(value) {
+                // Si el valor está vacío o es nulo, retornar cadena vacía.
+                if (!value) {
+                    return '';
+                }
+    
+                // 1. Convertir a número y asegurar que no haya caracteres que rompan la conversión.
+                // Reemplazamos cualquier separador existente (comas o puntos) para obtener un número limpio.
+                const cleanValue = String(value).replace(/[^0-9]/g, '');
+                const num = Number(cleanValue);
+
+                // 2. Si el resultado es NaN (no es un número), devolvemos el valor original (limpio).
+                if (isNaN(num) || num === 0) {
+                    return cleanValue;
+                }
+
+                // 3. Usar toLocaleString() para formatear con separador de miles (punto).
+                // Se configura para no mostrar decimales.
+                    return num.toLocaleString('es-ES', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                });
+            }
+
             // Función para formatear la fecha y hora completa
             function formatDateTime(date) {
                 const d = new Date(date);
@@ -1084,6 +1106,9 @@
                             cellContent = row[jsonKey] || '';
                             if (key === 'Ingreso') {
                                 cellContent = formatDate(cellContent);
+                            }
+                            if (key === 'Cédula') {
+                                cellContent = formatCedula(cellContent);
                             }
                         }
 
@@ -1265,6 +1290,9 @@
                     if (key === 'INGRESO') {
                         value = formatDate(value);
                     }
+                    if (key === 'CÉDULA') {
+                        value = formatCedula(value);
+                    }
                     if (detailsFieldsMap[key]) {
                         detailsFieldsMap[key].textContent = value;
                     }
@@ -1423,6 +1451,9 @@
                     if (key === 'INGRESO') {
                         value = formatDate(value);
                     }
+                    if (key === 'CÉDULA') {
+                        value = formatCedula(value);
+                    }
                     if (editFieldsMap[key]) {
                         editFieldsMap[key].value = value;
                     }
@@ -1528,11 +1559,12 @@
                 
                 // NUEVO: Formatear la fecha de ingreso
                 const formattedIngreso = formatDate(ingreso);
+                const formatCI = formatCedula(cedula); 
                 
                 // ACTUALIZACIÓN: Se incluye la fecha de ingreso en el título
                 vacationModalTitle.innerHTML = `
                     ${formattedNombres} ${formattedApellidos}<br>
-                    Cédula Identidad: ${cedula}<br>
+                    Cédula Identidad: ${formatCI}<br>
                     Fecha Ingreso: ${formattedIngreso}
                 `;
 
