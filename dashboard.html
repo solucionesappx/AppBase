@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>App JAL8</title>
-    <!-- Incluye el CDN de Tailwind CSS para un estilo rápido y moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Incluye la librería de iconos Font Awesome -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
     <style>
         /* Importa la fuente Poppins de Google Fonts */
@@ -266,7 +264,18 @@
             max-height: 90vh; /* Altura máxima del 90% del viewport */
             overflow-y: auto; /* Permite desplazamiento si el contenido excede la altura */
         }
-
+        
+        /* Regla para definir el tamaño del nuevo modal de añadir vacaciones */
+        #addVacationModal .modal-content {
+            max-height: 90vh; /* Altura máxima del 90% del viewport */
+            overflow-y: auto; /* Permite desplazamiento si el contenido excede la altura */
+        }
+        
+        /* Regla para definir el tamaño del nuevo modal de detalle de vacaciones, con más campos */
+        #vacationDetailsModal .modal-content {
+            max-height: 90vh; /* Altura máxima del 90% del viewport */
+            overflow-y: auto; /* Permite desplazamiento si el contenido excede la altura */
+        }
         
         .modal-container.active .modal-content {
             transform: scale(1);
@@ -455,36 +464,28 @@
     </style>
 </head>
 <body class="dark-mode min-h-screen flex flex-col">
-    <!-- 1. Cintillo Fijo (Header) -->
     <header class="fixed top-0 left-0 w-full header-bg box-shadow-down z-50 transition-colors">
         <div class="container max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-            <!-- Mensaje de Bienvenida (Asume que el usuario está logueado) -->
             <div class="flex-row space-x-2">
                 <span class="text-2xl font-semibold">¡Hola, Usuario!</span>
             </div>
 
             <div class="flex-row space-x-4 flex items-center">
-                <!-- Botón de Modo Claro/Oscuro -->
                 <div id="theme-toggle" class="toggle-switch-container dark-mode">
                     <div class="toggle-button"></div>
                 </div>
                 
-                <!-- Botón para cerrar sesión -->
                 <button id="logoutBtn" class="nav-link text-xl text-[var(--text-color)] hover:text-red-500 transition-colors">
-                    <!-- Icono de cerrar sesión de Font Awesome -->
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Contenedor principal que se estira para llenar el espacio disponible -->
     <div class="w-full max-w-lg mx-auto p-5 rounded-xl container relative mt-20 mb-20 flex-grow flex flex-col">
-        <!-- Loader visual -->
         <div id="loader" class="hidden absolute inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50 rounded-xl">
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
         </div>
-        <!-- Mensaje de notificación / error -->
         <div id="messageBox" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-4 text-white rounded-md shadow-lg z-50">
             <p id="messageText"></p>
         </div>
@@ -492,7 +493,6 @@
         <h1 class="text-2xl font-bold mb-2 text-center">Datos del Personal</h1>
         <p class="text-sm mb-4 text-center">Tabla con datos cargados desde Google Apps Script.</p>
         
-        <!-- Contenedor de búsqueda y ordenación, ahora siempre en una fila -->
         <div class="flex flex-row items-center space-x-2 mb-2">
             <input type="text" id="searchInput" placeholder="Buscar..." class="w-4/5 p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" autocomplete="off">
             <button id="sortButton" class="text-3xl bg-transparent hover:text-blue-600 text-blue-500 font-bold py-2 px-4 rounded transition-colors duration-300 ease-in-out" aria-label="Ordenar por Apellidos">
@@ -503,7 +503,6 @@
             </button>
         </div>
 
-        <!-- Contenedor de la tabla, ahora se estira para llenar el espacio restante -->
         <div class="data-table-container flex-grow max-h-[480px]">
             <table id="Data-grid" class="data-table">
                 <thead>
@@ -523,13 +522,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Los datos se renderizarán aquí con JavaScript -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Contenedor del Modal de Detalles (Visualizar) -->
     <div id="detailsModal" class="modal-container hidden">
         <div class="modal-content relative">
             <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
@@ -542,9 +539,7 @@
                 </button>
             </div>
             
-            <!-- Contenido del modal (páginas de datos) -->
             <div id="modal-pages-container-details">
-                <!-- Página 1: Campos Empresa, Nómina, Apellidos, Nombres, Cédula -->
                 <div id="modal-page-1-details" class="modal-page">
                     <div class="modal-field">
                         <label>Empresa:</label>
@@ -568,7 +563,6 @@
                     </div>
                 </div>
 
-                <!-- Página 2: Campos Cargo, Ingreso, Sector, Perfil, Nota -->
                 <div id="modal-page-2-details" class="modal-page hidden">
                     <div class="modal-field">
                         <label>Cargo:</label>
@@ -586,12 +580,10 @@
                         <label>Perfil:</label>
                         <span id="field-perfil-details"></span>
                     </div>
-                    <!-- El campo Nota ahora se mostrará u ocultará con JS -->
                     <div class="modal-field" id="nota-details-field">
                         <label>Nota:</label>
                         <span id="field-nota-details"></span>
                     </div>
-                    <!-- Se ha corregido este div para que sea único y muestre el campo 'Días' (CTRL2) -->
                     <div class="modal-field" id="dias-details-field">
                         <label>Días de Vacaciones:</label>
                         <span id="field-dias-details"></span>
@@ -599,9 +591,7 @@
                 </div>
             </div>
 
-            <!-- Navegación del Modal -->
             <div class="modal-footer flex items-center justify-between">
-                <!-- Contenedor para botones de navegación -->
                 <div class="flex space-x-2">
                     <button id="prevPageBtnDetails" class="modal-nav-button" disabled>
                         <i class="fa-solid fa-angle-left"></i>
@@ -610,13 +600,11 @@
                         <i class="fa-solid fa-angle-right"></i>
                     </button>
                 </div>
-                <!-- Botón de acción principal -->
                 <button class="modal-action-button close-modal-btn">Aceptar</button>
             </div>
         </div>
     </div>
 
-    <!-- Nuevo Modal: Cargar Archivo -->
     <div id="uploadModal" class="modal-container hidden">
         <div class="modal-content relative text-center">
             <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
@@ -636,7 +624,6 @@
         </div>
     </div>
 
-    <!-- Nuevo Modal: Editar -->
     <div id="editModal" class="modal-container hidden">
         <div class="modal-content relative">
             <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
@@ -644,14 +631,9 @@
             </button>
             <div class="modal-header">
                 <h3 class="text-xl font-bold">Editar</h3>
-                <button id="openVacationModalEditBtn" class="nav-link text-xl text-[var(--text-color)] hover:text-blue-500 transition-colors">
-                    <i class="fa-solid fa-calendar-alt" style="font-size: 2.5rem"></i>
-                </button>
             </div>
 
-            <!-- Contenido del modal (páginas de edición) -->
             <div id="modal-pages-container-edit">
-                <!-- Página 1: Campos Empresa, Nómina, Apellidos, Nombres, Cédula -->
                 <div id="modal-page-1-edit" class="modal-page">
                     <div class="modal-field">
                         <label>Empresa:</label>
@@ -675,7 +657,6 @@
                     </div>
                 </div>
 
-                <!-- Página 2: Campos Cargo, Ingreso, Sector, Perfil -->
                 <div id="modal-page-2-edit" class="modal-page hidden">
                     <div class="modal-field">
                         <label>Cargo:</label>
@@ -693,7 +674,6 @@
                         <label>Perfil:</label>
                         <input id="field-perfil-edit" type="text" class="text-color" style="font-style: italic"/>
                     </div>
-                    <!-- El campo Nota ahora se mostrará u ocultará con JS -->
                     <div class="modal-field" id="nota-edit-field">
                         <label>Nota:</label>
                         <input id="field-nota-edit" type="text" class="text-color" style="font-style: italic"/>
@@ -706,7 +686,6 @@
             </div>
             
             <div class="modal-footer flex items-center justify-between">
-                <!-- Contenedor para botones de navegación -->
                 <div class="flex space-x-2">
                     <button id="prevPageBtnEdit" class="modal-nav-button" disabled>
                         <i class="fa-solid fa-angle-left"></i>
@@ -715,13 +694,11 @@
                         <i class="fa-solid fa-angle-right"></i>
                     </button>
                 </div>
-                <!-- Botón de acción principal -->
                 <button id="saveBtn" class="modal-action-button bg-green-600 hover:bg-green-700">Guardar</button>
             </div>
         </div>
     </div>
 
-    <!-- Nuevo Modal: Ajustes -->
     <div id="settingsModal" class="modal-container hidden">
         <div class="modal-content relative text-center">
             <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
@@ -735,7 +712,6 @@
         </div>
     </div>
     
-    <!-- Nuevo Modal: Ayuda -->
     <div id="helpModal" class="modal-container hidden">
         <div class="modal-content relative text-center">
             <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
@@ -749,10 +725,8 @@
         </div>
     </div>
 
-    <!-- Nuevo Modal: Datos de Vacaciones -->
     <div id="vacationModal" class="modal-container hidden">
         <div class="modal-content relative">
-            <!-- Loader para este modal -->
             <div id="vacation-loader" class="vacation-loader hidden">
                 <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
             </div>
@@ -764,15 +738,11 @@
                 <h3 class="text-xl font-bold" id="vacationModalTitle">Detalles de Absentismos</h3>
             </div>
 
-            <!-- Aquí se reordena el contenido del modal según tu solicitud -->
-
-            <!-- NUEVO: Casilla de verificación para filtrar por periodo -->
             <div class="flex items-center space-x-2 mt-2 mb-2">
                 <input type="checkbox" id="filterByPeriodCheckbox" class="form-checkbox h-5 w-5 text-blue-600 rounded">
                 <label for="filterByPeriodCheckbox" class="text-sm cursor-pointer">Filtrar por periodo</label>
             </div>
             
-            <!-- Buscador para la tabla de vacaciones -->
             <div class="flex flex-row items-center space-x-2 mb-2">
                 <input type="text" id="vacationSearchInput" placeholder="Buscar..." class="w-4/6 flex-grow p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" autocomplete="off">
                 <button id="vacationSortButton" class="text-3xl bg-transparent hover:text-blue-600 text-blue-500 font-bold py-2 px-4 rounded transition-colors duration-300 ease-in-out" aria-label="Ordenar">
@@ -783,7 +753,6 @@
                 </button>
             </div>
 
-            <!-- Contenedor para el total y los subtotales -->
             <div class="total-container mb-2">
                 <div class="total-row">
                     <span class="total-label">Total Días Acumulados:</span>
@@ -799,7 +768,6 @@
                 </div>
             </div>
             
-            <!-- Contenedor de la tabla de vacaciones -->
             <div class="data-table-container flex-grow max-h-[420px] mb-4">
                 <table id="vacation-grid" class="data-table">
                     <thead>
@@ -812,8 +780,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Los datos se renderizarán aquí con JavaScript -->
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
 
@@ -823,18 +790,15 @@
         </div>
     </div>
 
-    <!-- Modal: Detalles de Vacaciones -->
     <div id="vacationDetailsModal" class="modal-container hidden">
         <div class="modal-content relative">
             <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <div class="modal-header">
-                <h3 class="text-xl font-bold">Detalles de Vacaciones</h3>
+                <h3 class="text-xl font-bold">Detalles de Registro de Vacaciones</h3>
             </div>
-           <!-- Contenido del modal (campos de datos) -->
-            <div id="modal-pages-container-vacation-details">
-                <!-- Se ha añadido un campo para mostrar el ID autogenerado -->
+           <div id="modal-pages-container-vacation-details">
                 <div class="modal-field">
                     <label>ID:</label>
                     <span id="field-id-vacation-details"></span>
@@ -851,19 +815,14 @@
                     <label>DIAS_VACACIONES:</label>
                     <span id="field-dias-vacaciones-vacation-details"></span>
                 </div>
-                <!-- Se añade un ID a este div para poder ocultarlo con JS -->
                 <div class="modal-field" id="bono-vacacional-field-details">
                     <label>BONO_VACACIONAL:</label>
                     <span id="field-bono-vacacional-vacation-details"></span>
-            </div>
-            <!-- Nuevo elemento para mostrar la posición del registro -->
-            <!-- Elemento de posición del registro con un borde -->
-            <p id="vacationRecordPosition" class="text-xl text-center font-semibold mt-4 border border-gray-400 rounded-md px-4 py-2"></p>
+                </div>
+                <p id="vacationRecordPosition" class="text-xl text-center font-semibold mt-4 border border-gray-400 rounded-md px-4 py-2"></p>
             
             </div>
-            <!-- Navegación del Modal -->
             <div class="modal-footer flex items-center justify-between">
-                <!-- Contenedor para botones de navegación -->
                 <div class="flex space-x-2">
                     <button id="prevPageBtnVacationDetails" class="modal-nav-button" disabled>
                         <i class="fa-solid fa-angle-left"></i>
@@ -872,43 +831,75 @@
                         <i class="fa-solid fa-angle-right"></i>
                     </button>
                 </div>
-                <!-- Botón de acción principal -->
                 <button class="modal-action-button close-modal-btn">Aceptar</button>
             </div>
         </div>
     </div>
 
-    <!-- Barra de Navegación Fija (Footer) -->
+    <div id="addVacationModal" class="modal-container hidden">
+        <div class="modal-content relative">
+            <button class="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-600 transition-colors close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="modal-header">
+                <h3 class="text-xl font-bold">Agregar Registro de Vacaciones</h3>
+            </div>
+           <div id="modal-pages-container-vacation-add">
+                <div class="modal-field">
+                    <label>Cédula Empleado:</label>
+                    <input id="field-cedula-vacation-add" type="text" class="text-color" style="color: gray" readonly />
+                </div>
+                <div class="modal-field">
+                    <label>PERIODO:</label>
+                    <input id="field-periodo-vacation-add" type="text" placeholder="Ej: 2024" />
+                </div>
+                <div class="modal-field">
+                    <label>DESCRIPCIÓN_CONCEPTO:</label>
+                    <input id="field-descripcion-vacation-add" type="text" placeholder="Ej: Disfrute Vacaciones Periodo 20xx" />
+                </div>
+                <div class="modal-field">
+                    <label>DIAS_VACACIONES:</label>
+                    <input id="field-dias-vacaciones-vacation-add" type="number" placeholder="Ej: 20" />
+                </div>
+                <div class="modal-field" id="bono-vacacional-field-add">
+                    <label>BONO_VACACIONAL:</label>
+                    <input id="field-bono-vacacional-vacation-add" type="number" placeholder="opcional" />
+                </div>
+            </div>
+            
+            <div class="modal-footer flex items-center justify-end">
+                <button id="saveVacationRecordBtn" class="modal-action-button bg-green-600 hover:bg-green-700">Guardar Registro</button>
+            </div>
+        </div>
+    </div>
+
     <footer class="fixed bottom-0 left-0 w-full header-bg box-shadow-up z-50 transition-colors">
         <div class="container max-w-lg mx-auto px-4 py-3 flex items-end justify-between relative">
-            <!-- Contenedor izquierdo -->
-            <div class="flex flex-row space-x-8">
-                <!-- Ícono para agregar un nuevo archivo -->
-                <button id="uploadBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Agregar Archivo">
-                    <i class="fa-solid fa-file-medical"></i>
+            <div class="flex flex-row space-x-4"> <button id="uploadBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Agregar Archivo">
+                    <i class="fa-solid fa-file-circle-plus"></i>
                 </button>
                 <button id="editBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Editar">
                     <i class="fa-solid fa-pen-to-square"></i>
                 </button>
-                <button id="reportsBtn" class="nav-link text-xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Reportes">
+                <button id="addVacationRecordBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-green-500 transition-colors" aria-label="Agregar Registro de Vacaciones" title="Agregar Registro de Vacaciones">
+                    <i class="fa-solid fa-file-medical"></i>
+                </button>
+                <button id="reportsBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Reportes">
                     <i class="fa-solid fa-chart-column"></i>
                 </button>
             </div>
 
-            <!-- Contenedor para el botón central de Inicio -->
             <div class="nav-center-home">
                 <button id="homeBtn" class="nav-link text-3xl" aria-label="Inicio">
                     <i class="fa-solid fa-house text-white hover:text-gray-300 transition-colors"></i>
                 </button>
             </div>
             
-            <!-- Contenedor derecho -->
             <div class="flex flex-row space-x-8">
                 <div class="relative">
                     <button id="notificationsBtn" class="nav-link text-2xl text-[var(--text-color)] hover:text-blue-500 transition-colors" aria-label="Notificaciones">
                         <i class="fa-solid fa-bell"></i>
                     </button>
-                    <!-- Círculo de notificación corregido -->
                     <span class="absolute -right-3 -top-2 w-6 h-6 text-xs font-bold rounded-full bg-red-600 text-white flex items-center justify-center">
                         3
                     </span>
@@ -956,6 +947,9 @@
             const usuarioIdx = localStorage.getItem('Usuario_Idx');
             const usuarioprimerNombre = localStorage.getItem('Usuario_Primer_Nombre');
 
+            // Simula el usuario logueado para fines de auditoría
+            const CURRENT_LOGGED_USER = "UsuarioPrueba@dominio.com"; 
+            
             // Extraer el primer nombre
             let primerNombre = '';
             if (usuarioNombre) {
@@ -1037,7 +1031,20 @@
                 return `${day}/${month}/${year}`;
             }
 
+            // Función para formatear la fecha y hora completa
+            function formatDateTime(date) {
+                const d = new Date(date);
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const year = d.getFullYear();
+                const hours = String(d.getHours()).padStart(2, '0');
+                const minutes = String(d.getMinutes()).padStart(2, '0');
+                const seconds = String(d.getSeconds()).padStart(2, '0');
+                return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+            }
+
             function renderTable(data) {
+                // CORRECCIÓN: Limpia el cuerpo de la tabla de personal
                 DataGridBody.innerHTML = '';
                 if (!data || data.length === 0) {
                     const noDataRow = document.createElement('tr');
@@ -1086,6 +1093,8 @@
                         }
                         tableRow.appendChild(cell);
                     });
+                    
+                    // CORRECCIÓN CRÍTICA: Se inserta la fila en el cuerpo de la tabla de personal
                     DataGridBody.appendChild(tableRow);
                 });
             }
@@ -1284,6 +1293,7 @@
                     });
                     clickedRow.classList.add('selected');
                     selectedRowIndex = parseInt(clickedRow.dataset.index);
+                    selectedPerson = allPersonData[selectedRowIndex]; // Asegura que selectedPerson esté actualizado
                 }
             });
 
@@ -1305,6 +1315,8 @@
             const logoutBtn = document.getElementById('logoutBtn');
             const uploadBtn = document.getElementById('uploadBtn');
             const editBtn = document.getElementById('editBtn');
+            // NUEVA LÍNEA: Obtener referencia al nuevo botón
+            const addVacationRecordBtn = document.getElementById('addVacationRecordBtn'); 
             const reportsBtn = document.getElementById('reportsBtn');
             const homeBtn = document.getElementById('homeBtn');
             const notificationsBtn = document.getElementById('notificationsBtn');
@@ -1317,6 +1329,8 @@
             const helpModal = document.getElementById('helpModal');
             const vacationModal = document.getElementById('vacationModal');
             const vacationDetailsModal = document.getElementById('vacationDetailsModal'); // Nuevo modal de detalles de vacaciones
+            // NUEVA LÍNEA: Obtener referencia al nuevo modal
+            const addVacationModal = document.getElementById('addVacationModal'); 
 
             // Función genérica para mostrar un modal
             function showModal(modalElement) {
@@ -1348,7 +1362,7 @@
             const saveBtn = document.getElementById('saveBtn');
             const prevPageBtnEdit = document.getElementById('prevPageBtnEdit');
             const nextPageBtnEdit = document.getElementById('nextPageBtnEdit');
-            const openVacationModalEditBtn = document.getElementById('openVacationModalEditBtn');
+            
             const notaEditField = document.getElementById('nota-edit-field');
             // NUEVA LÍNEA: Obtener referencia al nuevo campo de edición de Días
             const diasEditField = document.getElementById('dias-edit-field');
@@ -1519,7 +1533,7 @@
                 vacationModalTitle.innerHTML = `
                     ${formattedNombres} ${formattedApellidos}<br>
                     Cédula Identidad: ${cedula}<br>
-                    Fecha de Ingreso: ${formattedIngreso}
+                    Fecha Ingreso: ${formattedIngreso}
                 `;
 
                 vacationLoader.classList.remove('hidden');
@@ -1534,11 +1548,11 @@
                         return;
                     }
                     
+                    // CORRECCIÓN APLICADA: Solo filtra por Cédula para no descartar registros sin días de vacaciones
                     allVacationData = result.data.filter(row => {
-                        const rowCedula = String(row['CÉDULA']).trim();
-                        const personalCedula = String(cedula).trim();
-                        const diasVacaciones = parseFloat(row['DIAS_VACACIONES']);
-                        return rowCedula === personalCedula && !isNaN(diasVacaciones);
+                        const rowCedula = String(row['CÉDULA'] || '').trim();
+                        const personalCedula = String(cedula || '').trim();
+                        return rowCedula === personalCedula;
                     });
                     
                     sortVacationTable(vacationSortKey, vacationSortDirection);
@@ -1643,8 +1657,8 @@
             
             function sortVacationTable(key, direction) {
                 allVacationData.sort((a, b) => {
-                    const valA = String(a[key]).toLowerCase();
-                    const valB = String(b[key]).toLowerCase();
+                    const valA = String(a[key] || '').toLowerCase(); // Manejar null/undefined
+                    const valB = String(b[key] || '').toLowerCase(); // Manejar null/undefined
                     if (valA < valB) {
                         return direction === 'asc' ? -1 : 1;
                     }
@@ -1748,52 +1762,61 @@
                 }
             });
 
-            // MODIFICACIÓN CRÍTICA: Se añade el paso de selectedPerson['INGRESO']
-            openVacationModalEditBtn.addEventListener('click', () => {
-                if (selectedPerson && selectedPerson['CÉDULA']) {
-                    loadVacationData(
-                        selectedPerson['CÉDULA'], 
-                        selectedPerson['NOMBRES'], 
-                        selectedPerson['APELLIDOS'],
-                        selectedPerson['INGRESO'] // Se pasa la fecha de ingreso
-                    );
-                    hideModal(editModal);
-                    showModal(vacationModal);
-                } else {
-                    showMessage("Por favor, selecciona una fila para ver los datos de vacaciones.");
-                }
-            });
-
             // --- Lógica del nuevo modal de detalles de vacaciones ---
             const vacationDetailsModalEl = document.getElementById('vacationDetailsModal');
             const vacationRecordPositionEl = document.getElementById('vacationRecordPosition');
             const bonoVacacionalFieldDetails = document.getElementById('bono-vacacional-field-details');
             
+            // Mapeo ACTUALIZADO con las 10 columnas
             const vacationDetailsFields = {
                 'ID': document.getElementById('field-id-vacation-details'),
                 'PERIODO': document.getElementById('field-periodo-vacation-details'),
                 'DESCRIPCIÓN_CONCEPTO': document.getElementById('field-descripcion-vacation-details'),
                 'DIAS_VACACIONES': document.getElementById('field-dias-vacaciones-vacation-details'),
-                'BONO_VACACIONAL': document.getElementById('field-bono-vacacional-vacation-details')
+                'BONO_VACACIONAL': document.getElementById('field-bono-vacacional-vacation-details'),
             };
 
             const prevPageBtnVacationDetails = document.getElementById('prevPageBtnVacationDetails');
             const nextPageBtnVacationDetails = document.getElementById('nextPageBtnVacationDetails');
 
             function showVacationDetailsModal(record, index) {
+                // Lógica de visualización y ocultación de campos opcionales/no requeridos
                 const bonoValue = record['BONO_VACACIONAL'] || '';
                 if (String(bonoValue).trim() === '') {
                     bonoVacacionalFieldDetails.style.display = 'none';
                 } else {
                     bonoVacacionalFieldDetails.style.display = 'block';
                 }
+                
+                // Función para mostrar/ocultar campos si están vacíos
+                function toggleField(key, elementId, formatFn = val => val) {
+                    const value = record[key] || '';
+                    const element = vacationDetailsFields[key];
+                    if (String(value).trim() === '' || !element) {
+                        document.getElementById(elementId).style.display = 'none';
+                    } else {
+                        document.getElementById(elementId).style.display = 'block';
+                        element.textContent = formatFn(value);
+                    }
+                }
 
+                // Llenado de campos básicos
                 vacationDetailsFields['ID'].textContent = index + 1;
                 vacationDetailsFields['PERIODO'].textContent = record['PERIODO'] || '';
                 vacationDetailsFields['DESCRIPCIÓN_CONCEPTO'].textContent = record['DESCRIPCIÓN_CONCEPTO'] || '';
                 vacationDetailsFields['DIAS_VACACIONES'].textContent = record['DIAS_VACACIONES'] || '';
                 vacationDetailsFields['BONO_VACACIONAL'].textContent = bonoValue;
+
+                // Llenado y visibilidad de los 6 campos adicionales (CÉDULA, NOMBRES, APELLIDOS, EMPRESA, RegistroUser, RegistroDate)
+                //toggleField('CÉDULA', 'cedula-vacation-details-field');
+                //toggleField('NOMBRES', 'nombres-vacation-details-field');
+                //toggleField('APELLIDOS', 'apellidos-vacation-details-field');
+                //toggleField('EMPRESA', 'empresa-vacation-details-field');
                 
+                // Campos de auditoría con formato de fecha/hora si aplica
+                //toggleField('RegistroUser', 'registro-user-vacation-details-field');
+                //toggleField('RegistroDate', 'registro-date-vacation-details-field', formatDateTime);
+
                 vacationRecordPositionEl.textContent = `Registro ${index + 1} de ${allVacationData.length}`;
                 
                 showModal(vacationDetailsModalEl);
@@ -1871,6 +1894,102 @@
                     uploadFileBtn.disabled = true;
                 }
             });
+            
+            // --- Lógica del nuevo modal para Agregar Registro de Vacaciones ---
+            const cedulaVacationAddInput = document.getElementById('field-cedula-vacation-add');
+            const periodoVacationAddInput = document.getElementById('field-periodo-vacation-add');
+            const descripcionVacationAddInput = document.getElementById('field-descripcion-vacation-add');
+            const diasVacacionesAddInput = document.getElementById('field-dias-vacaciones-vacation-add');
+            const bonoVacacionalAddInput = document.getElementById('field-bono-vacacional-vacation-add');
+            const saveVacationRecordBtn = document.getElementById('saveVacationRecordBtn');
+
+            function showAddVacationModal() {
+                // 1. Verificar si hay una persona seleccionada en la tabla principal
+                if (selectedPerson && selectedPerson['CÉDULA']) {
+                    // 2. Limpiar los campos de entrada y prellenar la cédula (lectura)
+                    cedulaVacationAddInput.value = selectedPerson['CÉDULA'];
+                    periodoVacationAddInput.value = '';
+                    descripcionVacationAddInput.value = '';
+                    diasVacacionesAddInput.value = '';
+                    bonoVacacionalAddInput.value = '';
+                    
+                    // 3. Mostrar el modal
+                    showModal(addVacationModal);
+                } else {
+                    showMessage("Por favor, selecciona una fila de la tabla principal para agregar un registro de vacaciones.");
+                }
+            }
+            
+            saveVacationRecordBtn.addEventListener('click', () => {
+                const newRecord = {
+                    CEDULA: cedulaVacationAddInput.value,
+                    PERIODO: periodoVacationAddInput.value,
+                    DESCRIPCION_CONCEPTO: descripcionVacationAddInput.value,
+                    DIAS_VACACIONES: diasVacacionesAddInput.value,
+                    BONO_VACACIONAL: bonoVacacionalAddInput.value
+                };
+                
+                if (!newRecord.PERIODO || !newRecord.DESCRIPCION_CONCEPTO || !newRecord.DIAS_VACACIONES) {
+                    showMessage("Faltan campos obligatorios (PERIODO, DESCRIPCIÓN, DÍAS).", 4000, true);
+                    return;
+                }
+                
+                // Construir el objeto final, incluyendo el usuario logueado
+                const fullRecord = {
+                    'CÉDULA': newRecord.CEDULA,
+                    'NOMBRES': selectedPerson['NOMBRES'] || '',
+                    'APELLIDOS': selectedPerson['APELLIDOS'] || '',
+                    'EMPRESA': selectedPerson['EMPRESA'] || '',
+                    
+                    'PERIODO': newRecord.PERIODO,
+                    'DESCRIPCIÓN_CONCEPTO': newRecord.DESCRIPCION_CONCEPTO,
+                    'DIAS_VACACIONES': newRecord.DIAS_VACACIONES,
+                    'BONO_VACACIONAL': newRecord.BONO_VACACIONAL,
+                    
+                    // AUDITORÍA: Usando el usuario del localStorage
+                    'RegistroUser': usuarioNombre, 
+                    'RegistroDate': formatDateTime(new Date()),
+                };
+
+                console.log("Enviando registro de vacaciones a la API:", fullRecord);
+                
+                // ** Lógica de llamada a la API con fetch (POST) - ¡CORREGIDO CORS! **
+                fetch(GAS_URL, {method: 'POST', body: JSON.stringify(fullRecord) })
+                .then(response => {
+                    // La validación de errores se hace leyendo el JSON de respuesta
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.error || `Error HTTP: ${response.status}`);
+                        }).catch(() => {
+                            throw new Error(`Error en la solicitud. Estado HTTP: ${response.status}.`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        showMessage("¡Registro de vacaciones guardado con éxito!", 3000, false);
+                        hideModal(addVacationModal);
+                        
+                        if (!vacationModal.classList.contains('hidden') && selectedPerson) {
+                             loadVacationData(
+                                selectedPerson['CÉDULA'], 
+                                selectedPerson['NOMBRES'], 
+                                selectedPerson['APELLIDOS'], 
+                                selectedPerson['INGRESO']
+                             );
+                        }
+                    } else {
+                        showMessage(`Error al guardar: ${data.error || 'Desconocido'}`, 5000, true);
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                    showMessage(`Error de conexión al guardar el registro: ${error.message}. Verifica el despliegue de GAS.`, 5000, true);
+                });
+            });
+            
+            // --- Event Listeners para los botones de navegación ---
 
             // Agrega event listeners a los botones de navegación
             logoutBtn.addEventListener('click', () => {
@@ -1892,6 +2011,11 @@
                     showEditModal(personData);
                     hideModal(detailsModal);
                 }
+            });
+            
+            // NUEVA LÍNEA: Event listener para el botón de agregar registro de vacaciones
+            addVacationRecordBtn.addEventListener('click', () => {
+                showAddVacationModal();
             });
 
             reportsBtn.addEventListener('click', () => {
@@ -1922,4 +2046,3 @@
     </script>
 </body>
 </html>
-
