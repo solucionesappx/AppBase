@@ -461,7 +461,19 @@
                 display: none;
             }
         }
-    </style>
+
+        /* Oculta las flechas de incremento/decremento en inputs tipo number */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+</style>
+
 </head>
 <body class="dark-mode min-h-screen flex flex-col">
     <header class="fixed top-0 left-0 w-full header-bg box-shadow-down z-50 transition-colors">
@@ -851,11 +863,34 @@
                 </div>
                 <div class="modal-field">
                     <label>PERIODO:</label>
-                    <input id="field-periodo-vacation-add" type="text" placeholder="Ej: 2024" />
+<input 
+    id="field-periodo-vacation-add" 
+    type="number" 
+    placeholder="Ej: 2024" 
+    required 
+    min="2019"
+    maxlength="4" 
+    title="Debe ser un año de 4 dígitos"
+    class="w-full p-2 border border-gray-300 rounded focus:ring-accent-color-1 focus:border-accent-color-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+/>
+
+                
                 </div>
                 <div class="modal-field">
                     <label>DESCRIPCIÓN_CONCEPTO:</label>
                     <input id="field-descripcion-vacation-add" type="text" placeholder="Ej: Disfrute Vacaciones Periodo 20xx" />
+                </div>
+                <div class="modal-field">
+                    <label>DIAS_INI (Inicio de Disfrute):</label>
+                    <div class="relative flex items-center">
+                        <input id="field-dias-ini-vacation-add" type="date" class="flex-grow" />
+                    </div>
+                </div>
+                <div class="modal-field">
+                    <label>DIAS_FIN (Fin de Disfrute):</label>
+                    <div class="relative flex items-center">
+                        <input id="field-dias-fin-vacation-add" type="date" class="flex-grow" />
+                    </div>
                 </div>
                 <div class="modal-field">
                     <label>DIAS_VACACIONES:</label>
@@ -946,6 +981,9 @@
             const usuarioPerfil = localStorage.getItem('Usuario_Perfil');
             const usuarioIdx = localStorage.getItem('Usuario_Idx');
             const usuarioprimerNombre = localStorage.getItem('Usuario_Primer_Nombre');
+            const diasIniInput = document.getElementById('field-dias-ini-vacation-add'); 
+            const diasFinInput = document.getElementById('field-dias-fin-vacation-add'); 
+            const diasVacacionesInput = document.getElementById('field-dias-vacaciones-vacation-add'); 
           
             // Extraer el primer nombre
             let primerNombre = '';
@@ -1020,6 +1058,63 @@
                 }
             }
 
+            function calculateWorkDays(startDateString, endDateString) {
+                // Convertir las cadenas de fecha a objetos Date
+                // Usamos el constructor y la hora local para evitar problemas de zona horaria
+                const startDate = new Date(startDateString + 'T00:00:00');
+                const endDate = new Date(endDateString + 'T00:00:00');
+
+                if (startDate > endDate) {
+                    return 0; // Fechas inválidas o invertidas
+                }
+
+                let workDays = 0;
+                let currentDate = new Date(startDate);
+
+                // Iterar día por día
+                while (currentDate <= endDate) {
+                    // getDay() retorna: 0 (Domingo) a 6 (Sábado)
+                    const dayOfWeek = currentDate.getDay();
+
+                    // Si el día NO es sábado (6) y NO es domingo (0), es un día hábil
+                    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                        workDays++;
+                    }
+
+                    // Avanzar al siguiente día
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+
+                return workDays;
+            }
+
+            function updateVacationDays() {
+                const start = diasIniInput.value;
+                const end = diasFinInput.value;
+
+                if (start && end) {
+                    const calculatedDays = calculateWorkDays(start, end);
+        
+                    if (diasVacacionesInput) {
+                        diasVacacionesInput.value = calculatedDays;
+                    }
+                } else {
+                    if (diasVacacionesInput) {
+                        diasVacacionesInput.value = '';
+                    }
+                }
+            }
+
+            // Escuchar cambios en DIAS_INI
+            if (diasIniInput) {
+                diasIniInput.addEventListener('change', updateVacationDays);
+            }
+
+            // Escuchar cambios en DIAS_FIN
+            if (diasFinInput) {
+                diasFinInput.addEventListener('change', updateVacationDays);
+            }
+
             function formatDate(date) {
                 const d = new Date(date);
                 const day = String(d.getDate()).padStart(2, '0');
@@ -1028,6 +1123,13 @@
                 return `${day}/${month}/${year}`;
             }
 
+            function getTodayDate() {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0'); 
+                const day = String(today.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
 
             function formatCedula(value) {
                 // Si el valor está vacío o es nulo, retornar cadena vacía.
@@ -1359,6 +1461,36 @@
             const vacationDetailsModal = document.getElementById('vacationDetailsModal'); // Nuevo modal de detalles de vacaciones
             // NUEVA LÍNEA: Obtener referencia al nuevo modal
             const addVacationModal = document.getElementById('addVacationModal'); 
+
+            function updateVacationDays() {
+                const start = diasIniInput.value;
+                const end = diasFinInput.value;
+
+                // Solo calcular si ambas fechas están llenas
+                if (start && end) {
+                    const calculatedDays = calculateWorkDays(start, end);
+        
+                    // Actualiza el campo DIAS_VACACIONES
+                        if (diasVacacionesInput) {
+                        diasVacacionesInput.value = calculatedDays;
+                    }
+                } else {
+                    // Si falta alguna fecha, se limpia el campo
+                    if (diasVacacionesInput) {
+                        diasVacacionesInput.value = '';
+                    }
+                }
+            }
+
+            // Escuchar cambios en DIAS_INI
+            if (diasIniInput) {
+                diasIniInput.addEventListener('change', updateVacationDays);
+            }
+
+            // Escuchar cambios en DIAS_FIN
+            if (diasFinInput) {
+                diasFinInput.addEventListener('change', updateVacationDays);
+}
 
             // Función genérica para mostrar un modal
             function showModal(modalElement) {
@@ -1935,91 +2067,130 @@
             const bonoVacacionalAddInput = document.getElementById('field-bono-vacacional-vacation-add');
             const saveVacationRecordBtn = document.getElementById('saveVacationRecordBtn');
 
-            function showAddVacationModal() {
-                // 1. Verificar si hay una persona seleccionada en la tabla principal
-                if (selectedPerson && selectedPerson['CÉDULA']) {
-                    // 2. Limpiar los campos de entrada y prellenar la cédula (lectura)
-                    cedulaVacationAddInput.value = formatCedula(selectedPerson['CÉDULA']);
-                    periodoVacationAddInput.value = '';
-                    descripcionVacationAddInput.value = '';
-                    diasVacacionesAddInput.value = '';
-                    bonoVacacionalAddInput.value = '';
-                    
-                    // 3. Mostrar el modal
-                    showModal(addVacationModal);
-                } else {
-                    showMessage("Por favor, selecciona una fila de la tabla principal para agregar un registro de vacaciones.");
-                }
-            }
-            
-            saveVacationRecordBtn.addEventListener('click', () => {
-                const newRecord = {
-                    CEDULA: cedulaVacationAddInput.value,
-                    PERIODO: periodoVacationAddInput.value,
-                    DESCRIPCION_CONCEPTO: descripcionVacationAddInput.value,
-                    DIAS_VACACIONES: diasVacacionesAddInput.value,
-                    BONO_VACACIONAL: bonoVacacionalAddInput.value
-                };
-                
-                if (!newRecord.PERIODO || !newRecord.DESCRIPCION_CONCEPTO || !newRecord.DIAS_VACACIONES) {
-                    showMessage("Faltan campos obligatorios (PERIODO, DESCRIPCIÓN, DÍAS).", 4000, true);
-                    return;
-                }
-                
-                // Construir el objeto final, incluyendo el usuario logueado
-                const fullRecord = {
-                    'CÉDULA': newRecord.CEDULA,
-                    'NOMBRES': selectedPerson['NOMBRES'] || '',
-                    'APELLIDOS': selectedPerson['APELLIDOS'] || '',
-                    'EMPRESA': selectedPerson['EMPRESA'] || '',
-                    
-                    'PERIODO': newRecord.PERIODO,
-                    'DESCRIPCIÓN_CONCEPTO': newRecord.DESCRIPCION_CONCEPTO,
-                    'DIAS_VACACIONES': newRecord.DIAS_VACACIONES,
-                    'BONO_VACACIONAL': newRecord.BONO_VACACIONAL,
-                    
-                    // AUDITORÍA: Usando el usuario del localStorage
-                    'RegistroUser': usuarioNombre, 
-                    'RegistroDate': formatDateTime(new Date()),
-                };
 
-                console.log("Enviando registro de vacaciones a la API:", fullRecord);
-                
-                // ** Lógica de llamada a la API con fetch (POST) - ¡CORREGIDO CORS! **
-                fetch(GAS_URL, {method: 'POST', body: JSON.stringify(fullRecord) })
-                .then(response => {
-                    // La validación de errores se hace leyendo el JSON de respuesta
-                    if (!response.ok) {
-                        return response.json().then(errorData => {
-                            throw new Error(errorData.error || `Error HTTP: ${response.status}`);
-                        }).catch(() => {
-                            throw new Error(`Error en la solicitud. Estado HTTP: ${response.status}.`);
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        showMessage("¡Registro de vacaciones guardado con éxito!", 3000, false);
-                        hideModal(addVacationModal);
-                        
-                        if (!vacationModal.classList.contains('hidden') && selectedPerson) {
-                             loadVacationData(
-                                selectedPerson['CÉDULA'], 
-                                selectedPerson['NOMBRES'], 
-                                selectedPerson['APELLIDOS'], 
-                                selectedPerson['INGRESO']
-                             );
-                        }
-                    } else {
-                        showMessage(`Error al guardar: ${data.error || 'Desconocido'}`, 5000, true);
-                    }
-                })
-                .catch(error => {
-                    console.error('Fetch Error:', error);
-                    showMessage(`Error de conexión al guardar el registro: ${error.message}. Verifica el despliegue de GAS.`, 5000, true);
-                });
+        function showAddVacationModal() {
+            if (selectedRowIndex === -1 || !allPersonData[selectedRowIndex]) {
+                showMessage("Por favor, selecciona un empleado para agregar un registro de vacaciones.", 4000, true);
+                return;
+            }
+    
+            const selectedPerson = allPersonData[selectedRowIndex];
+    
+            // 1. Limpieza y asignación de valores estándar
+            document.getElementById('field-cedula-vacation-add').value = formatCedula(selectedPerson['CÉDULA']);
+            document.getElementById('field-periodo-vacation-add').value = '';
+            document.getElementById('field-descripcion-vacation-add').value = '';
+            document.getElementById('field-bono-vacacional-vacation-add').value = '';
+    
+            // Dejar DIAS_VACACIONES vacío o en '0' antes de calcular, para limpieza visual
+            document.getElementById('field-dias-vacaciones-vacation-add').value = 0; 
+
+            // 2. INICIALIZACIÓN DE FECHAS
+            const todayDate = getTodayDate(); 
+
+            // Inicializar DIAS_INI y DIAS_FIN con la fecha de hoy
+            if (diasIniInput) {
+                diasIniInput.value = todayDate;
+            }
+            if (diasFinInput) {
+                diasFinInput.value = todayDate;
+            }
+    
+            // 3. CLAVE: Calcular inmediatamente los días de vacaciones
+            updateVacationDays();
+
+            showModal(addVacationModal);
+        }   
+            
+saveVacationRecordBtn.addEventListener('click', () => {
+    
+    // 1. Lectura directa y saneada de los valores OBLIGATORIOS
+    const cedula = document.getElementById('field-cedula-vacation-add').value.trim();
+    const periodoStr = document.getElementById('field-periodo-vacation-add').value.trim(); 
+    const descripcion = document.getElementById('field-descripcion-vacation-add').value.trim();
+    const diasVacacionesStr = document.getElementById('field-dias-vacaciones-vacation-add').value.trim();
+    const bonoVacacional = document.getElementById('field-bono-vacacional-vacation-add').value.trim();
+    
+    // Conversiones a número
+    const periodo = parseInt(periodoStr, 10);
+    const dias = parseFloat(diasVacacionesStr);
+
+    // 2. VALIDACIÓN DE CAMPOS Y DETENCIÓN TEMPRANA
+    if (!cedula || !periodoStr || isNaN(periodo) || periodoStr.length !== 4 || !descripcion) {
+        showMessage("Por favor, verifica que Cédula, Período (4 dígitos) y Descripción estén completos.", 5000, true);
+        
+        // Enfocar el campo de error
+        if (!periodoStr || isNaN(periodo) || periodoStr.length !== 4) {
+            document.getElementById('field-periodo-vacation-add').focus();
+        } else if (!descripcion) {
+            document.getElementById('field-descripcion-vacation-add').focus();
+        }
+        
+        return; // Detiene la función A N T E S de mostrar el loader
+    }
+    
+    // 3. VALIDACIÓN NUMÉRICA DE DÍAS (debe ser > 0)
+    if (isNaN(dias) || dias <= 0) {
+        showMessage("Los Días de Vacaciones deben ser un número válido mayor a cero.", 4000, true);
+        document.getElementById('field-dias-vacaciones-vacation-add').focus();
+        return; // Detiene la función
+    }
+    
+    // --- LÓGICA DE CARGADOR E INICIO DE FETCH ---
+    
+    // 4. Muestra el Loader
+    if (vacationLoader) {
+        vacationLoader.classList.remove('hidden'); 
+    }
+
+    // 5. Construcción del objeto final
+    const fullRecord = {
+        'CÉDULA': cedula,
+        'NOMBRES': selectedPerson['NOMBRES'] || '',
+        'APELLIDOS': selectedPerson['APELLIDOS'] || '',
+        'EMPRESA': selectedPerson['EMPRESA'] || '',
+        
+        'PERIODO': periodo,
+        'DESCRIPCIÓN_CONCEPTO': descripcion,
+        'DIAS_VACACIONES': dias, 
+        'BONO_VACACIONAL': bonoVacacional,
+        
+        'RegistroUser': usuarioNombre, 
+        'RegistroDate': formatDateTime(new Date()),
+    };
+    
+    // 6. Ejecución del Fetch
+    fetch(GAS_URL, {method: 'POST', body: JSON.stringify(fullRecord) })
+    .then(response => {
+        if (!response.ok) {
+            // Manejo de errores HTTP: oculta el loader en caso de error
+            if (vacationLoader) vacationLoader.classList.add('hidden'); 
+            return response.json().then(errorData => {
+                throw new Error(errorData.error || `Error HTTP: ${response.status}`);
+            }).catch(() => {
+                throw new Error(`Error en la solicitud. Estado HTTP: ${response.status}.`);
             });
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Oculta el loader en caso de éxito
+        if (vacationLoader) vacationLoader.classList.add('hidden'); 
+        if (data.success) {
+            showMessage("¡Registro de vacaciones guardado con éxito!", 3000, false);
+            hideModal(addVacationModal);
+            // Si tiene lógica para recargar datos, póngala aquí.
+        } else {
+            showMessage(`Error al guardar: ${data.error || 'Desconocido'}`, 5000, true);
+        }
+    })
+    .catch(error => {
+        // Oculta el loader en caso de fallo de red o error de procesamiento
+        if (vacationLoader) vacationLoader.classList.add('hidden'); 
+        console.error('Fetch Error:', error);
+        showMessage(`Error de conexión al guardar el registro: ${error.message}.`, 5000, true);
+    });
+});
             
             // --- Event Listeners para los botones de navegación ---
 
