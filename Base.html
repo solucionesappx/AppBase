@@ -152,7 +152,8 @@
             z-index: 10;
             background-color: var(--color-header); /* #2D59A1 */
             color: var(--color-data-text);
-            padding: 0.75rem 1rem;
+            /* AJUSTE DE ALTURA: Se reduce el padding vertical de 0.25rem a 0.5rem */
+            padding: 0.25rem 0.5rem; 
             text-align: center; /* CENTRADO */
             white-space: nowrap;
         }
@@ -325,15 +326,16 @@
     <div id="app-container" class="shadow-xl">
         
         <header id="app-header" class="fixed top-0 w-full h-14 border-b border-gray-700 dark:border-gray-500 flex items-center justify-between px-4">
-            <h1 class="text-xl font-bold">Mi Aplicación Móvil</h1>
+            
+            <!-- Título que redirige a inicio.html -->
+            <h1 class="text-xl font-bold cursor-pointer hover:opacity-80 transition-opacity" onclick="window.location.href = 'inicio.html'">
+                Mi Aplicación Móvil
+            </h1>
             
             <div class="flex space-x-3">
                 
-                <button id="theme-toggle" class="p-2 rounded-full hover:opacity-80 transition-opacity">
-                    <i data-lucide="sun" class="w-6 h-6 text-yellow-300"></i>
-                </button>
-                
-                <button class="p-2 rounded-full hover:opacity-80 transition-opacity" onclick="showCustomAlert('Funcionalidad de Cerrar Sesión (simulada)')">
+                <!-- Botón de Cerrar Sesión con redirección a index.html -->
+                <button class="p-2 rounded-full hover:opacity-80 transition-opacity" onclick="window.location.href = 'index.html'">
                     <i data-lucide="log-out" class="w-6 h-6 text-red-400 dark:text-red-300"></i>
                 </button>
             </div>
@@ -370,6 +372,7 @@
             </button>
         </footer>
 
+        <!-- MODAL DE DETALLE DE TRABAJADOR -->
         <div id="DetalleTrabajadorModal" class="modal-overlay">
             
             <div id="modal-content-wrapper" class="mx-auto">
@@ -403,9 +406,13 @@
             </div>
             
         </div>
+        
+        <!-- MODAL DE ALERTA PERSONALIZADA (DUMMY) -->
         <div id="custom-alert-modal" class="modal-overlay" onclick="closeCustomAlert()">
             
         </div>
+        
+        <!-- MODAL DE DETALLE DE VACACIONES (DUMMY) -->
         <div id="VacationDetailModal" class="modal-overlay" onclick="closeVacationModal()">
             <div id="vacation-modal-content-wrapper" 
                  class="mx-auto absolute top-[var(--header-offset)] w-[95%] max-w-[450px]" 
@@ -453,14 +460,11 @@
         let sortOrder = 'asc'; // 'asc' (ascendente), 'desc' (descendente)
         
         // --- CONSTANTES ---
-        // URL BASE de la API de Google Apps Script (se utilizará para construir la URL con el nombre de la hoja y el filtro)
         const BASE_GAS_API_URL = 'https://script.google.com/macros/s/AKfycbx87WvxA9ca1KyGMA1wsw1npZw5vPtjoItomhF823BICXScNrWGFh5m0Dj6Veb24CtHXQ/exec';
-        const ACTIVITY_FEED_ID = 'activity-feed-container';
         
-        // --- CONSTANTES DE CACHÉ ---
+        // Constantes ajustadas para tu nueva función loadData:
         const CACHE_KEY = 'employeeDataCache';
         const CACHE_EXPIRATION_MS = 900000; // 15 minutos
-        const FULLSCREEN_KEY = 'fullscreenActive'; // Clave para localStorage
 
         // Mapeos de las columnas que se muestran en la TABLA BD_Personal2
         const TABLE_COLUMNS = [
@@ -511,7 +515,7 @@
             'NOMBRE_TRABAJADOR' // Nuevo campo calculado
         ];
         
-        // Mapeo de navegación para cargar el contenido SPA
+        // Mapeo de navegación
         const NAV_MAP = {
             'Inicio': 'inicio.html',
             'Nuevo Registro': 'NuevoReg.html',
@@ -520,8 +524,342 @@
             'Configuración': 'ConfigApp.html'
         };
 
-        // Obtiene la fecha actual en formato DD/MM/YYYY para la tarjeta de bienvenida
-        const todayDate = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        // --- FUNCIONES DE MANEJO DE DATOS GAS ---
+
+        function buildGasApiUrl(sheetName) {
+            return `${BASE_GAS_API_URL}?sheet=${sheetName}`;
+        }
+
+        async function loadData() {
+            const statusElement = document.getElementById('table-loading-status');
+            const tableContainer = document.getElementById('employee-table-container');
+
+            // Mostrar spinner y ocultar cualquier tabla anterior (usando los IDs existentes)
+            if (statusElement) {
+                statusElement.innerHTML = `
+                    <i data-lucide="loader-circle" class="w-8 h-8 mx-auto animate-spin text-blue-500"></i> 
+                    <p class="mt-2 text-sm text-gray-400">Cargando datos de la hoja "BD_Personal2"...</p>
+                `;
+                statusElement.style.display = 'block';
+            }
+            if (tableContainer) {
+                tableContainer.innerHTML = '';
+                tableContainer.style.display = 'none';
+            }
+            lucide.createIcons(); // Vuelve a crear el icono de carga
+
+            const cachedData = localStorage.getItem(CACHE_KEY);
+            if (cachedData) {
+                try {
+                    const parsedCache = JSON.parse(cachedData);
+                    const now = new Date().getTime();
+                    
+                    // Verificar si el caché aún es válido (15 minutos)
+                    if (now < parsedCache.expiry && Array.isArray(parsedCache.data)) {
+                        console.log("Cargando datos desde el CACHÉ local (Válido por 15 minutos).");
+                        const dataToUse = parsedCache.data;
+                        allEmployeeData = dataToUse;
+                        filteredEmployeeData = [...dataToUse];
+                        
+                        // Oculta el estado de carga y muestra el contenedor de la tabla
+                        if (statusElement) statusElement.style.display = 'none';
+                        if (tableContainer) tableContainer.style.display = 'block';
+                        
+                        renderTable(filteredEmployeeData); // Usamos renderTable en lugar de buildTable
+                        return; // ¡Carga exitosa desde caché!
+                    } else {
+                        console.log("Caché expirado o no válido (15 minutos). Recuperando datos nuevos.");
+                        localStorage.removeItem(CACHE_KEY); // Limpiar caché expirado
+                    }
+                } catch (e) {
+                    console.error("Error al parsear el caché local:", e);
+                    localStorage.removeItem(CACHE_KEY); // Limpiar caché corrupto
+                }
+            }
+
+            try {
+                const apiUrl = buildGasApiUrl('BD_Personal2'); // Carga la hoja principal
+                
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error de red: ${response.status} ${response.statusText || 'Error desconocido'}`);
+                }
+
+                const result = await response.json();
+                let data = result;
+
+                // Estructura robusta para GAS: { data: [...] } o array directo
+                if (result && result.data && Array.isArray(result.data)) {
+                    data = result.data;
+                } else if (!Array.isArray(result)) {
+                    // Si no es un array y no tiene la propiedad 'data' que es un array, es un error de formato.
+                    throw new Error("Formato de datos no válido. Se esperaba un array JSON o un objeto con la propiedad 'data' (array).");
+                }
+                
+                if (data.length === 0) {
+                    if (statusElement) {
+                        statusElement.innerHTML = '<div class="text-center py-8 text-gray-500 dark:text-gray-400">No se encontraron registros.</div>';
+                        statusElement.style.display = 'block';
+                    }
+                    if (tableContainer) tableContainer.style.display = 'none';
+                } else {
+                    allEmployeeData = data;
+                    filteredEmployeeData = [...data]; // Inicialmente, todos los datos son filtrados
+
+                    const expiry = new Date().getTime() + CACHE_EXPIRATION_MS;
+                    const cacheObject = { data: data, expiry: expiry };
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(cacheObject));
+                    console.log("Nuevos datos obtenidos y guardados en caché (expira en 15 minutos).");
+                    
+                    // Oculta el estado de carga y muestra el contenedor de la tabla
+                    if (statusElement) statusElement.style.display = 'none';
+                    if (tableContainer) tableContainer.style.display = 'block';
+                    
+                    // Renderizar la tabla con los datos frescos
+                    renderTable(filteredEmployeeData); // Usamos renderTable en lugar de buildTable
+                }
+
+            } catch (error) {
+                console.error("Fallo al obtener los datos:", error);
+                
+                // Mostrar mensaje de error en el contenedor de estado
+                if (statusElement) {
+                    statusElement.innerHTML = `
+                        <div class="bg-red-800 p-4 rounded-xl shadow-lg text-white">
+                            <strong class="font-bold">Error de Carga:</strong>
+                            <p class="mt-1 text-sm">No se pudo cargar la información. Detalles: ${error.message}</p>
+                            <p class="mt-2 text-xs opacity-80">Verifique la URL y la implementación de Google Apps Script (CORS/Deploy).</p>
+                        </div>
+                    `;
+                    statusElement.style.display = 'block';
+                    lucide.createIcons();
+                }
+                if (tableContainer) tableContainer.style.display = 'none';
+            }
+        }
+
+        function renderTable(data) { // Renombrado de buildTable a renderTable para ser consistente
+            const container = document.getElementById('employee-table-container');
+            if (!container) return;
+            
+            if (data.length === 0) {
+                container.innerHTML = `<p class="text-center py-4 text-gray-400">No se encontraron registros en la base de datos.</p>`;
+                return;
+            }
+            
+            // Define el ancho estrecho deseado para la columna ID (ej. 30px)
+            const narrowIdWidth = "30px";
+            
+            // Inicia la estructura de la tabla
+            let tableHtml = `
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr>
+                            <!-- CORRECCIÓN: Aplicamos el ancho estrecho a la cabecera (TH) también -->
+                            <th class="sticky-id-cell header p-3 text-sm" style="width: ${narrowIdWidth};">ID</th>
+                            ${TABLE_COLUMNS.map(col => `
+                                <th class="sortable-header text-sm">
+                                    ${col.label}
+                                </th>
+                            `).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            // Genera las filas de datos
+            data.forEach((row, index) => {
+                // Se asume que el ID es la columna ID o el índice + 1
+                const rowId = row.ID || (index + 1); 
+                // Verifica si la columna CTRL1 tiene contenido para aplicar estilo de advertencia
+                const hasWarning = row.CTRL1 && String(row.CTRL1).trim() !== '';
+
+                tableHtml += `
+                    <tr class="worker-row ${hasWarning ? 'row-warning-text' : ''}" data-id="${rowId}">
+                        <!-- CORRECCIÓN: Aplicamos el mismo ancho estrecho y padding mínimo (px-1) al TD -->
+                        <td class="table-data-cell sticky-id-cell px-1 py-0 text-xs" style="width: ${narrowIdWidth};">${rowId}</td>
+                        ${TABLE_COLUMNS.map(col => {
+                            const value = row[col.key] || '';
+                            // Asume justificación izquierda por defecto, pero aplica formato
+                            let formattedValue = String(value); 
+                            
+                            if (col.key === 'CEDULA') {
+                                formattedValue = formatNumberWithDots(value);
+                            } else if (col.key === 'INGRESO' || col.key === 'NACIMIENTO') {
+                                // Nota: Asume que el valor de la celda de la hoja de cálculo 
+                                // es un string en formato dd/mm/yyyy o similar compatible.
+                                formattedValue = formatDate(value);
+                            } else if (col.key === 'CTRL2') {
+                                // CTRL2 se define como 0 si está vacío por doGet, 
+                                // así que solo mostramos el valor.
+                                formattedValue = String(value); 
+                            }
+                            
+                            // Clases: 'text-left' para texto/cédula, 'text-center' para números/fechas
+                            const alignmentClass = ['EMPRESA', 'APELLIDOS', 'NOMBRES', 'CARGO', 'SECTOR', 'PERFIL'].includes(col.key) ? 'text-left' : 'text-center';
+                            
+                            return `<td class="table-data-cell ${alignmentClass} px-4">${formattedValue}</td>`;
+                        }).join('')}
+                    </tr>
+                `;
+            });
+            
+            tableHtml += `</tbody></table>`;
+            container.innerHTML = tableHtml;
+        }
+
+        // --- FUNCIONES DE UTILIDAD (Mantengo las funciones del Canvas original) ---
+        
+        function formatNumberWithDots(numStr) {
+            if (!numStr) return '';
+            // Asegura que es un string y elimina cualquier punto/coma existente (si viniera con formato)
+            const cleanStr = String(numStr).replace(/[.,]/g, ''); 
+            // Agrega puntos como separador de miles
+            return cleanStr.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            try {
+                // Intenta interpretar la fecha. Asume formato dd/mm/yyyy o similar compatible.
+                const parts = dateStr.split('/');
+                if (parts.length === 3) {
+                    // Si el formato es dd/mm/yyyy, lo devuelve tal cual
+                    return dateStr;
+                }
+                // Si falla o no tiene el formato esperado, intenta crear un objeto Date directamente
+                const date = new Date(dateStr);
+                if (isNaN(date)) {
+                    return dateStr; // Retorna la cadena original si no es una fecha válida
+                }
+                // Formato final dd/mm/yyyy para fechas válidas
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}/${month}/${year}`;
+            } catch (e) {
+                console.error("Error al formatear fecha:", e);
+                return dateStr;
+            }
+        }
+        
+        // Implementación dummy de showCustomAlert para evitar errores al eliminar el botón
+        function showCustomAlert(message) {
+            const alertModal = document.getElementById('custom-alert-modal');
+            let alertContent = document.getElementById('alert-content-wrapper');
+
+            // Crear el wrapper si no existe
+            if (!alertContent) {
+                alertContent = document.createElement('div');
+                alertContent.id = 'alert-content-wrapper';
+                alertContent.className = 'mx-auto'; // Centrado
+                alertModal.appendChild(alertContent);
+            }
+            
+            alertContent.innerHTML = `
+                <div class="bg-red-600 p-4 rounded-xl shadow-lg w-full max-w-sm text-center">
+                    <p class="text-white font-semibold">${message}</p>
+                </div>
+            `;
+            alertModal.style.display = 'flex';
+        }
+        
+        function closeCustomAlert() {
+             const alertModal = document.getElementById('custom-alert-modal');
+             if (alertModal) {
+                 alertModal.style.display = 'none';
+             }
+        }
+
+        // Implementación dummy de closeModal
+        function closeModal() {
+            const modal = document.getElementById('DetalleTrabajadorModal');
+            if (modal) {
+                modal.style.display = 'none';
+                if (_globalSelectedRowElement) {
+                    _globalSelectedRowElement.classList.remove('selected-row');
+                    _globalSelectedRowElement = null;
+                }
+                _globalSelectedWorkerData = null;
+            }
+        }
+
+        // Implementación dummy de showVacationDaysAlert
+        function showVacationDaysAlert() {
+             showCustomAlert("Funcionalidad de detalle de vacaciones aún no implementada.");
+        }
+
+        // Implementación dummy de closeVacationModal
+        function closeVacationModal() {
+            const modal = document.getElementById('VacationDetailModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // Función principal para cargar el contenido de la sección
+        function loadContent(section) {
+            console.log("Navegando a la sección:", section);
+            const mainContent = document.getElementById('main-content');
+            
+            // 1. Renderizar contenido
+            if (section === 'Inicio') {
+                mainContent.innerHTML = `
+                    <div id="data-view-container" class="w-full">
+                        <h2 class="text-2xl font-bold text-blue-400 mb-4">BD Personal (Hoja: BD_Personal2)</h2>
+                        <!-- Contenedor para el estado de carga/error -->
+                        <div id="table-loading-status" class="text-center py-8">
+                             <!-- Contenido inicial de carga, será reemplazado por la tabla -->
+                        </div>
+                        <!-- Contenedor de la tabla -->
+                        <div id="employee-table-container" class="table-scroll-container">
+                            <!-- Aquí se inyectará la tabla -->
+                        </div>
+                    </div>
+                `;
+                // Re-initialize Lucide icons for the new content
+                lucide.createIcons();
+                
+                // 2. Iniciar la carga de datos con la nueva función loadData
+                loadData();
+                
+            } else {
+                // Contenido de simulación para otras secciones
+                mainContent.innerHTML = `
+                    <div class="p-6 bg-gray-700 rounded-xl shadow-lg">
+                        <h2 class="text-2xl font-bold text-blue-400">Contenido de ${section}</h2>
+                        <p class="mt-2 text-gray-300">Esta es una simulación de la sección. En una aplicación real, se cargaría el archivo ${NAV_MAP[section]}.</p>
+                    </div>
+                `;
+            }
+            
+            // 3. Actualizar botón activo en el footer
+            document.querySelectorAll('.footer-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.querySelector(`.footer-btn[data-section="${section}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        }
+        
+        // Event Listeners para el footer
+        document.addEventListener('DOMContentLoaded', () => {
+            const footerButtons = document.querySelectorAll('.footer-btn');
+            footerButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const section = button.getAttribute('data-section');
+                    loadContent(section);
+                });
+            });
+            
+            // Carga la sección de inicio al cargar la página por primera vez
+            loadContent('Inicio'); 
+        });
+
     </script>
 </body>
 </html>
