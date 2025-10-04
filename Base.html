@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación Móvil - Datos GAS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Configuración de Tailwind para usar el color de acento y la fuente Inter  */
+        html {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent; /* Mejor experiencia táctil */
+        }
+
+        /* Definición de colores base para modo claro y oscuro */
+        :root {
+            --color-bg-light: #f9fafb;
+            --color-text-light: #1f2937;
+            --color-primary-light: #3b82f6;
+            --color-bg-dark: #1f2937;
+            --color-text-dark: #f3f4f6;
+            --color-primary-dark: #60a5fa;
+            --color-surface-light: #ffffff;
+            --color-surface-dark: #374151;
+            
+            /* Color de fondo para encabezado y columna ID: #2D59A1 */
+            --color-header: #2D59A1; 
+            
+            /* Color de texto puro para datos de la tabla */
+            --color-data-text: #ffffff;
+            
+            /* Altura de referencia para alinear el modal y la tarjeta de bienvenida (Header + Padding) */
+            --header-offset: 76px; 
+            /* Altura del footer (h-18 = 72px) para el padding inferior del main */
+            --footer-height: 72px; 
+            
+            /* Padding base para el modo inmersivo */
+            --immersive-padding: 16px; 
+            
+            /* Color de hover verde para la fila */
+            --color-row-hover: #15803d; /* Verde oscuro (ej. Emerald 700) */
+            /* Color de selección simple (ligeramente más claro que el hover para diferenciación) */
+            --color-row-selected: #1e8749; /* Verde intermedio */
+            
+            /* Color de advertencia para filas con CTRL1 (rojo sin negritas) */
+            --color-warning: #ef4444; /* Tailwind red-500 */
+        }
+        
+        /* Estilos del cuerpo en modo claro */
+        .light {
+            background-color: var(--color-bg-light);
+            color: var(--color-text-light);
+        }
+
+        /* Estilos del cuerpo en modo oscuro (por defecto en el HTML) */
+        .dark {
+            background-color: var(--color-bg-dark);
+            color: var(--color-text-dark);
+        }
+        
+        /* Contenedor principal: Fija el ancho máximo a 500px y lo centra */
+        #app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh; /* Asegura que ocupe toda la altura */
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            position: relative; 
+            overflow: hidden; 
+        }
+
+        /* Estilos específicos para Header y Footer */
+        header, footer {
+            width: 100%;
+            max-width: 500px; 
+            z-index: 50; 
+            transition: background-color 0.3s, color 0.3s;
+            
+            /* Corrección de alineación: Centra el elemento 'fixed' en pantallas grandes */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Colores específicos para modo claro y oscuro para Header/Footer */
+        .light header, .light footer {
+            background-color: var(--color-surface-light);
+            border-color: #e5e7eb;
+        }
+        .dark header, .dark footer {
+            background-color: var(--color-surface-dark);
+            border-color: #4b5563;
+        }
+
+        /* AJUSTE: Las propiedades de padding del main ahora se manejan en JS 
+           para alternar entre modo normal (con offset) y modo inmersivo (con padding reducido).
+           Se mantiene solo flex y overflow para el scroll principal. */
+        main {
+            flex-grow: 1;
+            overflow-y: auto; 
+            padding-left: 1rem; /* px-4 */
+            padding-right: 1rem; /* px-4 */
+            transition: padding 0.3s ease-in-out;
+        }
+        
+        /* Estilo para los botones del footer (interacción táctil) */
+        .footer-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 4px;
+            font-size: 0.75rem; /* texto pequeño */
+            line-height: 1;
+            transition: color 0.2s, background-color 0.2s;
+            border-radius: 0.5rem;
+            color: inherit; /* Color de texto por defecto */
+        }
+
+        /* Estilo para el botón activo en el footer */
+        .footer-btn.active {
+            color: var(--color-primary-dark);
+        }
+        .light .footer-btn.active {
+             color: var(--color-primary-light);
+        }
+        
+        /* * ESTILO ESPECÍFICO PARA LA TABLA DE DATOS * */
+
+        /* Contenedor de la tabla con scroll horizontal, max-height y SIN scroll vertical interno */
+        .table-scroll-container {
+            max-height: 450px; 
+            overflow-x: auto; 
+            overflow-y: auto; 
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            display: block; 
+        }
+        
+        /* REGLA DE ANCHO AUTOMÁTICO SOLICITADA */
+        .table-scroll-container table {
+            table-layout: auto; /* Ancho de columna basado en el contenido */
+            width: max-content; /* Permite que la tabla se ensanche para que el scroll funcione */
+            min-width: 100%; /* Asegura que ocupe el 100% del contenedor visible si el contenido es pequeño */
+        }
+        
+        /* Encabezados fijos: CENTRADOS */
+        .table-scroll-container th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: var(--color-header); /* #2D59A1 */
+            color: var(--color-data-text);
+            padding: 0.75rem 1rem;
+            text-align: center; /* CENTRADO */
+            white-space: nowrap;
+        }
+
+        /* REGLA ÚNICA PARA LAS CELDAS DE DATOS (td) */
+        .table-data-cell {
+            font-size: 0.875rem; /* text-sm */
+            /* Solo padding vertical, el horizontal se controla con clases Tailwind en JS para justificación */
+            padding-top: 0.25rem; 
+            padding-bottom: 0.25rem;
+            white-space: nowrap; /* whitespace-nowrap */
+            transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+        }
+
+        .light .table-data-cell {
+            color: var(--color-text-light);
+            border-bottom: 1px solid #e5e7eb; /* light:border-gray-200 */
+            background-color: var(--color-surface-light); /* light:bg-white */
+        }
+
+        .dark .table-data-cell {
+            color: var(--color-text-dark);
+            border-bottom: 1px solid var(--color-surface-dark); /* dark:border-gray-700 */
+            background-color: var(--color-bg-dark); /* dark:bg-gray-800 */
+        }
+        
+        /* NUEVO: Estilo para filas con advertencia (CTRL1 no vacío) */
+        .row-warning-text td {
+            color: var(--color-warning) !important;
+        }
+        .row-warning-text:hover td {
+            /* Asegura que el color rojo se mantenga visible sobre el hover verde, pero el hover tiene prioridad */
+            color: #ffffff !important; 
+        }
+
+        /* Columna ID fija (sticky) */
+        .sticky-id-cell {
+            position: sticky;
+            left: 0;
+            background-color: var(--color-header) !important; /* Mismo color que el encabezado (#2D59A1) */
+            color: var(--color-data-text) !important; /* Texto blanco puro */
+            border-right: 1px solid rgba(255, 255, 255, 0.2); /* Separador suave */
+            font-weight: bold;
+            text-align: center;
+            /* Se ha quitado el 'w-16' fijo de CSS para que JS controle el padding y el ancho. */
+        }
+
+        /* Combinación para la celda de la esquina superior izquierda (Header de ID) */
+        .sticky-id-cell.header {
+            top: 0;
+            z-index: 20; 
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1); 
+        }
+        
+        /* Estilo para los encabezados de la tabla interactivos */
+        .sortable-header {
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.1s;
+        }
+
+        .sortable-header:hover {
+            background-color: rgba(255, 255, 255, 0.1); /* Ligero hover para feedback */
+        }
+        
+        /* REGLA DE HOVER (APLICACIÓN A TD dentro de TR: verde oscuro) */
+        .worker-row:hover td {
+            background-color: var(--color-row-hover) !important;
+            color: #ffffff !important; 
+            cursor: pointer; 
+            border-bottom-color: var(--color-row-hover) !important; 
+        }
+
+        /* REGLA DE SELECCIÓN (CLICK): Para dar un feedback visual persistente mientras el JSON está visible */
+        .worker-row.selected-row td {
+            background-color: var(--color-row-selected) !important;
+            color: #ffffff !important; 
+            border-bottom-color: var(--color-row-selected) !important; 
+        }
+
+        /* Sobrescribir para la celda ID fija al hacer hover o selección */
+        .worker-row:hover td.sticky-id-cell,
+        .worker-row.selected-row td.sticky-id-cell {
+            background-color: var(--color-row-hover) !important;
+            /* Mantiene la separación visible con un borde blanco más fuerte */
+            border-right: 1px solid rgba(255, 255, 255, 0.4) !important; 
+        }
+
+        /* --- ESTILOS DEL MODAL FIJO Y ALINEADO --- */
+        .modal-overlay {
+            /* Fija el modal sobre todo el viewport */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); /* Fondo semi-transparente */
+            display: none; /* Oculto por defecto */
+            justify-content: center;
+            align-items: center;
+            z-index: 40; /* Por debajo del header/footer */
+        }
+
+        /* Contenedor del modal */
+        #modal-content-wrapper, #alert-content-wrapper {
+            /* Fija la posición relativa al contenido principal (simulando fixed dentro del max-width: 500px) */
+            position: absolute; 
+            top: var(--header-offset); /* Alineado con el inicio del contenido principal (tarjeta de bienvenida) */
+            
+            /* Ajuste para que ocupe todo el ancho en móvil, o una posición fija en desktop */
+            width: 90%; 
+            max-width: 380px; /* Ancho máximo para que no sea demasiado grande */
+        }
+        
+        /* Ajuste específico para el Modal de Vacaciones (más ancho) */
+        #vacation-modal-content-wrapper {
+             max-width: 450px !important;
+        }
+        
+        /* --- ESTILOS DEL TOGGLE SWITCH DE PANTALLA COMPLETA --- */
+        .toggle-switch-container {
+            position: relative;
+            display: inline-block;
+            width: 50px; /* Ancho total */
+            height: 28px; /* Altura total */
+        }
+
+        .toggle-switch-container input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #374151; /* Color Negro/Gris Oscuro (off) */
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--color-header); /* #2D59A1 (on) */
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px); /* Mueve el círculo a la derecha (50 - 20 - 4*2 = 22) */
+        }
+        
+    </style>
+</head>
+<body class="dark transition-colors duration-300">
+
+    <div id="app-container" class="shadow-xl">
+        
+        <header id="app-header" class="fixed top-0 w-full h-14 border-b border-gray-700 dark:border-gray-500 flex items-center justify-between px-4">
+            <h1 class="text-xl font-bold">Mi Aplicación Móvil</h1>
+            
+            <div class="flex space-x-3">
+                
+                <button id="theme-toggle" class="p-2 rounded-full hover:opacity-80 transition-opacity">
+                    <i data-lucide="sun" class="w-6 h-6 text-yellow-300"></i>
+                </button>
+                
+                <button class="p-2 rounded-full hover:opacity-80 transition-opacity" onclick="showCustomAlert('Funcionalidad de Cerrar Sesión (simulada)')">
+                    <i data-lucide="log-out" class="w-6 h-6 text-red-400 dark:text-red-300"></i>
+                </button>
+            </div>
+        </header>
+
+        <main id="main-content" class="pb-4 flex flex-col space-y-4 pt-[76px]">
+            </main>
+
+        <footer id="app-footer" class="fixed bottom-0 w-full h-18 border-t border-gray-700 dark:border-gray-500 flex items-center justify-around py-2">
+            
+            <button class="footer-btn active" data-section="Inicio">
+                <i data-lucide="home" class="w-6 h-6"></i>
+                <span>Inicio</span>
+            </button>
+            
+            <button class="footer-btn" data-section="Nuevo Registro">
+                <i data-lucide="plus-square" class="w-6 h-6"></i>
+                <span>Registro</span>
+            </button>
+            
+            <button class="footer-btn" data-section="Editar">
+                <i data-lucide="edit" class="w-6 h-6"></i>
+                <span>Editar</span>
+            </button>
+            
+            <button class="footer-btn" data-section="Perfil">
+                <i data-lucide="user" class="w-6 h-6"></i>
+                <span>Perfil</span>
+            </button>
+            
+            <button class="footer-btn" data-section="Configuración">
+                <i data-lucide="settings" class="w-6 h-6"></i>
+                <span>Config</span>
+            </button>
+        </footer>
+
+        <div id="DetalleTrabajadorModal" class="modal-overlay">
+            
+            <div id="modal-content-wrapper" class="mx-auto">
+                <div class="bg-gray-800 p-6 rounded-xl shadow-2xl w-full transition-all duration-300 transform scale-100 dark:bg-gray-700">
+                    
+                    <div class="flex justify-between items-center pb-3 border-b border-gray-600 mb-4">
+                        
+                        <div class="flex items-center space-x-2">
+                            <h3 class="text-xl font-bold text-blue-400">Detalle Trabajador</h3>
+                            
+                            <button onclick="showVacationDaysAlert()" class="p-1">
+                                <i data-lucide="calendar" class="w-6 h-6 text-yellow-400"></i>
+                            </button>
+                        </div>
+                        
+                        <button onclick="closeModal()" class="text-3xl text-red-400 hover:text-red-600 transition duration-150 p-2 -mr-3">
+                            <i data-lucide="x" class="w-6 h-6 icon-x relative -mt-8 -mr-2"></i> 		
+                        </button>
+                    </div>
+                    
+                    <div id="modalBodyContent" class="grid grid-cols-1 gap-2 text-left text-sm">
+                        <p class="text-gray-400">Cargando...</p>
+                    </div>
+                    
+                    <button class="mt-6 w-full py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors shadow-md"
+                            onclick="closeModal(); loadContent('Editar');">
+                        <i data-lucide="edit-3" class="w-4 h-4 inline-block mr-2"></i>
+                        Editar Registro
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+        <div id="custom-alert-modal" class="modal-overlay" onclick="closeCustomAlert()">
+            
+        </div>
+        <div id="VacationDetailModal" class="modal-overlay" onclick="closeVacationModal()">
+            <div id="vacation-modal-content-wrapper" 
+                 class="mx-auto absolute top-[var(--header-offset)] w-[95%] max-w-[450px]" 
+                 onclick="event.stopPropagation()">
+                
+                <div class="bg-gray-800 p-6 rounded-xl shadow-2xl w-full transition-all duration-300 transform scale-100 dark:bg-gray-700">
+                    
+                    <div class="flex justify-between items-center pb-3 border-b border-gray-600 mb-4">
+                        <h3 class="text-xl font-bold text-yellow-400">Detalle de Vacaciones</h3>
+                        <button onclick="closeVacationModal()" class="text-3xl text-red-400 hover:text-red-600 transition duration-150 p-2 -mr-3">
+                            <i data-lucide="x" class="w-6 h-6 icon-x relative -mt-8 -mr-2"></i> 		
+                        </button>
+                    </div>
+                    
+                    <div id="vacationWorkerDetails" class="text-sm light:text-gray-200 dark:text-gray-300 mb-4 bg-gray-700 p-3 rounded-lg">
+                        </div>
+                    
+                    <h4 class="text-lg font-semibold mb-2 text-white">Registros en Hoja "Vacaciones"</h4>
+                    
+                    <div id="vacationTableContainer" class="table-scroll-container h-64">
+                        <div id="vacation-loading-spinner" class="text-center py-4"> 
+                            <i data-lucide="loader-circle" class="w-6 h-6 mx-auto animate-spin text-yellow-500"></i> 
+                            <p class="mt-2 text-sm text-gray-400">Cargando registros de vacaciones...</p> 
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        </div>
+
+    <script>
+        // Inicializa los iconos de Lucide (los convierte de tags <i> a SVG)
+        lucide.createIcons();
+
+        // --- ESTADO GLOBAL ---
+        let allEmployeeData = []; // Almacena el dataset completo sin filtrar
+        let filteredEmployeeData = []; // Almacena el dataset filtrado para la tabla
+        let debounceTimer; // Para controlar la frecuencia de búsqueda
+        let _globalSelectedWorkerData = null; // Almacena los datos del trabajador seleccionado
+        let _globalSelectedRowElement = null; // Almacena la fila HTML seleccionada
+        
+        // Estado de ordenación:
+        let currentSortColumn = null; 
+        let sortOrder = 'asc'; // 'asc' (ascendente), 'desc' (descendente)
+        
+        // --- CONSTANTES ---
+        // URL BASE de la API de Google Apps Script (se utilizará para construir la URL con el nombre de la hoja y el filtro)
+        const BASE_GAS_API_URL = 'https://script.google.com/macros/s/AKfycbx87WvxA9ca1KyGMA1wsw1npZw5vPtjoItomhF823BICXScNrWGFh5m0Dj6Veb24CtHXQ/exec';
+        const ACTIVITY_FEED_ID = 'activity-feed-container';
+        
+        // --- CONSTANTES DE CACHÉ ---
+        const CACHE_KEY = 'employeeDataCache';
+        const CACHE_EXPIRATION_MS = 900000; // 15 minutos
+        const FULLSCREEN_KEY = 'fullscreenActive'; // Clave para localStorage
+
+        // Mapeos de las columnas que se muestran en la TABLA BD_Personal2
+        const TABLE_COLUMNS = [
+            { key: 'EMPRESA', label: 'EMPRESA' },
+            { key: 'NOMINA', label: 'NÓMINA' },
+            { key: 'APELLIDOS', label: 'APELLIDOS' },
+            { key: 'NOMBRES', label: 'NOMBRES' },
+            { key: 'CEDULA', label: 'CÉDULA' }, // Se aplicará formato aquí
+            { key: 'CARGO', label: 'CARGO' },
+            { key: 'INGRESO', label: 'INGRESO' },
+            { key: 'SECTOR', label: 'SECTOR' },
+            { key: 'PERFIL', label: 'PERFIL' },
+            // Se incluye CTRL2 (Días Vacaciones)
+            { key: 'CTRL2', label: 'Días Vacaciones' }, 
+        ];
+        
+        const VACATION_TABLE_COLUMNS = [
+            { key: 'PERIODO', label: 'Período' },
+            { key: 'DESCRIPCION_CONCEPTO', label: 'Concepto' },
+            { key: 'DIAS_VACACIONES', label: 'Días' },
+            { key: 'BONO_VACACIONAL', label: 'Bono' },
+            { key: 'CEDULA', label: 'Cédula' },
+        ];
+        
+        // Mapeos para el contenido del MODAL DetalleTrabajadorModal
+        const MODAL_FIELD_MAP = [
+            { key: 'NOMBRES', label: 'Nombres', format: (v) => v || 'N/A' },
+            { key: 'APELLIDOS', label: 'Apellidos', format: (v) => v || 'N/A' },
+            // APLICACIÓN DE FORMATO: CEDULA debe mostrar puntos
+            { key: 'CEDULA', label: 'Cédula', format: (v) => v ? formatNumberWithDots(v) : 'N/A' },
+            { key: 'CARGO', label: 'Cargo', format: (v) => v || 'N/A' },
+            { key: 'EMPRESA', label: 'Empresa', format: (v) => v || 'N/A' },
+            { key: 'SECTOR', label: 'Sector', format: (v) => v || 'N/A' },
+            { key: 'NOMINA', label: 'Nómina', format: (v) => v || 'N/A' },
+            { key: 'PERFIL', label: 'Perfil', format: (v) => v || 'N/A' },
+            { key: 'INGRESO', label: 'Fecha Ingreso', format: (v) => v ? formatDate(v) : 'N/A' },
+            { key: 'NACIMIENTO', label: 'Fecha Nacimiento', format: (v) => v ? formatDate(v) : 'N/A' },
+            // Mapeo de CTRL2 con etiqueta Días Vacaciones
+            { key: 'CTRL2', label: 'Días Vacaciones', format: (v) => v || '0' },
+            { key: 'CTRL1', label: 'Nota/Comentario', format: (v) => v || 'Sin nota' },
+        ];
+        
+        // Campos usados para el JSON de filtrado (simulado)
+        const JSON_FIELD_MAP = [
+            'CEDULA', 
+            'EMPRESA', 
+            'INGRESO', 
+            'NOMBRE_TRABAJADOR' // Nuevo campo calculado
+        ];
+        
+        // Mapeo de navegación para cargar el contenido SPA
+        const NAV_MAP = {
+            'Inicio': 'inicio.html',
+            'Nuevo Registro': 'NuevoReg.html',
+            'Editar': 'EditarReg.html',
+            'Perfil': 'PerfilUsuario.html',
+            'Configuración': 'ConfigApp.html'
+        };
+
+        // Obtiene la fecha actual en formato DD/MM/YYYY para la tarjeta de bienvenida
+        const todayDate = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    </script>
+</body>
+</html>
