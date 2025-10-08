@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estructura Base Móvil</title>
+    <title>Aplicación Móvil - Perfil</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -83,11 +83,11 @@
         
         <header id="app-header" class="fixed top-0 w-full h-14 border-b border-gray-700 dark:border-gray-500 flex items-center justify-between px-4">
             
-            <!-- Título de la Aplicación -->
-            <h1 class="text-xl font-bold cursor-pointer hover:opacity-80 transition-opacity">
-                Mi Aplicación Móvil
+            <h1 class="text-xl font-bold cursor-pointer hover:opacity-80 transition-opacity" onclick="window.location.href = 'Inicio.html'">
+                Mi Aplicación Móvil DHO
             </h1>
-            
+
+            <span class="text-2xl font-semibold">¡Hola, Usuario!</span>
             <div class="flex space-x-3">
                 
                 <!-- Botón de Cerrar Sesión con redirección a index.html -->
@@ -101,7 +101,7 @@
             <!-- Contenido de la sección por defecto -->
             <div class="p-6 text-center mt-4 dark:bg-gray-800 rounded-xl shadow-lg">
                 <i data-lucide="edit" class="w-8 h-8 mx-auto mb-3 text-blue-400"></i>
-                <h2 class="text-xl font-bold mb-2">Página de Inicio (Editar)</h2>
+                <h2 class="text-xl font-bold mb-2">Página de Inicio (Perfil)</h2>
                 <p class="text-sm text-gray-400">Esta es la estructura base. Presiona un botón para redirigir.</p>
             </div>
         </main>
@@ -118,13 +118,12 @@
                 <span>Vacaciones</span>
             </button>
             
-            <!-- Botón 'Editar' activo por defecto -->
-            <button class="footer-btn active" data-section="Editar">
+            <button class="footer-btn" data-section="Editar">
                 <i data-lucide="edit" class="w-6 h-6"></i>
                 <span>Editar</span>
             </button>
             
-            <button class="footer-btn" data-section="Perfil">
+            <button class="footer-btn active" data-section="Perfil">
                 <i data-lucide="user" class="w-6 h-6"></i>
                 <span>Perfil</span>
             </button>
@@ -138,7 +137,7 @@
 
     <script>
         lucide.createIcons();
-        
+
         // Mapeo de navegación (Actualizado para referencia)
         const NAV_MAP = {
             'Inicio': 'inicio.html',
@@ -200,8 +199,22 @@
 
         // --- INICIALIZACIÓN DE LA APLICACIÓN ---
         document.addEventListener('DOMContentLoaded', () => {
-            
-            // 1. Agregar event listeners a los botones del footer
+            const usuarioTienda = localStorage.getItem('Usuario_Tienda');
+            const usuarioNombre = localStorage.getItem('Usuario_Nombre');
+            const usuarioPerfil = localStorage.getItem('Usuario_Perfil');
+            const usuarioIdx = localStorage.getItem('Usuario_Idx');
+            const diasIniInput = document.getElementById('field-dias-ini-vacation-add'); 
+            const diasFinInput = document.getElementById('field-dias-fin-vacation-add'); 
+            const diasVacacionesInput = document.getElementById('field-dias-vacaciones-vacation-add'); 
+        
+            // Extraer el primer nombre
+            let primerNombre = '';
+            if (usuarioNombre) {
+                primerNombre = usuarioNombre.trim().split(' ')[0];
+                document.querySelector('.text-xl.font-bold').textContent = `¡Hola, ${primerNombre}!`;
+            }
+
+            // Agregar event listeners a los botones del footer
             document.querySelectorAll('#app-footer .footer-btn').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const section = e.currentTarget.getAttribute('data-section');
@@ -209,8 +222,8 @@
                 });
             });
 
-            // 2. Establecer 'Editar' como activo si no hay redirección inicial
-            setActiveFooterButton('Editar');
+            // 2. Establecer 'Sección X' como activo si no hay redirección inicial
+            setActiveFooterButton('Perfil');
         });
         
     </script>
