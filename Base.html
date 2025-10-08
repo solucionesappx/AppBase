@@ -78,16 +78,19 @@
     </style>
 </head>
 <body class="dark transition-colors duration-300">
+
     <div id="app-container" class="shadow-xl">
+        
         <header id="app-header" class="fixed top-0 w-full h-14 border-b border-gray-700 dark:border-gray-500 flex items-center justify-between px-4">
-            <h1 class="text-xl font-bold cursor-pointer hover:opacity-80 transition-opacity" onclick="window.location.href = 'Inicio.html'">
+         <h1 class="text-xl font-bold cursor-pointer hover:opacity-80 transition-opacity" onclick="window.location.href = 'Inicio.html'">
                 Mi Aplicación Móvil DHO
             </h1>
             <div class="flex space-x-3">
-            <!-- Botón de Cerrar Sesión con redirección a index.html -->
-            <button class="p-2 rounded-full hover:opacity-80 transition-opacity" onclick="window.location.href = 'index.html'">
-                <i data-lucide="log-out" class="w-6 h-6 text-red-400 dark:text-red-300"></i>
-            </button>
+                
+                <!-- Botón de Cerrar Sesión con redirección a index.html -->
+                <button class="p-2 rounded-full hover:opacity-80 transition-opacity" onclick="window.location.href = 'index.html'">
+                    <i data-lucide="log-out" class="w-6 h-6 text-red-400 dark:text-red-300"></i>
+                </button>
             </div>
         </header>
 
@@ -154,41 +157,61 @@
             });
         }
         
-        // Función principal para cargar el contenido de la sección (Ahora realiza redirecciones completas)
+        // Función principal para cargar el contenido de la sección
         function loadContent(section) {
             console.log("Navegando a la sección:", section);
-            
-            let targetUrl;
+            const mainContent = document.getElementById('main-content');
 
-            // La navegación ahora usa redirección completa (non-SPA)
-            switch (section) {
-                case 'Inicio':
-                    targetUrl = 'inicio.html';
-                    break;
-                case 'Vacaciones':
-                    targetUrl = 'Vacaciones.html';
-                    break;
-                case 'Editar':
-                    // Usando 'EditarDat.html' según tu solicitud
-                    targetUrl = 'EditarDat.html'; 
-                    break;
-                case 'Perfil':
-                    // Usando 'PerfilUser.html' según tu solicitud
-                    targetUrl = 'PerfilUser.html'; 
-                    break;
-                case 'Configuración':
-                    targetUrl = 'ConfigApp.html';
-                    break;
-                default:
-                    console.error(`Sección desconocida: ${section}`);
-                    return;
+        if (section === 'Vacaciones') {
+            window.location.href = 'Vacaciones.html';
+            return; // Importante: Detiene la ejecución aquí.
+        }
+
+        if (section === 'Agregar') {
+                window.location.href = 'AgregarDat.html';
+                return;
+        }
+            
+        if (section === 'Editar') {
+            window.location.href = 'EditarDat.html';
+            return;
+        }
+    
+        if (section === 'Inicio') {
+            window.location.href = 'Inicio.html';
+            return;
+        }
+    
+        if (section === 'Configuración') {
+            window.location.href = 'ConfigApp.html';
+            return;
+        }
+            
+            if (section === 'Perfil') {
+                mainContent.innerHTML = `
+                    <div class="p-6 bg-gray-700 rounded-xl shadow-lg">
+                        <h2 class="text-2xl font-bold text-blue-400">Contenido de ${section}</h2>
+                        <p class="mt-2 text-gray-300">Esta es una simulación de la sección. En una aplicación real, se cargaría el archivo ${NAV_MAP[section]}.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+            
+            } else {
+                mainContent.innerHTML = `
+                    <div class="p-6 bg-gray-700 rounded-xl shadow-lg">
+                        <h2 class="text-2xl font-bold text-blue-400">Contenido de ${section}</h2>
+                        <p class="mt-2 text-gray-300">Esta es una simulación de la sección. En una aplicación real, se cargaría el archivo ${NAV_MAP[section]}.</p>
+                    </div>
+                `;
             }
-
-            // Establece la clase activa antes de redirigir (aunque la redirección la perderá)
-            setActiveFooterButton(section);
             
-            // Redirección completa
-            window.location.href = targetUrl;
+            document.querySelectorAll('.footer-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.querySelector(`.footer-btn[data-section="${section}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
         }
 
         // --- INICIALIZACIÓN DE LA APLICACIÓN ---
@@ -209,15 +232,14 @@
             }
 
             // Agregar event listeners a los botones del footer
-            document.querySelectorAll('#app-footer .footer-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const section = e.currentTarget.getAttribute('data-section');
+            const footerButtons = document.querySelectorAll('.footer-btn');
+            footerButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const section = button.getAttribute('data-section');
                     loadContent(section);
                 });
-            });
-
-            // 2. Establecer 'Sección X' como activo si no hay redirección inicial
-            setActiveFooterButton('Perfil');
+            });            
+            loadContent('Perfil'); 
         });
         
     </script>
