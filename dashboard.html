@@ -1714,7 +1714,7 @@
                     
                     // CORRECCIÓN APLICADA: Solo filtra por Cédula para no descartar registros sin días de vacaciones
                     allVacationData = result.data.filter(row => {
-                        const rowCedula = String(row['CÉDULA'] || '').trim();
+                        const rowCedula = String(row['CEDULA'] || '').trim();
                         const personalCedula = String(cedula || '').trim();
                         return rowCedula === personalCedula;
                     });
@@ -1912,9 +1912,9 @@
 
             // MODIFICACIÓN CRÍTICA: Se añade el paso de selectedPerson['INGRESO']
             openVacationModalBtn.addEventListener('click', () => {
-                if (selectedPerson && selectedPerson['CÉDULA']) {
+                if (selectedPerson && selectedPerson['CEDULA']) {
                     loadVacationData(
-                        selectedPerson['CÉDULA'], 
+                        selectedPerson['CEDULA'], 
                         selectedPerson['NOMBRES'], 
                         selectedPerson['APELLIDOS'], 
                         selectedPerson['INGRESO'] // Se pasa la fecha de ingreso
@@ -1972,7 +1972,7 @@
                 vacationDetailsFields['BONO_VACACIONAL'].textContent = bonoValue;
 
                 // Llenado y visibilidad de los 6 campos adicionales (CÉDULA, NOMBRES, APELLIDOS, EMPRESA, RegistroUser, RegistroDate)
-                //toggleField('CÉDULA', 'cedula-vacation-details-field');
+                //toggleField('CEDULA', 'cedula-vacation-details-field');
                 //toggleField('NOMBRES', 'nombres-vacation-details-field');
                 //toggleField('APELLIDOS', 'apellidos-vacation-details-field');
                 //toggleField('EMPRESA', 'empresa-vacation-details-field');
@@ -2077,7 +2077,7 @@
             const selectedPerson = allPersonData[selectedRowIndex];
     
             // 1. Limpieza y asignación de valores estándar
-            document.getElementById('field-cedula-vacation-add').value = formatCedula(selectedPerson['CÉDULA']);
+            document.getElementById('field-cedula-vacation-add').value = formatCedula(selectedPerson['CEDULA']);
             document.getElementById('field-periodo-vacation-add').value = '';
             document.getElementById('field-descripcion-vacation-add').value = '';
             document.getElementById('field-bono-vacacional-vacation-add').value = '';
@@ -2145,13 +2145,13 @@ saveVacationRecordBtn.addEventListener('click', () => {
 
     // 5. Construcción del objeto final
     const fullRecord = {
-        'CÉDULA': cedula,
+        'CEDULA': cedula,
         'NOMBRES': selectedPerson['NOMBRES'] || '',
         'APELLIDOS': selectedPerson['APELLIDOS'] || '',
         'EMPRESA': selectedPerson['EMPRESA'] || '',
         
         'PERIODO': periodo,
-        'DESCRIPCIÓN_CONCEPTO': descripcion,
+        'DESCRIPCION_CONCEPTO': descripcion,
         'DIAS_VACACIONES': dias*-1, 
         'BONO_VACACIONAL': bonoVacacional,
         
