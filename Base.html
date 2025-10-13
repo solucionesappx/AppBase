@@ -144,6 +144,13 @@
             'Configuración': 'ConfigApp.html'
         };
 
+        const USUARIO_NOMBRE_KEY = 'Usuario_Nombre';        
+        const usuarioTienda = localStorage.getItem('Usuario_Tienda');
+        const usuarioNombre = localStorage.getItem('Usuario_Nombre');
+        const usuarioPerfil = localStorage.getItem('Usuario_Perfil');
+        const usuarioIdx = localStorage.getItem('Usuario_Idx');
+        const usuarioprimerNombre = localStorage.getItem('Usuario_Primer_Nombre');
+        
         /**
          * Marca el botón activo en el footer (Necesario si esta fuera la página de destino).
          * @param {string} sectionName - El nombre de la sección a activar.
