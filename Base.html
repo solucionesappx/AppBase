@@ -6,6 +6,12 @@
     <title>Aplicación Móvil - Base</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    /* Control de Caché del Navegador  */
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <style>
         /* Configuración de Tailwind para usar el color de acento y la fuente Inter  */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
@@ -85,10 +91,9 @@
          <h1 class="text-xl font-bold cursor-pointer hover:opacity-80 transition-opacity" onclick="window.location.href = 'Inicio.html'">
                 Mi Aplicación Móvil ZXC
             </h1>
-            <div class="flex space-x-3">
-                
+            <div class="flex space-x-3">               
                 <!-- Botón de Cerrar Sesión con redirección a index.html -->
-                <button class="p-2 rounded-full hover:opacity-80 transition-opacity" onclick="window.location.href = 'index.html'">
+                <button class="p-2 rounded-full hover:opacity-80 transition-opacity" onclick="logoutAndClearCache()">
                     <i data-lucide="log-out" class="w-6 h-6 text-red-400 dark:text-red-300"></i>
                 </button>
             </div>
@@ -221,7 +226,51 @@
             }
         }
 
+            function logoutAndClearCache() {
+            // Definir las claves que deben ser eliminadas al cerrar sesión:
+            const cacheKeys = [
+                // Claves de caché de datos:
+                'employeeDataCache_BD_Personal2', // Caché de BD_Personal2
+                'vacaciones2DataCache',           // Caché de Vacaciones2
+                
+                // Claves de datos de sesión/perfil del usuario (CRÍTICAS para la limpieza):
+                'Usuario_Nombre',
+                'Usuario_Correo', 
+                'Usuario_Telefono', 
+                'Usuario_PreguntaSeg', 
+                'Usuario_RespuestaSeg', 
+                'Usuario_Id',
+                'Usuario_Idx',
+                'Usuario_Tienda',
+                'Usuario_Perfil'
+            ];
+        
+            console.log("Iniciando proceso de cierre de sesión y limpieza de caché...");
+        
+            // Limpiar cada clave
+            cacheKeys.forEach(key => {
+                localStorage.removeItem(key);
+                console.log(`Caché limpia: ${key}`);
+            });
+        
+            // Redirigir al usuario a la página de inicio (index.html)
+            window.location.href = 'index.html';
+        }
+
         // --- INICIALIZACIÓN DE LA APLICACIÓN ---
+
+       document.addEventListener('DOMContentLoaded', function() {
+            const correo = localStorage.getItem('Usuario_Correo');
+            const id = localStorage.getItem('Usuario_Id');
+            
+            // Verifica si AMBAS claves están ausentes.
+            // La sesión no es válida si NO hay Correo AND NO hay Id.
+            if (!correo && !id) {
+                console.log("Redirigiendo a index.html");
+                window.location.replace('index.html'); 
+            }
+        });    
+        
         document.addEventListener('DOMContentLoaded', () => {
             const usuarioTienda = localStorage.getItem('Usuario_Tienda');
             const usuarioNombre = localStorage.getItem('Usuario_Nombre');
