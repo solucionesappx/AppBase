@@ -117,7 +117,7 @@
             color: var(--color-data-text);
             padding: 0.25rem 0.5rem; 
             text-align: center; 
-            white-space: nowrap;
+            white-space: nowrap; 
             font-size: 0.75rem; 
             border-bottom: 2px solid rgba(255, 255, 255, 0.1); 
             cursor: pointer;
@@ -132,7 +132,6 @@
             font-weight: bold;
             text-align: center;
             border-right: 1px solid rgba(255, 255, 255, 0.2); 
-            /* Se asegura que la celda sticky tenga un ancho fijo y pequeño para el correlativo */
             min-width: 50px; 
             max-width: 50px; 
         }
@@ -143,12 +142,16 @@
         }
         
         .table-data-cell.sticky-id-cell {
-            /* Color de fondo para la celda ID pegajosa */
             color: var(--color-primary-dark);
-            font-size: 0.75rem; 
+            /* ELIMINADO: font-size: 0.75rem; para heredar el tamaño de datos 0.875rem */
+            font-family: monospace, sans-serif; 
+            
+            /* AJUSTE: Fondo igual al encabezado */
+            background-color: var(--color-header) !important; 
+            z-index: 35; /* Asegura que esté por encima de las filas normales */
         }
 
-        /* Celdas de Datos */
+        /* Celdas de Datos General */
         .table-data-cell {
             font-size: 0.875rem; 
             padding: 0.25rem 0.5rem; 
@@ -159,6 +162,27 @@
             text-align: left; 
         }
         
+        /* === ESTILO: CELDA CON ANCHO FIJO Y SCROLL HORIZONTAL === */
+        /* Aplicado a TD y TH */
+        .cell-fixed-width-scroll {
+            min-width: 50ch; 
+            max-width: 50ch;
+            white-space: normal; /* Permitir el salto de línea para el contenido dentro de TD */
+        }
+        
+        .table-data-cell.cell-fixed-width-scroll {
+            overflow-x: auto; /* Scroll horizontal si el contenido es demasiado ancho */
+            white-space: nowrap; /* Deshacer el 'normal' para mantener el scroll horizontal en TD */
+            display: block; /* Necesario para que overflow funcione */
+        }
+        
+        .table-scroll-container th.cell-fixed-width-scroll {
+             /* El encabezado no debe tener overflow-x, solo el ancho */
+             overflow-x: hidden; 
+             white-space: normal; /* Permitir salto de línea en el encabezado si es necesario */
+             font-size: 0.75rem; /* Mantener la fuente pequeña en el encabezado */
+        }
+
         /* Estilos de las filas alternas */
         .table-scroll-container tr:nth-child(even) .table-data-cell {
             background-color: #374151; /* Filas pares */
@@ -168,13 +192,9 @@
             background-color: #2c3645; /* Filas impares */
         }
         
-        /* Asegura que la celda sticky tenga el color de fondo correcto al alternar filas */
-        .table-scroll-container tr:nth-child(even) .table-data-cell.sticky-id-cell {
-            background-color: #374151; 
-        }
-        .table-scroll-container tr:nth-child(odd) .table-data-cell.sticky-id-cell {
-            background-color: #2c3645; 
-        }
+        /* Eliminamos el override para la celda sticky ya que ahora tiene !important para el color de fondo */
+        /* .table-scroll-container tr:nth-child(even) .table-data-cell.sticky-id-cell {} */
+        /* .table-scroll-container tr:nth-child(odd) .table-data-cell.sticky-id-cell {} */
 
 
         .header-content {
@@ -267,26 +287,50 @@
             'DIAS_VACACIONES': 'DIAS VAC',
             'BONO_VACACIONAL': 'BONO VAC',
             'VACACION_CONDICION': 'TIPO REGISTRO',
-            'OBSERVACIONES': 'OBSERVACIONES'
+            'OBSERVACIONES': 'OBSERVACIONES',
+            'NOMBRE_EMPLEADO': 'NOMBRE CORTO',
+            'INGRESO': 'FECHA INGRESO', 
+            'RegistroDate': 'FECHA REGISTRO',
+            'RegistroUser': 'USUARIO REGISTRO',
+            'CEDULA': 'CÉDULA'
         };
+        
+        // --- VARIABLE GLOBAL DE ORDEN DE COLUMNAS (Claves de la tabla) ---
+        const COLUMN_ORDER_LIST = [
+            'VACACIONES_ID', 
+            'NOMBRE_EMPLEADO', 
+            'CEDULA', 
+            'INGRESO', 
+            'PERIODO',
+            'DESCRIPCION_CONCEPTO', 
+            'DIF',
+            'DIA_INICIO',
+            'DIA_FINAL',
+            'DIF', 
+            'DIAS_VAC2',
+            'DIAS_VACACIONES',
+            'BONO_VACACIONAL',
+            'VACACION_CONDICION',
+            'OBSERVACIONES', 
+            'RegistroDate',
+            'RegistroUser'  
+        ];
 
         // --- FUNCIONES DE FORMATEO ---
         
         /**
          * Formatea un valor numérico para incluir puntos como separadores de miles y maneja decimales.
-         * @param {string|number} value - El valor a formatear.
-         * @returns {string} El número formateado o un string vacío.
          */
         function formatNumberWithDots(value) {
             if (value === null || value === undefined || value === '') return '0';
             
-            // Reemplaza comas por puntos y asegura que el valor es un string
             const numStr = String(value).replace(',', '.'); 
             const number = parseFloat(numStr);
             
             if (!isNaN(number)) {
-                // Usa 2 decimales si el número tiene decimales, si no, usa 0
-                const maxDigits = number % 1 !== 0 ? 2 : 0;
+                const hasDecimalPart = numStr.includes('.');
+                const maxDigits = hasDecimalPart ? 2 : 0;
+                
                 return new Intl.NumberFormat('es-ES', { 
                     minimumFractionDigits: maxDigits, 
                     maximumFractionDigits: maxDigits 
@@ -301,7 +345,6 @@
                 const date = new Date(value);
                 if (isNaN(date.getTime())) return String(value); 
                 
-                // Usando métodos UTC para evitar problemas de offset si la API devuelve ISO strings
                 const d = date.getUTCDate().toString().padStart(2, '0');
                 const m = (date.getUTCMonth() + 1).toString().padStart(2, '0');
                 const y = date.getUTCFullYear();
@@ -324,7 +367,6 @@
                 if (typeof value === 'string' && value.includes('T') && value.includes('Z')) {
                     date = new Date(value);
                 } else if (typeof value === 'string' && !value.includes('T')) {
-                    // Intenta parsear como fecha local para evitar problemas de zona horaria si es solo YYYY-MM-DD
                     date = new Date(value.replace(/-/g, '/')); 
                 } else {
                     date = new Date(value);
@@ -332,7 +374,6 @@
                 
                 if (isNaN(date.getTime())) return String(value); 
                 
-                // Usando métodos locales (getDate/getMonth/getFullYear)
                 const d = date.getDate().toString().padStart(2, '0');
                 const m = (date.getMonth() + 1).toString().padStart(2, '0');
                 const y = date.getFullYear();
@@ -391,8 +432,11 @@
                 `;
             }
 
-            const originalHeaders = Object.keys(data[0]);
-            const displayHeaders = ['#', ...originalHeaders]; 
+            const displayHeaders = ['#', ...COLUMN_ORDER_LIST]; 
+
+            // Determinar la longitud de padding para el correlativo
+            const totalRecords = data.length;
+            const paddingLength = Math.max(2, String(totalRecords).length); 
 
             let tableHTML = `<div class="table-scroll-container mb-4"><table class="w-full">`;
             tableHTML += '<thead><tr>';
@@ -400,16 +444,21 @@
             // Generar la fila de encabezados
             displayHeaders.forEach((headerKey, index) => {
                 let headerText;
+                let fixedClass = ''; 
                 
                 if (index === 0) {
                     headerText = '#';
                 } else {
-                    const originalKey = originalHeaders[index - 1]; 
+                    const originalKey = headerKey;
                     headerText = COLUMN_HEADERS_MAP[originalKey] || originalKey;
+                    if (originalKey === 'DESCRIPCION_CONCEPTO') {
+                        // Aplicamos la clase de ancho fijo al encabezado
+                        fixedClass = ' cell-fixed-width-scroll';
+                    }
                 }
                 
                 const isSticky = index === 0 ? ' sticky-id-cell' : '';
-                tableHTML += `<th class="${isSticky}"><div class="header-content">${headerText}</div></th>`;
+                tableHTML += `<th class="${isSticky}${fixedClass}"><div class="header-content">${headerText}</div></th>`;
             });
             tableHTML += '</tr></thead>';
 
@@ -419,40 +468,71 @@
                 tableHTML += '<tr>';
                 
                 // --- CELDA 1: CORRELATIVO VIRTUAL (PEGADIZO) ---
-                const correlative = rowIndex + 1;
+                const rawCorrelative = rowIndex + 1;
+                const correlative = String(rawCorrelative).padStart(paddingLength, '0');
+                
                 tableHTML += `<td class="table-data-cell sticky-id-cell">${correlative}</td>`;
                 
-                // --- RESTO DE LAS CELDAS: DATOS REALES DE LA HOJA CON FORMATO ---
-                originalHeaders.forEach(header => {
+                // --- RESTO DE LAS CELDAS: Itera sobre la lista de orden (COLUMN_ORDER_LIST) ---
+                COLUMN_ORDER_LIST.forEach(header => {
                     let cellValue = row[header] !== undefined && row[header] !== null ? row[header] : '';
-                    let alignmentClass = ''; // Para alinear texto a la izquierda y números a la derecha
+                    let alignmentClass = ''; 
+                    let fixedClass = ''; 
 
-                    // Aplicar formateo basado en la clave del encabezado
+                    // Aplicar formateo y clases especiales
                     switch (header) {
+                        case 'VACACIONES_ID':
+                            alignmentClass = 'text-center'; 
+                            break;
+                            
+                        // Fechas que usan formatDate y centrado
+                        case 'INGRESO': 
+                        case 'DIA_INICIO':
+                        case 'DIA_FINAL':
+                            cellValue = formatDate(cellValue);
+                            alignmentClass = 'text-center'; 
+                            break;
+                        
+                        // Fechas y hora que usan formatDateTime y centrado
+                        case 'RegistroDate':
+                            cellValue = formatDateTime(cellValue);
+                            alignmentClass = 'text-center'; 
+                            break;
+                        
+                        // Descripción con ancho fijo y scroll
+                        case 'DESCRIPCION_CONCEPTO':
+                            // Aplicamos la clase de ancho fijo al TD
+                            fixedClass = ' cell-fixed-width-scroll';
+                            break;
+
+                        // Números formateados con puntos y alineados a la derecha
+                        case 'CEDULA': 
                         case 'DIF':
                         case 'DIAS_VAC2':
                         case 'DIAS_VACACIONES':
                         case 'BONO_VACACIONAL':
                             cellValue = formatNumberWithDots(cellValue);
-                            alignmentClass = 'text-right'; // Alinear números a la derecha
+                            alignmentClass = 'text-right'; 
                             break;
-                        case 'DIA_INICIO':
-                        case 'DIA_FINAL':
-                            cellValue = formatDate(cellValue);
-                            alignmentClass = 'text-center'; // Alinear fechas al centro o derecha
+                        
+                        case 'RegistroUser':
+                        case 'NOMBRE_EMPLEADO':
+                            cellValue = String(cellValue) || '';
                             break;
+                            
                         default:
-                            cellValue = String(cellValue); // Asegura que es un string
+                            cellValue = String(cellValue); 
                             break;
                     }
-
-                    tableHTML += `<td class="table-data-cell ${alignmentClass}">${cellValue}</td>`;
+                    
+                    // Aplicamos la clase de alineación y la clase de ancho fijo
+                    tableHTML += `<td class="table-data-cell ${alignmentClass}${fixedClass}">${cellValue}</td>`;
                 });
                 
                 tableHTML += '</tr>';
             });
             tableHTML += '</tbody>';
-            tableHTML += '</table></div>';
+            tableHTML += '</table></div>'; 
             
             const header = `<h2 class="text-2xl font-bold mb-2">Tabla de Datos</h2><p class="text-sm text-gray-400 mb-6">Contenido de la hoja '${SHEET_NAME}'. (Correlativo: # | Desplácese horizontal/verticalmente).</p>`;
             
