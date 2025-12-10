@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación Móvil - Datos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <style>
+        /* Configuración de Tailwind para usar el color de acento y la fuente Inter */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        html {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Definición de colores base */
+        :root {
+            --color-bg-dark: #1f2937;
+            --color-text-dark: #f3f4f6;
+            --color-primary-dark: #60a5fa;
+            --color-surface-dark: #374151;
+            /* Nuevas variables para la tabla */
+            --color-header: #374151; /* Encabezado de tabla */
+            --color-data-text: #f3f4f6;
+            --color-bg-table-row: #2c3645; /* Fondo general de las filas */
+        }
+        
+        /* Estilos del cuerpo en modo oscuro */
+        .dark { background-color: var(--color-bg-dark); color: var(--color-text-dark); }
+        
+        #app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            position: relative; 
+            overflow: hidden; 
+        }
+
+        header, footer {
+            width: 100%;
+            max-width: 500px; 
+            z-index: 50; 
+            transition: background-color 0.3s, color 0.3s;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Estilos específicos para header y footer en modo oscuro */
+        .dark header, .dark footer { 
+            background-color: var(--color-surface-dark); 
+            border-color: #4b5563; 
+        }
+
+        main {
+            flex-grow: 1;
+            overflow-y: auto; 
+            padding-left: 1rem;
+            padding-right: 1rem;
+            transition: padding 0.3s ease-in-out;
+            padding-top: 76px; /* Para compensar la altura del header */
+            padding-bottom: 72px; /* Para compensar la altura del footer */
+        }
+        
+        .footer-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 4px;
+            font-size: 0.75rem;
+            line-height: 1;
+            transition: color 0.2s, background-color 0.2s;
+            border-radius: 0.5rem;
+            color: inherit;
+        }
+
+        .footer-btn.active { color: var(--color-primary-dark); }
+
+
+        /* ========================================================== */
+        /* --- ESTILOS DE LA TABLA DINÁMICA --- */
+        /* ========================================================== */
+        
+        .table-scroll-container {
+            /* Ajuste de la altura: 85vh - (Header + Footer + Margen) */
+            max-height: calc(85vh - 150px); 
+            overflow-x: auto; 
+            overflow-y: auto; 
+            border-radius: 0.75rem; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            display: block; 
+            border: 1px solid #4b5563; 
+            background-color: var(--color-bg-table-row); 
+        }
+        
+        .table-scroll-container table {
+            border-collapse: collapse; 
+            table-layout: auto; 
+            width: max-content; 
+            min-width: 100%; 
+        }
+
+        .table-scroll-container th {
+            position: sticky;
+            top: 0; 
+            z-index: 20; 
+            background-color: var(--color-header); 
+            color: var(--color-data-text);
+            padding: 0.25rem 0.5rem; 
+            text-align: center; 
+            white-space: nowrap;
+            font-size: 0.75rem; 
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1); 
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        /* Celdas Fijas */
+        .sticky-id-cell {
+            position: sticky;
+            left: 0;
+            z-index: 30; 
+            font-weight: bold;
+            text-align: center;
+            border-right: 1px solid rgba(255, 255, 255, 0.2); 
+            /* Se asegura que la celda sticky tenga un ancho fijo y pequeño para el correlativo */
+            min-width: 50px; 
+            max-width: 50px; 
+        }
+        
+        .table-scroll-container th.sticky-id-cell {
+            background-color: var(--color-header); 
+            z-index: 40; 
+        }
+        
+        .table-data-cell.sticky-id-cell {
+            /* Color de fondo para la celda ID pegajosa */
+            color: var(--color-primary-dark);
+            font-size: 0.75rem; 
+        }
+
+        /* Celdas de Datos */
+        .table-data-cell {
+            font-size: 0.875rem; 
+            padding: 0.25rem 0.5rem; 
+            white-space: nowrap; 
+            transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+            border-bottom: 1px solid #4b5563; 
+            height: 32px; 
+            text-align: left; 
+        }
+        
+        /* Estilos de las filas alternas */
+        .table-scroll-container tr:nth-child(even) .table-data-cell {
+            background-color: #374151; /* Filas pares */
+        }
+
+        .table-scroll-container tr:nth-child(odd) .table-data-cell {
+            background-color: #2c3645; /* Filas impares */
+        }
+        
+        /* Asegura que la celda sticky tenga el color de fondo correcto al alternar filas */
+        .table-scroll-container tr:nth-child(even) .table-data-cell.sticky-id-cell {
+            background-color: #374151; 
+        }
+        .table-scroll-container tr:nth-child(odd) .table-data-cell.sticky-id-cell {
+            background-color: #2c3645; 
+        }
+
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center; 
+            gap: 4px;
+        }
+
+        .row-warning-text .table-data-cell {
+            color: #fcd34d; 
+        }
+        
+        .row-alert-text .table-data-cell {
+            background-color: #582b2b; 
+            color: #fca5a5; 
+            font-weight: 600;
+        }
+        
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.8);
+            transition: opacity 0.3s ease;
+        }
+        
+    </style>
+</head>
+<body class="dark transition-colors duration-300">
+
+    <div id="app-container" class="shadow-xl">
+        
+        <header id="app-header" class="fixed top-0 w-full h-14 border-b border-gray-700 dark:border-gray-500 flex items-center justify-between px-4">
+           <h1 class="text-xl font-bold cursor-pointer hover:opacity-80 transition-opacity" onclick="window.location.href = 'Inicio.html'">
+                Mi Aplicación Móvil ZXC
+            </h1>
+            <div class="flex space-x-3">              
+                <button class="p-2 rounded-full hover:opacity-80 transition-opacity" onclick="logoutAndClearCache()">
+                    <i data-lucide="log-out" class="w-6 h-6 text-red-400 dark:text-red-300"></i>
+                </button>
+            </div>
+        </header>
+
+        <main id="main-content" class="flex flex-col space-y-4">
+            </main>
+
+        <footer id="app-footer" class="fixed bottom-0 w-full h-18 border-t border-gray-700 dark:border-gray-500 flex items-center justify-around py-2">
+            
+            <button class="footer-btn" data-section="Inicio">
+                <i data-lucide="home" class="w-6 h-6"></i>
+                <span>Inicio</span>
+            </button>
+            
+            <button class="footer-btn active" data-section="Datos">
+                <i data-lucide="calendar-days" class="w-6 h-6"></i>
+                <span>Datos</span>
+            </button>
+
+            <button class="footer-btn hidden" data-section="Agregar">
+                <i data-lucide="calendar-plus" class="w-6 h-6"></i>
+                <span>Agregar</span>
+            </button>
+                                   
+            <button class="footer-btn" data-section="Perfil">
+                <i data-lucide="user" class="w-6 h-6"></i>
+                <span>Perfil</span>
+            </button>
+            
+            <button class="footer-btn" data-section="Configuración">
+                <i data-lucide="settings" class="w-6 h-6"></i>
+                <span>Config</span>
+            </button>
+        </footer>
+    </div>
+
+    <script>
+        // ! [IMPORTANTE] URL de tu despliegue de Aplicación Web GAS
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyW6DPOoH6xRq_pxVnf3H5KStpgjayH1zFfCFfSkObVKix4bkcE50EOSRu0xPY2DiP-/exec'; 
+        // Clave de caché (Definida solo para limpieza de sesión)
+        const CACHE_KEY = 'DatosX_cache';
+        const SHEET_NAME = 'DatosX';
+
+        // --- VARIABLE GLOBAL DE MAPEO DE ENCABEZADOS ---
+        const COLUMN_HEADERS_MAP = {
+            'VACACIONES_ID': 'REGISTRO ID',
+            'PERIODO': 'PERIODO',
+            'DESCRIPCION_CONCEPTO': 'DESCRIPCIÓN/CONCEPTO',
+            'DIA_INICIO': 'DESDE',
+            'DIA_FINAL': 'HASTA',
+            'DIF': 'DIFERENCIA',
+            'DIAS_VAC2': 'DIAS VAC2',
+            'DIAS_VACACIONES': 'DIAS VAC',
+            'BONO_VACACIONAL': 'BONO VAC',
+            'VACACION_CONDICION': 'TIPO REGISTRO',
+            'OBSERVACIONES': 'OBSERVACIONES'
+        };
+
+        // --- FUNCIONES DE FORMATEO ---
+        
+        /**
+         * Formatea un valor numérico para incluir puntos como separadores de miles y maneja decimales.
+         * @param {string|number} value - El valor a formatear.
+         * @returns {string} El número formateado o un string vacío.
+         */
+        function formatNumberWithDots(value) {
+            if (value === null || value === undefined || value === '') return '0';
+            
+            // Reemplaza comas por puntos y asegura que el valor es un string
+            const numStr = String(value).replace(',', '.'); 
+            const number = parseFloat(numStr);
+            
+            if (!isNaN(number)) {
+                // Usa 2 decimales si el número tiene decimales, si no, usa 0
+                const maxDigits = number % 1 !== 0 ? 2 : 0;
+                return new Intl.NumberFormat('es-ES', { 
+                    minimumFractionDigits: maxDigits, 
+                    maximumFractionDigits: maxDigits 
+                }).format(number);
+            }
+            return String(value);
+        }
+        
+        function formatDateTime(value) {
+            if (!value) return 'N/A';
+            try {
+                const date = new Date(value);
+                if (isNaN(date.getTime())) return String(value); 
+                
+                // Usando métodos UTC para evitar problemas de offset si la API devuelve ISO strings
+                const d = date.getUTCDate().toString().padStart(2, '0');
+                const m = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+                const y = date.getUTCFullYear();
+                
+                const h = date.getUTCHours().toString().padStart(2, '0');
+                const min = date.getUTCMinutes().toString().padStart(2, '0');
+                const s = date.getUTCSeconds().toString().padStart(2, '0');
+
+                return `${d}/${m}/${y} ${h}:${min}:${s}`;
+            } catch (e) {
+                console.error("Error al formatear fecha/hora (formatDateTime):", value, e);
+                return String(value);
+            }
+        }
+        
+        function formatDate(value) {
+            if (!value) return 'N/A';
+            try {
+                let date;
+                if (typeof value === 'string' && value.includes('T') && value.includes('Z')) {
+                    date = new Date(value);
+                } else if (typeof value === 'string' && !value.includes('T')) {
+                    // Intenta parsear como fecha local para evitar problemas de zona horaria si es solo YYYY-MM-DD
+                    date = new Date(value.replace(/-/g, '/')); 
+                } else {
+                    date = new Date(value);
+                }
+                
+                if (isNaN(date.getTime())) return String(value); 
+                
+                // Usando métodos locales (getDate/getMonth/getFullYear)
+                const d = date.getDate().toString().padStart(2, '0');
+                const m = (date.getMonth() + 1).toString().padStart(2, '0');
+                const y = date.getFullYear();
+
+                return `${d}/${m}/${y}`;
+            } catch (e) {
+                console.error("Error al formatear fecha (formatDate):", value, e);
+                return String(value);
+            }
+        }
+        
+        // --- FUNCIÓN PRINCIPAL DE OBTENCIÓN DE DATOS (fetchAndCacheData) ---
+        async function fetchAndCacheData() {
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = `
+                <div class="text-center py-10">
+                    <i data-lucide="loader-circle" class="w-8 h-8 mx-auto text-blue-400 animate-spin"></i>
+                    <p class="mt-2 text-gray-400">Cargando datos frescos de Google Sheets...</p>
+                </div>
+            `;
+            lucide.createIcons(); 
+
+            try {
+                console.log("Cargando datos directamente desde la API de Google Apps Script.");
+                const response = await fetch(GAS_API_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                return data;
+
+            } catch (error) {
+                console.error("Error al obtener los datos:", error);
+                
+                mainContent.innerHTML = `
+                    <div class="p-6 text-center mt-4 bg-red-900/50 rounded-xl shadow-lg border border-red-700">
+                        <i data-lucide="cloud-off" class="w-8 h-8 mx-auto mb-3 text-red-400"></i>
+                        <h2 class="text-lg font-bold">Error de Conexión</h2>
+                        <p class="text-sm text-red-300 mt-2">No se pudo cargar la tabla. Asegúrate de que el script GAS esté correctamente desplegado y la URL configurada.</p>
+                        <p class="text-xs text-red-300 mt-1">Detalle: ${error.message}</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return null;
+            }
+        }
+
+        // --- FUNCIÓN DE RENDERIZADO DE TABLA (renderDataTable) ---
+        function renderDataTable(data) {
+            if (!data || data.length === 0) {
+                return `
+                    <div class="p-6 text-center mt-4 dark:bg-gray-800 rounded-xl shadow-lg">
+                        <i data-lucide="search-x" class="w-8 h-8 mx-auto mb-3 text-yellow-400"></i>
+                        <p class="text-sm text-gray-400">No hay registros disponibles en la hoja de cálculo.</p>
+                    </div>
+                `;
+            }
+
+            const originalHeaders = Object.keys(data[0]);
+            const displayHeaders = ['#', ...originalHeaders]; 
+
+            let tableHTML = `<div class="table-scroll-container mb-4"><table class="w-full">`;
+            tableHTML += '<thead><tr>';
+            
+            // Generar la fila de encabezados
+            displayHeaders.forEach((headerKey, index) => {
+                let headerText;
+                
+                if (index === 0) {
+                    headerText = '#';
+                } else {
+                    const originalKey = originalHeaders[index - 1]; 
+                    headerText = COLUMN_HEADERS_MAP[originalKey] || originalKey;
+                }
+                
+                const isSticky = index === 0 ? ' sticky-id-cell' : '';
+                tableHTML += `<th class="${isSticky}"><div class="header-content">${headerText}</div></th>`;
+            });
+            tableHTML += '</tr></thead>';
+
+            // Construir cuerpo de la tabla (filas)
+            tableHTML += '<tbody>';
+            data.forEach((row, rowIndex) => {
+                tableHTML += '<tr>';
+                
+                // --- CELDA 1: CORRELATIVO VIRTUAL (PEGADIZO) ---
+                const correlative = rowIndex + 1;
+                tableHTML += `<td class="table-data-cell sticky-id-cell">${correlative}</td>`;
+                
+                // --- RESTO DE LAS CELDAS: DATOS REALES DE LA HOJA CON FORMATO ---
+                originalHeaders.forEach(header => {
+                    let cellValue = row[header] !== undefined && row[header] !== null ? row[header] : '';
+                    let alignmentClass = ''; // Para alinear texto a la izquierda y números a la derecha
+
+                    // Aplicar formateo basado en la clave del encabezado
+                    switch (header) {
+                        case 'DIF':
+                        case 'DIAS_VAC2':
+                        case 'DIAS_VACACIONES':
+                        case 'BONO_VACACIONAL':
+                            cellValue = formatNumberWithDots(cellValue);
+                            alignmentClass = 'text-right'; // Alinear números a la derecha
+                            break;
+                        case 'DIA_INICIO':
+                        case 'DIA_FINAL':
+                            cellValue = formatDate(cellValue);
+                            alignmentClass = 'text-center'; // Alinear fechas al centro o derecha
+                            break;
+                        default:
+                            cellValue = String(cellValue); // Asegura que es un string
+                            break;
+                    }
+
+                    tableHTML += `<td class="table-data-cell ${alignmentClass}">${cellValue}</td>`;
+                });
+                
+                tableHTML += '</tr>';
+            });
+            tableHTML += '</tbody>';
+            tableHTML += '</table></div>';
+            
+            const header = `<h2 class="text-2xl font-bold mb-2">Tabla de Datos</h2><p class="text-sm text-gray-400 mb-6">Contenido de la hoja '${SHEET_NAME}'. (Correlativo: # | Desplácese horizontal/verticalmente).</p>`;
+            
+            return header + tableHTML;
+        }
+
+        // Inicializa los íconos de Lucide
+        lucide.createIcons();
+
+        // --- FUNCIÓN DE NAVEGACIÓN (loadContent) ---
+        function loadContent(section) {
+            console.log("Navegando a la sección:", section);
+            const mainContent = document.getElementById('main-content'); 
+
+            mainContent.innerHTML = '';
+            
+            if (section === 'Datos') {
+                fetchAndCacheData().then(data => {
+                    if (data) {
+                        mainContent.innerHTML = renderDataTable(data);
+                        lucide.createIcons();
+                    }
+                });
+                return;
+            }
+            if (section === 'Agregar') {
+                window.location.href = 'AgregarDat.html';
+                return;
+            }
+            
+            if (section === 'Inicio') {
+                window.location.href = 'Inicio.html';
+                return;
+            }
+            
+            if (section === 'Configuración') {
+                window.location.href = 'ConfigApp.html';
+                return;
+            }
+            
+            if (section === 'Perfil') {
+                window.location.href = 'PerfilUser.html';
+                return;
+            }
+            
+            console.error(`ERROR: Sección no mapeada para navegación: ${section}`);
+        }
+
+        function logoutAndClearCache() {
+            const cacheKeys = [
+                CACHE_KEY, 
+                // Claves de sesión/perfil...
+                'Usuario_Nombre', 'Usuario_Correo', 'Usuario_Telefono', 
+                'Usuario_PreguntaSeg', 'Usuario_RespuestaSeg', 
+                'Usuario_Id', 'Usuario_IdX', 'Usuario_Tienda', 'Usuario_Perfil'
+            ];
+            
+            console.log("Iniciando proceso de cierre de sesión y limpieza de caché...");
+            
+            cacheKeys.forEach(key => {
+                localStorage.removeItem(key);
+            });
+            
+            window.location.href = 'index.html';
+        }
+        
+        // --- INICIALIZACIÓN DE LA APLICACIÓN ---
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const correo = localStorage.getItem('Usuario_Correo');
+            const id = localStorage.getItem('Usuario_Id');
+            
+            if (!correo && !id) {
+                console.log("Redirigiendo a index.html (Sesión no válida)");
+                window.location.replace('index.html'); 
+                return;
+            }
+
+            const usuarioNombreCompleto = localStorage.getItem('Usuario_Nombre');
+            const headerTitle = document.querySelector('#app-header h1');
+            
+            if (usuarioNombreCompleto && headerTitle) {
+                const primerNombre = usuarioNombreCompleto.trim().split(' ')[0];
+                headerTitle.textContent = `¡Hola, ${primerNombre}!`;
+            }
+            
+            const footerButtons = document.querySelectorAll('.footer-btn');
+            footerButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    footerButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    const section = button.getAttribute('data-section');
+                    loadContent(section);
+                });
+            });
+            
+            const activeSectionButton = document.querySelector('.footer-btn.active');
+            if (activeSectionButton && activeSectionButton.getAttribute('data-section') === 'Datos') {
+                loadContent('Datos');
+            }
+        });
+        
+    </script>
+</body>
+</html>
