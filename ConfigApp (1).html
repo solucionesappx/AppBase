@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación Móvil - Base</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Control de Caché del Navegador  -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <style>
+        /* Configuración de Tailwind para usar el color de acento y la fuente Inter  */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        html {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Definición de colores base  */
+        :root {
+            --color-bg-dark: #1f2937;
+            --color-text-dark: #f3f4f6;
+            --color-primary-dark: #60a5fa;
+            --color-surface-dark: #374151;
+        }
+        
+        /* Estilos del cuerpo en modo oscuro */
+        .dark { background-color: var(--color-bg-dark); color: var(--color-text-dark); }
+        
+        #app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            position: relative; 
+            overflow: hidden; 
+        }
+
+        header, footer {
+            width: 100%;
+            max-width: 500px; 
+            z-index: 50; 
+            transition: background-color 0.3s, color 0.3s;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Estilos específicos para header y footer en modo oscuro */
+        .dark header, .dark footer { 
+            background-color: var(--color-surface-dark); 
+            border-color: #4b5563; 
+        }
+
+        main {
+            flex-grow: 1;
+            overflow-y: auto; 
+            padding-left: 1rem;
+            padding-right: 1rem;
+            transition: padding 0.3s ease-in-out;
+            padding-top: 76px; /* Para compensar la altura del header */
+            padding-bottom: 72px; /* Para compensar la altura del footer */
+        }
+        
+        .footer-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 4px;
+            font-size: 0.75rem;
+            line-height: 1;
+            transition: color 0.2s, background-color 0.2s;
+            border-radius: 0.5rem;
+            color: inherit;
+        }
+
+        .footer-btn.active { color: var(--color-primary-dark); }
+    </style>
+</head>
+<body class="dark transition-colors duration-300">
+
+    <div id="app-container" class="shadow-xl">
+        
+        <header id="app-header" class="fixed top-0 w-full h-14 border-b border-gray-700 dark:border-gray-500 flex items-center justify-between px-4">
+         <h1 class="text-xl font-bold cursor-pointer hover:opacity-80 transition-opacity" onclick="window.location.href = 'Inicio.html'">
+                Mi Aplicación Móvil ZXC
+            </h1>
+            <div class="flex space-x-3">              
+                <!-- Botón de Cerrar Sesión con redirección a index.html -->
+                <button class="p-2 rounded-full hover:opacity-80 transition-opacity" onclick="logoutAndClearCache()">
+                    <i data-lucide="log-out" class="w-6 h-6 text-red-400 dark:text-red-300"></i>
+                </button>
+            </div>
+        </header>
+
+        <main id="main-content" class="flex flex-col space-y-4">
+            <!-- Contenido de la sección por defecto (Página 'Perfil' al no usar SPA) -->
+            <div class="p-6 text-center mt-4 dark:bg-gray-800 rounded-xl shadow-lg">
+                <i data-lucide="user" class="w-8 h-8 mx-auto mb-3 text-blue-400"></i>
+                <h2 class="text-xl font-bold mb-2">Página Configuración de la Aplicación</h2>
+                <p class="text-sm text-gray-400">Sección exclusiva para Administradores y Propietarios.</p>
+                <p class="text-xs mt-3 text-gray-500">Este es el archivo base (index.html), que redirigirá al Perfil.</p>
+            </div>
+        </main>
+
+        <footer id="app-footer" class="fixed bottom-0 w-full h-18 border-t border-gray-700 dark:border-gray-500 flex items-center justify-around py-2">
+            
+            <!-- INICIO: Botón activo como se requiere/confirma -->
+            <button class="footer-btn active" data-section="Inicio">
+                <i data-lucide="home" class="w-6 h-6"></i>
+                <span>Inicio</span>
+            </button>
+            
+            <button class="footer-btn" data-section="Vacaciones">
+                <i data-lucide="calendar-days" class="w-6 h-6"></i>
+                <span>Vacaciones</span>
+            </button>
+
+            <button class="footer-btn hidden" data-section="Agregar">
+                <i data-lucide="calendar-plus" class="w-6 h-6"></i>
+                <span>Agregar</span>
+            </button>
+            
+            <button class="footer-btn hidden" data-section="Editar">
+                <i data-lucide="edit" class="w-6 h-6"></i>
+                <span>Editar</span>
+            </button>
+            
+            <!-- PERFIL: Se corrigió la sintaxis de la clase y se aseguró que no esté activo -->
+            <button class="footer-btn" data-section="Perfil">
+                <i data-lucide="user" class="w-6 h-6"></i>
+                <span>Perfil</span>
+            </button>
+            
+            <button class="footer-btn" data-section="Configuración">
+                <i data-lucide="settings" class="w-6 h-6"></i>
+                <span>Config</span>
+            </button>
+        </footer>
+    </div>
+
+    <script>
+        // Inicializa los íconos de Lucide
+        lucide.createIcons();
+
+        // Función principal para cargar el contenido de la sección y manejar la navegación MPA
+        function loadContent(section) {
+            console.log("Navegando a la sección:", section);
+            // La siguiente variable se mantiene por si se añade lógica futura, aunque actualmente no se usa
+            const mainContent = document.getElementById('main-content'); 
+
+            if (section === 'Vacaciones') {
+                window.location.href = 'Vacaciones.html';
+                return; // Importante: Detiene la ejecución aquí.
+            }
+
+            if (section === 'Agregar') {
+                window.location.href = 'AgregarDat.html';
+                return;
+            }
+
+            if (section === 'Editar') {
+                // Redirecciona al archivo 'EditarDat.html por ahora a Inicio.html'
+                window.location.href = 'Inicio.html';
+                return;
+            }
+            
+            if (section === 'Inicio') {
+                window.location.href = 'Inicio.html';
+                return;
+            }
+            
+            if (section === 'Configuración') {
+                window.location.href = 'ConfigApp.html';
+                return;
+            }
+            
+            if (section === 'Perfil') {
+                // Redirecciona al archivo 'PerfilUser.html'
+                window.location.href = 'PerfilUser.html';
+                return;
+            }
+            
+            console.error(`ERROR: Sección no mapeada para navegación: ${section}`);
+        }
+
+                function logoutAndClearCache() {
+            // Definir las claves que deben ser eliminadas al cerrar sesión:
+            const cacheKeys = [
+                // Claves de caché de datos:
+                'employeeDataCache_BD_Personal2', // Caché de BD_Personal2
+                'vacaciones2DataCache',           // Caché de Vacaciones2
+                
+                // Claves de datos de sesión/perfil del usuario (CRÍTICAS para la limpieza):
+                'Usuario_Nombre',
+                'Usuario_Correo', 
+                'Usuario_Telefono', 
+                'Usuario_PreguntaSeg', 
+                'Usuario_RespuestaSeg', 
+                'Usuario_Id',
+                'Usuario_IdX',
+                'Usuario_Tienda',
+                'Usuario_Perfil'
+            ];
+        
+            console.log("Iniciando proceso de cierre de sesión y limpieza de caché...");
+        
+            // Limpiar cada clave
+            cacheKeys.forEach(key => {
+                localStorage.removeItem(key);
+                console.log(`Caché limpia: ${key}`);
+            });
+        
+            // Redirigir al usuario a la página de inicio (index.html)
+            window.location.href = 'index.html';
+        }
+        
+        // --- INICIALIZACIÓN DE LA APLICACIÓN ---
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const correo = localStorage.getItem('Usuario_Correo');
+            const id = localStorage.getItem('Usuario_Id');
+            
+            // Verifica si AMBAS claves están ausentes.
+            // La sesión no es válida si NO hay Correo AND NO hay Id.
+            if (!correo && !id) {
+                console.log("Redirigiendo a index.html");
+                window.location.replace('index.html'); 
+            }
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Lógica para mostrar solo el primer nombre del usuario si existe en localStorage
+            const usuarioNombreCompleto = localStorage.getItem('Usuario_Nombre');
+            const headerTitle = document.querySelector('#app-header h1');
+            
+            if (usuarioNombreCompleto && headerTitle) {
+                // Extrae solo el primer nombre, tomando la primera palabra y recortando espacios
+                const primerNombre = usuarioNombreCompleto.trim().split(' ')[0];
+                headerTitle.textContent = `¡Hola, ${primerNombre}!`;
+            }
+            // Si usuarioNombreCompleto es null/vacío, el h1 mantiene su valor por defecto ("Mi Aplicación Móvil ZXC").
+
+            // Agrega event listeners para la navegación MPA, llamando a loadContent
+            const footerButtons = document.querySelectorAll('.footer-btn');
+            footerButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const section = button.getAttribute('data-section');
+                    loadContent(section);
+                });
+            });
+            
+            // Opcional: Redirigir a 'Perfil' (que es la vista principal) al cargar el index
+            // loadContent('Perfil'); 
+        });
+        
+    </script>
+</body>
+</html>
