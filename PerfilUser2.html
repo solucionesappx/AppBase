@@ -2,27 +2,32 @@
 <html lang="es" class="dark">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>ZXC - Inicio</title>
+    <title>ZXC - Perfil</title>
     <script src="https://cdn.tailwindcss.com"></script><script src="https://unpkg.com/lucide@latest"></script>
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-    html { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; }
-    :root { --bg:#1f2937; --txt:#f3f4f6; --p-soft:#60a5fa; --surf:#374151; }
-    .dark { background-color:var(--bg); color:var(--txt); }
-    #app-container { width:100%; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; box-shadow:0 0 20px rgba(0,0,0,.2); position:relative; transition:max-width .4s ease-in-out; }
-    .mode-mobile { max-width:500px; }
-    .mode-desktop { max-width:100%!important; }
-    header,footer { width:100%; max-width:inherit; z-index:50; left:50%; transform:translateX(-50%); position:fixed; background:var(--surf); border-color:#4b5563; }
-    main { flex-grow:1; overflow-y:auto; padding:76px 1rem 72px; }
-    .footer-btn { display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.75rem; color:var(--txt); cursor:pointer; }
-    .footer-btn.active { color:var(--p-soft); font-weight:700; }
-    .modal-overlay { position:fixed; inset:0; background:rgba(17,24,39,.8); backdrop-filter:blur(4px); z-index:100; display:flex; justify-content:center; align-items:center; }
-    .modal-content { background:var(--surf); border:1px solid #4b5563; border-radius:1rem; width:90%; max-width:320px; }
-    .hidden { display:none; }
-    .footer-tienda { width: auto !important; min-width: 140px; max-width: fit-content; height: 40px !important; bottom: 20px !important; }
-    .footer-tienda { border-radius: 9999px; border: 1px solid #4b5563; background: var(--surf); padding: 0 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-    .footer-tienda { left: 50%; transform: translateX(-50%); position: fixed; display: flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 40; font-size: 0.75rem; text-transform: uppercase; }
-</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        html { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; }
+        :root { --bg:#1f2937; --txt:#f3f4f6; --p-soft:#60a5fa; --surf:#374151; }
+        .dark { background-color:var(--bg); color:var(--txt); }
+        #app-container { width:100%; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; box-shadow:0 0 20px rgba(0,0,0,.2); position:relative; transition:max-width .4s ease-in-out; }
+        .mode-mobile { max-width:500px; }
+        .mode-desktop { max-width:100%!important; }
+        header,footer { width:100%; max-width:inherit; z-index:50; left:50%; transform:translateX(-50%); position:fixed; background:var(--surf); border-color:#4b5563; }
+        main { flex-grow:1; overflow-y:auto; padding:76px 1rem 72px; }
+        .footer-btn { display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.75rem; color:var(--txt); cursor:pointer; }
+        .footer-btn.active { color:var(--p-soft); font-weight:700; }
+        .modal-overlay { position:fixed; inset:0; background:rgba(17,24,39,.8); backdrop-filter:blur(4px); z-index:100; display:flex; justify-content:center; align-items:center; }
+        .modal-content { background:var(--surf); border:1px solid #4b5563; border-radius:1rem; width:90%; max-width:320px; }
+        .hidden { display:none; }
+        .footer-tienda { width: auto !important; min-width: 140px; max-width: fit-content; height: 40px !important; bottom: 20px !important; }
+        .footer-tienda { border-radius: 9999px; border: 1px solid #4b5563; background: var(--surf); padding: 0 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .footer-tienda { left: 50%; transform: translateX(-50%); position: fixed; display: flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 40; font-size: 0.75rem; text-transform: uppercase; }
+    </style>
+    <style>
+        /* ESTILOS ESPECÍFICOS DE LA SECCIÓN (SPA PERFIL) */
+        .input-form{margin-top:0.25rem;display:block;width:100%;padding:0.5rem 1rem;background-color:#1f2937;border:1px solid #4b5563;border-radius:0.5rem;color:white;outline:none}
+        .input-form:focus{border-color:#3b82f6}
+    </style>
 </head>
 <body class="dark">
     <div id="app-container" class="mode-mobile shadow-xl">
@@ -35,40 +40,33 @@
         </header>
 
         <main id="main-content">
-            <div class="flex flex-col gap-4 mt-6">
-                <div class="p-6 bg-gray-800 rounded-2xl border border-gray-700 text-center mb-2">
-                    <i data-lucide="layout-dashboard" class="w-12 h-12 mx-auto mb-3 text-blue-400"></i>
-                    <h2 class="text-2xl font-bold">Panel ZXC</h2>
-                    <p class="text-sm text-gray-400 mt-1">Gestión de operaciones.</p>
+            <div id="DetallePerfilContent" class="p-6 bg-gray-800 rounded-xl border border-gray-700">
+                <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-4">
+                    <h3 class="text-3xl font-bold text-blue-400">Datos de Usuario</h3>
+                    <button onclick="showEditMode()" class="text-yellow-400 hover:text-yellow-600"><i data-lucide="pencil" class="w-6 h-6"></i></button>
                 </div>
+                <div id="perfilBodyContent" class="space-y-1 pb-20"></div>
+            </div>
 
-                <button onclick="loadContent('Datos')" class="w-full p-5 bg-gray-800 rounded-xl border border-gray-700 flex items-center justify-between hover:border-blue-500 transition-all active:scale-95 group">
-                    <div class="flex items-center gap-4"><i data-lucide="database" class="w-7 h-7 text-blue-400"></i><span class="text-lg font-semibold">Consultar Datos</span></div>
-                    <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600 group-hover:text-blue-400"></i>
-                </button>
-
-                <button onclick="loadContent('Agregar')" class="w-full p-5 bg-gray-800 rounded-xl border border-gray-700 flex items-center justify-between hover:border-emerald-500 transition-all active:scale-95 group">
-                    <div class="flex items-center gap-4"><i data-lucide="plus-circle" class="w-7 h-7 text-emerald-400"></i><span class="text-lg font-semibold">Agregar Registro</span></div>
-                    <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600 group-hover:text-emerald-400"></i>
-                </button>
-
-                <button onclick="loadContent('Perfil')" class="w-full p-5 bg-gray-800 rounded-xl border border-gray-700 flex items-center justify-between hover:border-purple-500 transition-all active:scale-95 group">
-                    <div class="flex items-center gap-4"><i data-lucide="user" class="w-7 h-7 text-purple-400"></i><span class="text-lg font-semibold">Mi Perfil</span></div>
-                    <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600 group-hover:text-purple-400"></i>
-                </button>
-
-                <button onclick="loadContent('Configuracion')" class="w-full p-5 bg-gray-800 rounded-xl border border-gray-700 flex items-center justify-between hover:border-amber-500 transition-all active:scale-95 group">
-                    <div class="flex items-center gap-4"><i data-lucide="settings" class="w-7 h-7 text-amber-400"></i><span class="text-lg font-semibold">Configuración</span></div>
-                    <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600 group-hover:text-amber-400"></i>
-                </button>
+            <div id="EditPerfilContent" class="p-6 bg-gray-800 rounded-xl border border-gray-700 hidden">
+                <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-4">
+                    <h2 class="text-3xl font-bold text-white">Editar Perfil</h2>
+                    <button onclick="showViewMode()" class="text-red-400 hover:text-red-600"><i data-lucide="circle-x" class="w-7 h-7"></i></button>
+                </div>
+                <form id="editProfileForm" class="space-y-1">
+                    <input type="hidden" id="Usuario_Correo_Actual" name="Usuario_Correo_Actual">               
+                    <div id="editProfileFormFields" class="space-y-1"></div>
+                    <button type="submit" class="w-full bg-blue-600 mt-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition-all active:scale-95">Guardar Cambios</button>
+                </form>
+                <p class="text-sm text-gray-400 text-center pt-4 pb-12">Los campos que no sean modificados mantendrán su valor.</p>
             </div>
         </main>
 
-        <footer id="app-footer" class="bottom-0 h-18 border-t flex items-center justify-around px-2 py-1">
-            <button class="footer-btn active" data-section="Inicio"><i data-lucide="home" class="w-6 h-6"></i><span>Inicio</span></button>
-            <button class="footer-btn" data-section="Datos"><i data-lucide="database" class="w-6 h-6"></i><span>Datos</span></button>
-            <button class="footer-btn" data-section="Agregar"><i data-lucide="plus-circle" class="w-6 h-6"></i><span>Agregar</span></button>
-            <button class="footer-btn" data-section="Perfil"><i data-lucide="user" class="w-6 h-6"></i><span>Perfil</span></button>
+        <footer class="bottom-0 h-18 border-t flex items-center justify-around px-2 py-1">
+            <button class="footer-btn" data-section="Inicio"><i data-lucide="home" class="w-6 h-6"></i><span>Inicio</span></button>
+            <button id="btn-datos" class="footer-btn" data-section="Datos"><i data-lucide="database" class="w-6 h-6"></i><span>Datos</span></button>
+            <button id="btn-agregar" class="footer-btn" data-section="Agregar"><i data-lucide="plus-circle" class="w-6 h-6"></i><span>Agregar</span></button>
+            <button class="footer-btn active" data-section="Perfil"><i data-lucide="user" class="w-6 h-6"></i><span>Perfil</span></button>
             <button class="footer-btn" data-section="Configuracion"><i data-lucide="settings" class="w-6 h-6"></i><span>Config</span></button>
         </footer>
     </div>
@@ -98,7 +96,7 @@
             if(window.lucide)lucide.createIcons();
         }
         async function loadContent(s){
-            const NAV={'Datos':'Datos.html','Agregar':'AgregarDat.html','Perfil':'PerfilUser.html','Configuracion':'ConfigApp.html'};
+            const NAV={'Inicio':'Inicio.html','Agregar':'AgregarDat.html','Perfil':'PerfilUser.html','Configuracion':'ConfigApp.html'};
             if(s==='Configuracion'&&localStorage.getItem(KEYS.PERFIL)!=='Admin')return showSystemModal({title:'Acceso Denegado',text:'Solo administradores.',type:'warning'});
             if(NAV[s])window.location.href=NAV[s];
         }
@@ -115,28 +113,122 @@
     </script>
 
     <script>
+        const GAS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz29nU5Ra_k_RZ9BpXUp5D6YAQx3cScf_WDVHjPcJo-gOYtUQ-leW7GU6qSOM85Mbq_/exec";
+        const PROFILE_KEYS = { ...KEYS, TELEFONO:'Usuario_Telefono', PREGUNTA:'Usuario_PreguntaSeg', RESPUESTA:'Usuario_RespuestaSeg', IDX:'Usuario_Idx'};
+
         document.addEventListener('DOMContentLoaded', () => {
-            const footerPrincipal = document.getElementById('app-footer');
-            if(footerPrincipal) {
-                footerPrincipal.classList.add('hidden');
-                if(footerPrincipal.classList.contains('hidden')) renderTiendaFooter();
+            // Solo ejecutamos la lógica de renderizado si el usuario está validado (ya chequeado por Script 1)
+            if(localStorage.getItem(KEYS.CORREO)) {
+                renderProfile();
+                document.getElementById('editProfileForm').onsubmit = handleEditSubmit;
             }
         });
 
-        function renderTiendaFooter() {
-            const tienda = localStorage.getItem(KEYS.TIENDA) || 'General';
-            const container = document.getElementById('app-container');
-            
-            // Creamos el elemento footer
-            const infoFooter = document.createElement('footer');
-            infoFooter.className = 'footer-tienda'; // Usamos la nueva clase de botón
-            infoFooter.innerHTML = `
-                <i data-lucide="store" class="w-4 h-4 text-emerald-400"></i>
-                <span class="font-bold text-xs tracking-wider">${tienda}</span>
-            `;
+        function renderProfile() {
+            const flds = [
+                { id: 'Nombre', l: 'Nombre Usuario', v: localStorage.getItem(PROFILE_KEYS.NOMBRE), i: true },
+                { id: 'Perfil', l: 'Perfil', v: localStorage.getItem(PROFILE_KEYS.PERFIL), i: true },
+                { id: 'Correo', l: 'Correo registrado', v: localStorage.getItem(PROFILE_KEYS.CORREO) },
+                { id: 'Telefono', l: 'Teléfono registrado', v: localStorage.getItem(PROFILE_KEYS.TELEFONO) },
+                { id: 'Pregunta', l: 'Pregunta de Seguridad', v: localStorage.getItem(PROFILE_KEYS.PREGUNTA) },
+                { id: 'Respuesta', l: 'Respuesta de Seguridad', v: localStorage.getItem(PROFILE_KEYS.RESPUESTA), s: true },
+                { id: 'Idx', l: 'IDX Seguridad', v: localStorage.getItem(PROFILE_KEYS.IDX), s: true }
+            ];
 
-            container.appendChild(infoFooter);
+            document.getElementById('perfilBodyContent').innerHTML = flds.map(f => {
+                const isSensitive = f.s === true;
+                const valReal = (f.v || '---').replace(/'/g, "\\'");
+                const valueClass = f.i ? 'text-[22px] text-blue-300 font-bold leading-tight' : 'text-[18px] text-gray-200 leading-tight';
+
+                return `
+                    <div class="border-b border-gray-700/40 py-1">
+                        <span class="text-[10px] font-bold text-gray-500 uppercase block -mb-1">${f.l}</span>
+                        <div class="flex items-center space-x-2 min-h-[32px]" 
+                            ${isSensitive ? `onmouseenter="toggleMaskedValue('val-${f.id}', '${valReal}', true, 'icon-${f.id}')" 
+                                            onmouseleave="toggleMaskedValue('val-${f.id}', '${valReal}', false, 'icon-${f.id}')"` : ''}>
+                            <span id="val-${f.id}" class="${valueClass}">${isSensitive ? '••••••' : (f.v || '---')}</span>
+                            ${isSensitive ? `<span id="icon-${f.id}" class="text-gray-500 transition-opacity duration-200"><i data-lucide="eye" class="w-4 h-4"></i></span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
             if(window.lucide) lucide.createIcons();
+        }
+
+        function showEditMode() {
+            document.getElementById('DetallePerfilContent').classList.add('hidden');
+            document.getElementById('EditPerfilContent').classList.remove('hidden');
+            const editForm = document.getElementById('editProfileFormFields');
+            const fields = [
+                { id: 'Nombre', l: 'Nombre Usuario', v: localStorage.getItem(PROFILE_KEYS.NOMBRE), edit: false, i: true },
+                { id: 'Perfil', l: 'Perfil', v: localStorage.getItem(PROFILE_KEYS.PERFIL), edit: false, i: true },
+                { id: 'Usuario_Correo', l: 'Correo registrado', v: localStorage.getItem(PROFILE_KEYS.CORREO), edit: true, type: 'email' },
+                { id: 'Usuario_Telefono', l: 'Teléfono registrado', v: localStorage.getItem(PROFILE_KEYS.TELEFONO), edit: true, type: 'text' },
+                { id: 'Usuario_PreguntaSeg', l: 'Pregunta de Seguridad', v: localStorage.getItem(PROFILE_KEYS.PREGUNTA), edit: true, type: 'text' },
+                { id: 'Usuario_RespuestaSeg', l: 'Respuesta de Seguridad', v: localStorage.getItem(PROFILE_KEYS.RESPUESTA), edit: true, type: 'text' }
+            ];
+
+            editForm.innerHTML = fields.map((f) => {
+                const valueClass = f.i ? 'text-[22px] text-blue-300 font-bold leading-tight' : 'text-[18px] text-gray-200 leading-tight';
+                const labelClass = f.edit ? 'text-blue-400' : 'text-gray-500';
+                if (!f.edit) {
+                    return `<div class="border-b border-gray-700/40 py-1"><span class="text-[10px] font-bold ${labelClass} uppercase block -mb-1">${f.l}</span><div class="flex items-center h-[32px]"><span class="${valueClass} opacity-60">${f.v || '---'}</span></div></div>`;
+                } else {
+                    return `<div class="border-b border-blue-700/40 py-1 group hover:bg-gray-500"><label for="${f.id}" class="text-[10px] font-bold ${labelClass} uppercase block -mb-1 cursor-pointer">${f.l}</label><div class="flex items-center h-[32px]"><input type="${f.type}" id="${f.id}" name="${f.id}" placeholder="${f.v || ''}" class="px-1 w-full bg-gray-500 ${valueClass} outline-none placeholder-white p-0 m-0 border border-blue-600 rounded-md focus:ring-0 appearance-none leading-tight"></div></div>`;
+                } 
+            }).join('');
+            document.getElementById('Usuario_Correo_Actual').value = localStorage.getItem(PROFILE_KEYS.CORREO);
+            if(window.lucide) lucide.createIcons();
+        }
+
+        function showViewMode() { 
+            document.getElementById('EditPerfilContent').classList.add('hidden'); 
+            document.getElementById('DetallePerfilContent').classList.remove('hidden'); 
+        }
+
+        function toggleMaskedValue(valueId, actualValue, show, iconId) {
+            const valueElement = document.getElementById(valueId);
+            const iconElement = document.getElementById(iconId); 
+            if (valueElement) {
+                if (show) { valueElement.textContent = actualValue; if (iconElement) iconElement.style.opacity = '0';
+                } else { valueElement.textContent = '••••••'; if (iconElement) iconElement.style.opacity = '1'; }
+            }
+        }
+
+        async function handleEditSubmit(e) {
+            e.preventDefault();
+            const f = e.target;
+            const submitBtn = f.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.textContent = "Procesando...";
+            submitBtn.disabled = true;
+
+            const d = { 
+                action: 'editProfile', 
+                Usuario_Tienda: localStorage.getItem(PROFILE_KEYS.TIENDA), 
+                Usuario_Correo_Actual: f.Usuario_Correo_Actual.value,
+                Usuario_Correo: f.Usuario_Correo.value.trim() || localStorage.getItem(PROFILE_KEYS.CORREO), 
+                Usuario_Telefono: f.Usuario_Telefono.value.trim() || localStorage.getItem(PROFILE_KEYS.TELEFONO),
+                Usuario_PreguntaSeg: f.Usuario_PreguntaSeg.value.trim() || localStorage.getItem(PROFILE_KEYS.PREGUNTA), 
+                Usuario_RespuestaSeg: f.Usuario_RespuestaSeg.value.trim() || localStorage.getItem(PROFILE_KEYS.RESPUESTA) 
+            };
+
+            try {
+                const r = await fetch(GAS_SCRIPT_URL, { method: 'POST', body: new URLSearchParams(d) });
+                const res = await r.json();
+                if (res.success) {
+                    localStorage.setItem(PROFILE_KEYS.CORREO, d.Usuario_Correo);
+                    localStorage.setItem(PROFILE_KEYS.TELEFONO, d.Usuario_Telefono);
+                    localStorage.setItem(PROFILE_KEYS.PREGUNTA, d.Usuario_PreguntaSeg);
+                    localStorage.setItem(PROFILE_KEYS.RESPUESTA, d.Usuario_RespuestaSeg);
+                    // Usamos el modal de la plantilla en lugar de alert
+                    await showSystemModal({title:'¡Éxito!', text:'Perfil actualizado correctamente.', type:'info'});
+                    location.reload();
+                } else {
+                    await showSystemModal({title:'Error', text: res.message || "No se pudo actualizar", type:'warning'});
+                }
+            } catch (err) { await showSystemModal({title:'Error', text:'Error de conexión', type:'warning'}); }
+            finally { submitBtn.textContent = originalBtnText; submitBtn.disabled = false; }
         }
     </script>
 </body>
