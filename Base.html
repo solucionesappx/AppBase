@@ -5,6 +5,7 @@
     <title>ZXC - Inicio</title>
     <script src="https://cdn.tailwindcss.com"></script><script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        /* ESTILOS DE LA PLANTILLA (MPA) */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         html{font-family:'Inter',sans-serif;-webkit-tap-highlight-color:transparent}
         :root{--bg:#1f2937;--txt:#f3f4f6;--p-soft:#60a5fa;--surf:#374151}
@@ -17,57 +18,97 @@
         .footer-btn.active{color:var(--p-soft);font-weight:700}
         .modal-overlay{position:fixed;inset:0;background:rgba(17,24,39,.8);backdrop-filter:blur(4px);z-index:100;display:flex;justify-content:center;align-items:center}
         .modal-content{background:var(--surf);border:1px solid #4b5563;border-radius:1rem;width:90%;max-width:320px}
-        .dashboard-grid{display:grid;gap:1rem;grid-template-columns:repeat(1,1fr)}
-        @media(min-width:640px){.mode-desktop .dashboard-grid{grid-template-columns:repeat(2,1fr)}}
-        @media(min-width:1024px){.mode-desktop .dashboard-grid{grid-template-columns:repeat(4,1fr)}}
+        .hidden{display:none}
+        /* Ajuste para cuando no hay footer */
+        .no-footer main {padding-bottom: 2rem}
     </style>
 </head>
 <body class="dark">
-    <div id="app-container" class="shadow-xl mode-mobile">
+    <div id="app-container" class="mode-mobile shadow-xl">
         <header class="top-0 h-14 border-b flex items-center justify-between px-6">
-            <h1 class="text-xl font-bold truncate mr-2 text-white">Cargando...</h1>
+            <h1 class="text-xl font-bold text-white truncate mr-2">Cargando...</h1>
             <div class="flex items-center gap-3">
-                <button id="btn-toggle-view" class="p-2 transition-all" onclick="toggleView()"><div id="view-icon-container"></div></button>
+                <button id="btn-toggle-view" class="p-2" onclick="toggleView()"><div id="view-icon-container"></div></button>
                 <button class="p-2 text-red-400" onclick="logout()"><i data-lucide="log-out" class="w-6 h-6"></i></button>
             </div>
         </header>
+
         <main id="main-content">
-            <div class="dashboard-grid mt-6">
-                <div class="p-4 bg-gray-800 rounded-2xl border border-gray-700 text-center sm:col-span-full mb-2">
+            <div class="flex flex-col gap-4 mt-6">
+                <div class="p-6 bg-gray-800 rounded-2xl border border-gray-700 text-center mb-2">
                     <i data-lucide="layout-dashboard" class="w-12 h-12 mx-auto mb-3 text-blue-400"></i>
                     <h2 class="text-2xl font-bold">Panel ZXC</h2>
-                    <p class="text-sm text-gray-400 mt-1">Gestión centralizada de operaciones.</p>
+                    <p class="text-sm text-gray-400 mt-1">Seleccione una opción para continuar.</p>
                 </div>
-                <div onclick="loadContent('Datos')" class="p-6 bg-gray-800 rounded-xl border border-gray-700 flex flex-col items-center cursor-pointer hover:border-blue-500 transition-all group">
-                    <i data-lucide="database" class="w-8 h-8 mb-2 text-gray-500 group-hover:text-blue-400"></i><span class="font-bold">Datos</span>
-                </div>
-                <div onclick="loadContent('Agregar')" class="p-6 bg-gray-800 rounded-xl border border-gray-700 flex flex-col items-center cursor-pointer hover:border-emerald-500 transition-all group">
-                    <i data-lucide="plus-circle" class="w-8 h-8 mb-2 text-gray-500 group-hover:text-emerald-400"></i><span class="font-bold">Agregar</span>
-                </div>
-                <div onclick="loadContent('Perfil')" class="p-6 bg-gray-800 rounded-xl border border-gray-700 flex flex-col items-center cursor-pointer hover:border-purple-500 transition-all group">
-                    <i data-lucide="user" class="w-8 h-8 mb-2 text-gray-500 group-hover:text-purple-400"></i><span class="font-bold">Perfil</span>
-                </div>
-                <div onclick="loadContent('Configuracion')" class="p-6 bg-gray-800 rounded-xl border border-gray-700 flex flex-col items-center cursor-pointer hover:border-amber-500 transition-all group">
-                    <i data-lucide="settings" class="w-8 h-8 mb-2 text-gray-500 group-hover:text-amber-400"></i><span class="font-bold">Config</span>
-                </div>
+
+                <button onclick="loadContent('Datos')" class="w-full p-5 bg-gray-800 rounded-xl border border-gray-700 flex items-center justify-between hover:border-blue-500 transition-all active:scale-95 group">
+                    <div class="flex items-center gap-4">
+                        <i data-lucide="database" class="w-7 h-7 text-blue-400"></i>
+                        <span class="text-lg font-semibold">Consultar Datos</span>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600 group-hover:text-blue-400"></i>
+                </button>
+
+                <button onclick="loadContent('Agregar')" class="w-full p-5 bg-gray-800 rounded-xl border border-gray-700 flex items-center justify-between hover:border-emerald-500 transition-all active:scale-95 group">
+                    <div class="flex items-center gap-4">
+                        <i data-lucide="plus-circle" class="w-7 h-7 text-emerald-400"></i>
+                        <span class="text-lg font-semibold">Agregar Registro</span>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600 group-hover:text-emerald-400"></i>
+                </button>
+
+                <button onclick="loadContent('Perfil')" class="w-full p-5 bg-gray-800 rounded-xl border border-gray-700 flex items-center justify-between hover:border-purple-500 transition-all active:scale-95 group">
+                    <div class="flex items-center gap-4">
+                        <i data-lucide="user" class="w-7 h-7 text-purple-400"></i>
+                        <span class="text-lg font-semibold">Mi Perfil</span>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600 group-hover:text-purple-400"></i>
+                </button>
+
+                <button onclick="loadContent('Configuracion')" class="w-full p-5 bg-gray-800 rounded-xl border border-gray-700 flex items-center justify-between hover:border-amber-500 transition-all active:scale-95 group">
+                    <div class="flex items-center gap-4">
+                        <i data-lucide="settings" class="w-7 h-7 text-amber-400"></i>
+                        <span class="text-lg font-semibold">Configuración</span>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600 group-hover:text-amber-400"></i>
+                </button>
             </div>
         </main>
-        <footer class="bottom-0 h-18 border-t flex items-center justify-around px-2 py-1">
+
+        <footer id="app-footer" class="bottom-0 h-18 border-t flex items-center justify-around px-2 py-1">
             <button class="footer-btn active" data-section="Inicio"><i data-lucide="home" class="w-6 h-6"></i><span>Inicio</span></button>
-            <button id="btn-datos" class="footer-btn" data-section="Datos"><i data-lucide="database" class="w-6 h-6"></i><span>Datos</span></button>
-            <button id="btn-agregar" class="footer-btn" data-section="Agregar"><i data-lucide="plus-circle" class="w-6 h-6"></i><span>Agregar</span></button>
+            <button class="footer-btn" data-section="Datos"><i data-lucide="database" class="w-6 h-6"></i><span>Datos</span></button>
+            <button class="footer-btn" data-section="Agregar"><i data-lucide="plus-circle" class="w-6 h-6"></i><span>Agregar</span></button>
             <button class="footer-btn" data-section="Perfil"><i data-lucide="user" class="w-6 h-6"></i><span>Perfil</span></button>
             <button class="footer-btn" data-section="Configuracion"><i data-lucide="settings" class="w-6 h-6"></i><span>Config</span></button>
         </footer>
     </div>
-    <div id="system-modal" class="hidden modal-overlay"><div class="modal-content p-6 text-center"><div id="sys-modal-icon" class="mb-4 flex justify-center"></div><h3 id="sys-modal-title" class="text-lg font-bold text-white mb-2"></h3><p id="sys-modal-text" class="text-gray-400 text-sm mb-6"></p><div id="sys-modal-actions" class="flex gap-3 justify-center"></div></div></div>
+
+    <div id="system-modal" class="hidden modal-overlay">
+        <div class="modal-content p-6 text-center">
+            <div id="sys-modal-icon" class="mb-4 flex justify-center"></div>
+            <h3 id="sys-modal-title" class="text-lg font-bold text-white mb-2"></h3>
+            <p id="sys-modal-text" class="text-gray-400 text-sm mb-6"></p>
+            <div id="sys-modal-actions" class="flex gap-3 justify-center"></div>
+        </div>
+    </div>
+
     <script>
-        const KEYS={NOMBRE:'Usuario_Nombre',PERFIL:'Usuario_Perfil',CEDULA:'Usuario_Cedula',CORREO:'Usuario_Correo',VIEW_MODE:'App_View_Mode'};
+        document.addEventListener('DOMContentLoaded', () => {
+            const footer = document.getElementById('app-footer');
+            const container = document.getElementById('app-container');
+            if (footer) {
+                footer.classList.add('hidden');
+                container.classList.add('no-footer');
+            }
+        });
+    </script>    
+    <script>
+        const KEYS={NOMBRE:'Usuario_Nombre',PERFIL:'Usuario_Perfil',CORREO:'Usuario_Correo',VIEW_MODE:'App_View_Mode'};
         document.addEventListener('DOMContentLoaded',()=>{if(!localStorage.getItem(KEYS.CORREO))window.location.replace('index.html');initUI();if(window.lucide)lucide.createIcons()});
         function initUI(){
             const nom=localStorage.getItem(KEYS.NOMBRE);if(nom)document.querySelector('h1').textContent=`¡Hola, ${nom.trim().split(/\s+/)[0]}!`;
             applyViewMode(localStorage.getItem(KEYS.VIEW_MODE)||'mobile');
-            const ced=localStorage.getItem(KEYS.CEDULA);if(!ced||ced.trim()===""){['btn-datos','btn-agregar'].forEach(id=>{const b=document.getElementById(id);if(b){b.disabled=true;b.classList.add('opacity-30');b.style.pointerEvents='none'}})}
             document.querySelectorAll('.footer-btn').forEach(b=>b.onclick=()=>loadContent(b.getAttribute('data-section')));
         }
         function toggleView(){const m=localStorage.getItem(KEYS.VIEW_MODE)==='desktop'?'mobile':'desktop';localStorage.setItem(KEYS.VIEW_MODE,m);applyViewMode(m)}
@@ -78,8 +119,8 @@
             if(window.lucide)lucide.createIcons();
         }
         async function loadContent(s){
-            if(s==='Inicio')return;const NAV={'Datos':'Datos.html','Agregar':'AgregarDat.html','Perfil':'PerfilUsuario.html','Configuracion':'ConfigApp.html'};
-            if(['Datos','Agregar'].includes(s)&&!localStorage.getItem(KEYS.CEDULA))return showSystemModal({title:'Acceso Restringido',text:'Registre su CÉDULA en el perfil.',type:'warning'});
+            if(s==='Inicio')return;
+            const NAV={'Datos':'Datos.html','Agregar':'AgregarDat.html','Perfil':'PerfilUser.html','Configuracion':'ConfigApp.html'};
             if(s==='Configuracion'&&localStorage.getItem(KEYS.PERFIL)!=='Admin')return showSystemModal({title:'Acceso Denegado',text:'Solo administradores.',type:'warning'});
             if(NAV[s])window.location.href=NAV[s];
         }
@@ -94,5 +135,6 @@
         }
         function logout(){localStorage.clear();window.location.href='index.html'}
     </script>
+
 </body>
 </html>
