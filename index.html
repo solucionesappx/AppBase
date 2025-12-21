@@ -4,251 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>App YLOC</title>
-    <!-- Incluye el CDN de Tailwind CSS para un estilo rápido y moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
     <style>
-        /* Importa la fuente Poppins de Google Fonts */
         @import url("https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap");
-
-        /* Definición de variables CSS para el tema claro */
-        :root {
-            --bg-color: #f0f2f5;
-            --box-color: #e9ecef;
-            --border-color: #dcdcdc;
-            --text-color: #111;
-            --link-color: #4041C2;
-            --accent-color-1: #4041C2;
-            --accent-color-2: #7aebbc;
-            --box-shadow-color: rgba(0,0,0,0.2);
-            --placeholder-color: #6b7280;
-        }
-
-        /* Variables para el tema oscuro */
-        body.dark-mode {
-            --bg-color: #25252b;
-            --box-color: #2d2d39;
-            --border-color: #25252b;
-            --text-color: #fff;
-            --link-color: #4041C2;
-            --accent-color-1: #4041C2;
-            --accent-color-2: #dbeb7a;
-            --box-shadow-color: rgba(0,0,0,0.5);
-            --placeholder-color: #9ca3af;
-        }
-        
-        body {
-            font-family: 'Poppins', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: var(--bg-color);
-            transition: background 0.3s, color 0.3s;
-            overflow: hidden; /* Evita el scroll cuando el modal está activo */
-        }
-
-        .login-container {
-            background: var(--box-color);
-            padding: 2.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 4px 10px var(--box-shadow-color);
-            width: 100%;
-            max-width: 400px;
-            transition: background 0.3s, box-shadow 0.3s;
-            position: relative;
-        }
-
-        .form-input {
-            background: var(--bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            transition: background 0.3s, border-color 0.3s, color 0.3s;
-        }
-        
-        .form-input::placeholder {
-            color: var(--placeholder-color);
-        }
-
-        .input-icon-container {
-            position: relative;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--placeholder-color);
-        }
-
-        .password-toggle-icon {
-            position: absolute;
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--placeholder-color);
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-
-        .password-toggle-icon:hover {
-            color: var(--text-color);
-        }
-
-        .form-button {
-            background: var(--accent-color-1);
-            color: var(--text-color);
-            transition: background 0.3s;
-        }
-
-        .form-button:hover:not(:disabled) {
-            opacity: 0.9;
-        }
-
-        .form-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .form-button-secondary {
-            background-color: transparent;
-            color: var(--accent-color-1);
-            border: 2px solid var(--accent-color-1);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .form-button-secondary:hover:not(:disabled) {
-            background-color: var(--accent-color-1);
-            color: var(--text-color);
-        }
-
-        .form-button-secondary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        /* Estilos del switch de tema */
-        .toggle-switch-container {
-            position: relative;
-            width: 40px; 
-            height: 22px;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-            transform: translate3d(0, 0, 0);
-        }
-
-        .toggle-switch-container:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            width: 40px; 
-            height: 22px;
-            border-radius: 11px;
-            background-color: var(--accent-color-1);
-            transition: background-color 0.3s cubic-bezier(0.86, 0, 0.07, 1);
-        }
-
-        .toggle-switch-container .toggle-button {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 18px; 
-            height: 18px;
-            border-radius: 50%;
-            background-color: var(--box-color);
-            transition: transform 0.3s cubic-bezier(0.86, 0, 0.07, 1), background-color 0.3s cubic-bezier(0.86, 0, 0.07, 1);
-        }
-
-        .toggle-switch-container.dark-mode:before {
-            background-color: var(--accent-color-1);
-        }
-
-        .toggle-switch-container.dark-mode .toggle-button {
-            transform: translateX(18px);
-        }
-
-        /* Estilos para el modal de recuperación de contraseña */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro semitransparente */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            visibility: hidden;
-            opacity: 0;
-            transition: visibility 0s, opacity 0.3s;
-        }
-
-        .modal.is-visible {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .modal-content {
-            background: var(--box-color);
-            padding: 2.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 4px 10px var(--box-shadow-color);
-            width: 100%;
-            max-width: 400px;
-            position: relative;
-            transform: scale(0.95);
-            transition: transform 0.3s;
-        }
-
-        .modal.is-visible .modal-content {
-            transform: scale(1);
-        }
-
-        /* Regla CSS para el botón de cierre */
-        .modal-close-btn {
-            position: absolute;
-            top: 0rem;
-            right: 1rem;
-            font-size: 2rem;
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-color);
-            transition: color 0.2s;
-        }
-
-        .modal-close-btn:hover {
-            color: var(--accent-color-1);
-        }
-        
-        /* Estilos del loader visual */
-        #loader {
-            z-index: 1001; /* Valor superior al del modal para que aparezca encima */
-            transition: opacity 0.3s;
-        }
-        
+        :root {--bg-color: #f0f2f5;--box-color: #e9ecef;--border-color: #dcdcdc;--text-color: #111;--link-color: #4041C2;--accent-color-1: #4041C2;--accent-color-2: #7aebbc;--box-shadow-color: rgba(0,0,0,0.2);--placeholder-color: #6b7280;}
+        body.dark-mode {--bg-color: #25252b;--box-color: #2d2d39;--border-color: #25252b;--text-color: #fff;--link-color: #4041C2;--accent-color-1: #4041C2;--accent-color-2: #dbeb7a;--box-shadow-color: rgba(0,0,0,0.5);--placeholder-color: #9ca3af;}
+        body {font-family: 'Poppins', sans-serif;display: flex;justify-content: center;align-items: center;min-height: 100vh;background: var(--bg-color); transition: background 0.3s, color 0.3s;overflow: hidden;}
+        .login-container {background: var(--box-color); padding: 2.5rem;border-radius: 1rem;box-shadow: 0 4px 10px var(--box-shadow-color);width: 100%; max-width: 400px; transition: background 0.3s, box-shadow 0.3s; position: relative;}
+        .form-input { background: var(--bg-color);color: var(--text-color); border: 1px solid var(--border-color);transition: background 0.3s, border-color 0.3s, color 0.3s;}
+        .form-input::placeholder {color: var(--placeholder-color);}
+        .input-icon-container {position: relative;}
+        .input-icon {position: absolute;left: 1rem;top: 50%;transform: translateY(-50%);color: var(--placeholder-color);}
+        .password-toggle-icon {position: absolute; right: 1rem;top: 50%;transform: translateY(-50%);color: var(--placeholder-color);cursor: pointer;transition: color 0.2s;}
+        .password-toggle-icon:hover {color: var(--text-color);}
+        .form-button {background: var(--accent-color-1);color: var(--text-color); transition: background 0.3s; }
+        .form-button:hover:not(:disabled) {opacity: 0.9;}
+        .form-button:disabled {opacity: 0.5;cursor: not-allowed;}
+        .form-button-secondary {background-color: transparent;color: var(--accent-color-1); border: 2px solid var(--accent-color-1);transition: background-color 0.3s, color 0.3s;}
+        .form-button-secondary:hover:not(:disabled) { background-color: var(--accent-color-1);color: var(--text-color); }
+        .form-button-secondary:disabled {opacity: 0.5; cursor: not-allowed; }
+        .toggle-switch-container {position: relative;width: 40px;height: 22px;cursor: pointer;-webkit-tap-highlight-color: transparent;transform: translate3d(0, 0, 0); }
+        .toggle-switch-container:before {content: '';position: absolute;top: 0; width: 40px;height: 22px;border-radius: 11px;background-color: var(--accent-color-1);transition: background-color 0.3s cubic-bezier(0.86, 0, 0.07, 1);}
+        .toggle-switch-container .toggle-button {position: absolute;top: 2px;left: 2px;width: 18px;height: 18px; border-radius: 50%;background-color: var(--box-color);transition: transform 0.3s cubic-bezier(0.86, 0, 0.07, 1), background-color 0.3s cubic-bezier(0.86, 0, 0.07, 1); }
+        .toggle-switch-container.dark-mode:before {background-color: var(--accent-color-1);}
+        .toggle-switch-container.dark-mode .toggle-button { transform: translateX(18px); }
+        .modal {position: fixed;top: 0;left: 0;width: 100%;height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex;justify-content: center;align-items: center; z-index: 1000;visibility: hidden;opacity: 0; transition: visibility 0s, opacity 0.3s;}
+        .modal.is-visible {visibility: visible;opacity: 1;}
+        .modal-content {background: var(--box-color); padding: 2.5rem; border-radius: 1rem;box-shadow: 0 4px 10px var(--box-shadow-color);width: 100%;max-width: 400px; position: relative; transform: scale(0.95);transition: transform 0.3s; }
+        .modal.is-visible .modal-content {transform: scale(1);}
+        #custom-modal { z-index: 9999;}
+        .modal-close-btn {position: absolute;top: 0rem;right: 1rem; font-size: 2rem; background: none; border: none;cursor: pointer;color: var(--text-color); transition: color 0.2s; }
+        .modal-close-btn:hover {color: var(--accent-color-1);}
+        #loader {z-index: 1001;transition: opacity 0.3s; }  
     </style>
 </head>
 <body class="dark-mode">
 
     <div class="login-container">
         <!-- Contenedor del switch en la esquina superior derecha -->
-        <div class="absolute top-4 right-4">
-            <div id="theme-toggle" class="toggle-switch-container">
+        <div class="absolute top-4 right-4 hidden">
+            <div id="theme-toggle" class="toggle-switch-container inactive">
                 <div class="toggle-button"></div>
             </div>
         </div>
-
-        <h1 class="text-3xl font-bold mb-6 text-center" style="color: var(--text-color);">Inicia Sesión</h1>
-        
+        <h1 class="text-3xl font-bold mb-6 text-center" style="color: var(--text-color);">Inicia Sesión</h1>      
         <form id="loginForm" class="w-full" autocomplete="off">
             <div class="mb-4">
-                <label for="userEmailLogin" class="block text-sm font-semibold mb-2" style="color: var(--text-color);">Usuario o Correo</label>
+                <label for="userCredentialLogin" class="block text-sm font-semibold mb-2" style="color: var(--text-color);">Usuario o Correo</label>
                 <div class="input-icon-container">
                     <i class="fa-solid fa-user input-icon"></i>
-                    <input type="text" id="userEmailLogin" placeholder="Tu nombre de usuario o email" class="w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-color-1 form-input" required autocomplete="off">
+                    <input type="text" id="userCredentialLogin" placeholder="Tu usuario o email" class="w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-color-1 form-input" required autocomplete="off">
                 </div>
             </div>
             <div class="mb-6">
@@ -267,15 +73,18 @@
                     ¿Olvidaste tu contraseña?
                 </a>
             </div>
+            <div class="text-center mt-2">
+                <a href="#" id="signup-user-link" class="text-sm font-semibold hover:underline" style="color: var(--text-color);">
+                    ¿No tienes usuario? Regístrate aquí
+                </a>
+            </div>
         </form>
     </div>
-
-    <!-- Modal para recuperación de contraseña -->
+   
     <div id="recovery-modal" class="modal">
         <div class="modal-content">
             <button id="close-recovery-modal-btn" class="modal-close-btn">&times;</button>
-            <h2 class="text-2xl font-bold mb-4 text-center" style="color: var(--text-color);">Recuperar Contraseña</h2>
-            
+            <h2 class="text-2xl font-bold mb-4 text-center" style="color: var(--text-color);">Recuperar Contraseña</h2>           
             <form id="forgotPasswordForm" autocomplete="off">
                 <div class="mb-4">
                     <label for="userEmailRecuperar" class="block text-sm font-semibold mb-2" style="color: var(--text-color);">Ingresa tu correo electrónico</label>
@@ -291,13 +100,10 @@
                         <input type="tel" id="userTelefonoRecuperar" placeholder="Tu número de teléfono" class="w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-color-1 form-input" required autocomplete="off">
                     </div>
                 </div>
-
                 <div class="flex flex-col space-y-4 mt-4">
-                    <!-- Botón para Restablecer Contraseña (generado por backend) -->
                     <button type="submit" id="btn-reset-password" class="w-full py-2 rounded-lg font-semibold form-button">
                         <i class="fa-solid fa-arrows-rotate mr-2"></i> Restablecer Contraseña
                     </button>
-                    <!-- Botón para Generar Contraseña en pantalla (nueva) -->
                     <button type="button" id="btn-generate-password" class="w-full py-2 rounded-lg font-semibold form-button-secondary">
                         <i class="fa-solid fa-key mr-2"></i> Generar Contraseña
                     </button>
@@ -306,18 +112,16 @@
         </div>
     </div>
     
-    <!-- MODAL PARA INGRESO MANUAL DE CONTRASEÑA -->
     <div id="generate-password-modal" class="modal">
         <div class="modal-content">
             <button id="close-generate-password-modal-btn" class="modal-close-btn">&times;</button>
-            <h2 class="text-2xl font-bold mb-4 text-center" style="color: var(--text-color);">Nueva Contraseña (5 caracteres)</h2>
+            <h2 class="text-xl font-bold mb-4 text-center" style="color: var(--text-color);">Nueva Contraseña (4 caracteres)</h2>
             
-            <!-- Formulario para ingreso manual -->
             <form id="manualPasswordForm" autocomplete="off">
                 <div class="mb-4">
                     <div class="input-icon-container">
                         <i class="fa-solid fa-key input-icon"></i>
-                        <input type="text" id="manualPasswordInput" maxlength="5" placeholder="Ingresa 5 caracteres" class="w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-color-1 form-input" required autocomplete="off">
+                        <input type="text" id="manualPasswordInput" maxlength="5" placeholder="Ingresa 4 carácteres alfanumérico" class="w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-color-1 form-input" required autocomplete="off">
                     </div>
                 </div>
                 <button type="submit" id="confirm-manual-btn" class="w-full py-2 rounded-lg font-semibold form-button">
@@ -327,13 +131,11 @@
         </div>
     </div>
 
-    <!-- Modal genérico para mensajes personalizados -->
     <div id="custom-modal" class="modal">
         <div class="modal-content">
             <p id="custom-modal-message" class="text-center" style="color: var(--text-color);"></p>
-            <!-- Contenedor para mostrar la contraseña y el ícono de copia -->
             <div id="password-display-container" class="flex justify-center items-center mt-4 hidden">
-                <span id="new-password-display" class="font-bold text-3xl mr-2" style="color: var(--text-color);"></span>
+                <span id="new-password-display" class="font-bold text-2xl mr-2" style="color: var(--text-color);"></span>
                 <i id="copy-icon" class="fa-3x fa-solid fa-copy cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"></i>
             </div>
             <div class="flex justify-center mt-4">
@@ -341,18 +143,80 @@
             </div>
         </div>
     </div>
-    
-    <!-- Loader visual -->
+
+    <div id="signup-modal" class="modal">
+        <div class="modal-content"> 
+            <button id="close-signup-modal-btn" class="modal-close-btn">&times;</button>
+            <h2 class="text-xl font-bold mb-4 text-center" style="color: var(--text-color);">Nuevo Registro</h2>           
+            <form id="signupForm" autocomplete="off">
+                <div class="grid grid-cols-4 gap-x-2 gap-y-1 items-center">
+                    
+                    <label for="userIdSignup" class="col-span-1 text-xs font-normal text-right" style="color: var(--text-color);">Usuario *</label>
+                    <div class="col-span-3">
+                        <div class="input-icon-container">
+                            <i class="fa-solid fa-id-card input-icon text-xs"></i>
+                            <input type="text" id="userIdSignup" placeholder="ID único" class="w-full pl-8 pr-4 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-color-1 form-input text-xs" required autocomplete="off">
+                        </div>
+                    </div>                    
+                    <label for="userNameSignup" class="col-span-1 text-xs font-normal text-right" style="color: var(--text-color);">Nombre *</label>
+                    <div class="col-span-3">
+                        <div class="input-icon-container">
+                            <i class="fa-solid fa-user input-icon text-xs"></i>
+                            <input type="text" id="userNameSignup" placeholder="Nombre y Apellido" class="w-full pl-8 pr-4 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-color-1 form-input text-xs" required autocomplete="off">
+                        </div>
+                    </div>                    
+                    <label for="userEmailSignup" class="col-span-1 text-xs font-normal text-right" style="color: var(--text-color);">Email *</label>
+                    <div class="col-span-3">
+                        <div class="input-icon-container">
+                            <i class="fa-solid fa-envelope input-icon text-xs"></i>
+                            <input type="email" id="userEmailSignup" placeholder="email@ejemplo.com" class="w-full pl-8 pr-4 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-color-1 form-input text-xs" required autocomplete="off">
+                        </div>
+                    </div>                   
+                    <label for="userTelefonoSignup" class="col-span-1 text-xs font-normal text-right" style="color: var(--text-color);">Teléfono *</label>
+                    <div class="col-span-3">
+                        <div class="input-icon-container">
+                            <i class="fa-solid fa-phone input-icon text-xs"></i>
+                            <input type="tel" id="userTelefonoSignup" placeholder="Tu número de teléfono" class="w-full pl-8 pr-4 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-color-1 form-input text-xs" required autocomplete="off">
+                        </div>
+                    </div>                    
+                    <label for="passwordSignup" class="col-span-1 text-xs font-normal text-right" style="color: var(--text-color);">Clave *</label>
+                    <div class="col-span-3">
+                        <div class="input-icon-container">
+                            <i class="fa-solid fa-lock input-icon text-xs"></i>
+                            <input type="password" id="passwordSignup" placeholder="4 dígitos numéricos" class="w-full pl-8 pr-4 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-color-1 form-input text-xs" required autocomplete="off" maxlength="4">
+                        </div>
+                    </div>
+                    <hr class="col-span-4 my-2" style="border-top: 1px solid #d1d5db;">                      
+                    <label for="preguntaSegSignup" class="col-span-1 text-xs font-normal text-right" style="color: var(--text-color);">Pregunta Seguridad</label>
+                    <div class="col-span-3">
+                        <div class="input-icon-container">
+                            <i class="fa-solid fa-question-circle input-icon text-xs"></i>
+                            <input type="text" id="preguntaSegSignup" placeholder="Pregunta de seguridad" class="w-full pl-8 pr-4 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-color-1 form-input text-xs" autocomplete="off">
+                        </div>
+                    </div>                    
+                    <label for="respuestaSegSignup" class="col-span-1 text-xs font-normal text-right" style="color: var(--text-color);">Respuesta</label>
+                    <div class="col-span-3">
+                        <div class="input-icon-container">
+                            <i class="fa-solid fa-shield-alt input-icon text-xs"></i>
+                            <input type="text" id="respuestaSegSignup" placeholder="Tu respuesta" class="w-full pl-8 pr-4 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-color-1 form-input text-xs" autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+                <p class="text-xs mt-3 text-center" style="color: var(--placeholder-color);">Los campos marcados con (*) son obligatorios.</p>               
+                <button type="submit" class="w-full py-2 rounded-lg font-semibold form-button mt-3">
+                    Registrarse
+                </button>
+            </form>
+        </div>
+    </div>
+
     <div id="loader" class="hidden fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
         <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
     </div>
 
     <script>
-        // *** IMPORTANTE: REEMPLAZA ESTA URL CON LA URL DE TU SCRIPT DE GOOGLE APPS DESPUÉS DE DESPLEGARLO COMO APLICACIÓN WEB ***
         const GAS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz29nU5Ra_k_RZ9BpXUp5D6YAQx3cScf_WDVHjPcJo-gOYtUQ-leW7GU6qSOM85Mbq_/exec'; // URL de tu script en Google Apps
-        const appTienda = 'ULTRA_DHO'; // Nombre de tu tienda o aplicación
-        
-        // Elementos del DOM
+        const appTienda = 'ULTRA_DHO';
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
         const forgotPasswordLink = document.getElementById('forgot-password-link');
@@ -366,20 +230,18 @@
         const customModalMessage = document.getElementById('custom-modal-message');
         const customModalCloseBtn = document.getElementById('custom-modal-close-btn');
         const loader = document.getElementById('loader');
-
-        // Elementos para el nuevo modal de generación de contraseña
+        const signupLink = document.getElementById('signup-user-link');
+        const signupModal = document.getElementById('signup-modal');
+        const closeSignupModalBtn = document.getElementById('close-signup-modal-btn');
+        const signupForm = document.getElementById('signupForm');
         const generatePasswordModal = document.getElementById('generate-password-modal');
         const closeGeneratePasswordModalBtn = document.getElementById('close-generate-password-modal-btn');
         const generatePasswordBtn = document.getElementById('btn-generate-password');
         const manualPasswordForm = document.getElementById('manualPasswordForm');
         const manualPasswordInput = document.getElementById('manualPasswordInput');
-
-        // Nuevos elementos para la funcionalidad de copiar
         const passwordDisplayContainer = document.getElementById('password-display-container');
         const newPasswordDisplay = document.getElementById('new-password-display');
         const copyIcon = document.getElementById('copy-icon');
-        
-        // Variable para almacenar el correo del usuario
         let userEmailToUpdate = '';
 
         // Lógica del tema
@@ -408,6 +270,16 @@
                 localStorage.setItem('theme', 'dark');
             }
         });
+
+        // Lógica para generar el ID único (Usuario_Idx)
+        function generateShortUUID() {
+            const chars = 'ABCDEFGHIJKLMNPQRSTUVWXYZ234562589';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
 
         // Lógica para mostrar y ocultar modales y loaders
         function showLoader() {
@@ -453,20 +325,15 @@
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 showLoader();
-            
-                const userEmailLogin = document.getElementById('userEmailLogin').value;
+                const userCredential = document.getElementById('userCredentialLogin').value; 
                 const password = document.getElementById('password').value;
-
-                if (!userEmailLogin || !password) {
-                    hideLoader();
-                    showCustomModal("El correo electrónico y la contraseña son obligatorios.");
-                    return;
+                if (!userCredential || !password) {
                 }
                 
                 const requestData = {
                     action: 'login',
                     Usuario_Tienda: appTienda,
-                    Usuario_Correo: userEmailLogin,
+                    Usuario_Credencial: userCredential,
                     Usuario_Clave: password
                 };
                 console.log('Datos enviados:', requestData);
@@ -476,19 +343,23 @@
                         body: new URLSearchParams(requestData)
                     });
                     const result = await response.json();
+                    console.log('Respuesta completa del Backend (Login):', result);
 
                 if (result.success) {
-                // Guarda los datos del usuario en localStorage
                         if (result.userData) {
                             localStorage.setItem('Usuario_Tienda', result.userData.Usuario_Tienda);
+                            localStorage.setItem('Usuario_ID', result.userData.Usuario_ID);
                             localStorage.setItem('Usuario_Nombre', result.userData.Usuario_Nombre);
                             localStorage.setItem('Usuario_Perfil', result.userData.Usuario_Perfil);
+                            localStorage.setItem('Usuario_Correo', result.userData.Usuario_Correo);
+                            localStorage.setItem('Usuario_Telefono', result.userData.Usuario_Telefono);
                             localStorage.setItem('Usuario_Idx', result.userData.Usuario_Idx);
-                            localStorage.setItem('Usuario_Primer_Nombre', result.userData.Usuario_Primer_Nombre);
+                            localStorage.setItem('Usuario_PreguntaSeg', result.userData.Usuario_PreguntaSeg);
+                            localStorage.setItem('Usuario_RespuestaSeg', result.userData.Usuario_RespuestaSeg);
+                            console.log('Datos listos para guardar en localStorage:', result.userData);
                         }
                             loginForm.reset();
-                            // Redireccionamiento directo a dashboard.html al cerrar el modal de éxito
-                            showCustomModal("¡Inicio de sesión exitoso!", null, 'dashboard.html');
+                            showCustomModal("¡Inicio de sesión exitoso!", null, 'Inicio.html');                          
                         } else {
                         showCustomModal(result.message || "Credenciales incorrectas. Por favor, inténtalo de nuevo.");
                        }
@@ -500,15 +371,87 @@
             });
         }
         
-        // Manejo del formulario de "Forgot Password"
+        if (signupLink) {
+            signupLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                signupModal.classList.add('is-visible');
+            });
+        }
+        
+        if (closeSignupModalBtn) {
+            closeSignupModalBtn.addEventListener('click', () => {
+                closeModal('signup-modal');
+                signupForm.reset(); 
+            });
+        }
+        
+        if (signupForm) {
+            signupForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                showLoader();
+
+                const user_id = document.getElementById('userIdSignup').value;
+                const user_name = document.getElementById('userNameSignup').value;
+                const user_email = document.getElementById('userEmailSignup').value;
+                const user_telefono = document.getElementById('userTelefonoSignup').value;
+                const user_clave = document.getElementById('passwordSignup').value;
+                const user_pregunta_seg = document.getElementById('preguntaSegSignup').value;
+                const user_respuesta_seg = document.getElementById('respuestaSegSignup').value;
+
+                if (!user_id || !user_name || !user_email || !user_telefono || !user_clave) {
+                    hideLoader();
+                    showCustomModal("Por favor, completa todos los campos requeridos (*).");
+                    return;
+                }
+                if (user_clave.length !== 4) {
+                    hideLoader();
+                    showCustomModal("La contraseña debe tener exactamente 4 caracteres.");
+                    return;
+                }
+
+                const requestData = {
+                    action: 'signup',
+                    Usuario_Tienda: appTienda,
+                    Usuario_RegName: user_name,
+                    Usuario_Idx: generateShortUUID(),
+                    Usuario_ID: user_id,
+                    Usuario_Nombre: user_name,
+                    Usuario_Correo: user_email,
+                    Usuario_Telefono: user_telefono,
+                    Usuario_Clave: user_clave,
+                    Usuario_PreguntaSeg: user_pregunta_seg,
+                    Usuario_RespuestaSeg: user_respuesta_seg,
+                };               
+                console.log('Datos de Registro enviados:', requestData);
+
+                try {
+                    const response = await fetch(GAS_SCRIPT_URL, {
+                        method: 'POST',
+                        body: new URLSearchParams(requestData),
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        closeModal('signup-modal');
+                        signupForm.reset();
+                        showCustomModal("¡Registro exitoso! Ya puedes iniciar sesión.", null);
+                    } else {
+                        showCustomModal(result.message || "Error en el registro. Verifica los datos y que no sean duplicados.");
+                    }
+                } catch (error) {
+                    showCustomModal("Ocurrió un error de red al intentar registrar el usuario.");
+                } finally {
+                    hideLoader();
+                }
+            });
+        }
+        
         if (forgotPasswordForm) {
             forgotPasswordForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 showLoader();
-
                 const userEmailRecuperar = document.getElementById('userEmailRecuperar').value;
-                const userTelefonoRecuperar = document.getElementById('userTelefonoRecuperar').value;
-                
+                const userTelefonoRecuperar = document.getElementById('userTelefonoRecuperar').value;             
                 if (!userEmailRecuperar || !userTelefonoRecuperar) {
                     hideLoader();
                     showCustomModal("Por favor, completa todos los campos requeridos.");
@@ -532,7 +475,6 @@
                     if (result.success) {
                         closeModal('recovery-modal');
                         forgotPasswordForm.reset();
-                        // Se muestra la contraseña en el modal con el ícono de copia
                         showCustomModal("Tu contraseña es:", result.newPassword);
                     } else {
                         showCustomModal(result.message || "No se pudo recuperar la contraseña. Verifica los datos.");
@@ -565,9 +507,7 @@
                 if (result.success) {
                     closeModal('generate-password-modal');
                     closeModal('recovery-modal');
-                    // Reiniciar el formulario después de un éxito
                     manualPasswordForm.reset();
-                    // Se muestra la nueva contraseña
                     showCustomModal("¡Contraseña actualizada con éxito!", result.newPassword);
                 } else {
                     showCustomModal(result.message || "Hubo un error al actualizar la contraseña.");
@@ -579,7 +519,6 @@
             }
         }
         
-        // Lógica para alternar la visibilidad de la contraseña
         passwordToggle.addEventListener('click', () => {
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
@@ -588,7 +527,6 @@
             passwordToggle.classList.toggle('fa-eye-slash');
         });
 
-        // Event listener para el ícono de copia
         copyIcon.addEventListener('click', () => {
             const passwordText = newPasswordDisplay.textContent;
             const tempInput = document.createElement('input');
@@ -598,7 +536,6 @@
             document.execCommand('copy');
             document.body.removeChild(tempInput);
             
-            // Retroalimentación visual
             copyIcon.classList.remove('fa-copy');
             copyIcon.classList.add('fa-check');
             showCustomModal("Contraseña copiada al portapapeles.");
@@ -609,49 +546,42 @@
             }, 2000);
         });
 
-        // Mostrar el modal de recuperación de contraseña
         forgotPasswordLink.addEventListener('click', (e) => {
             e.preventDefault();
             recoveryModal.classList.add('is-visible');
         });
 
-        // Ocultar el modal de recuperación al hacer clic en el botón de cerrar
         closeRecoveryModalBtn.addEventListener('click', () => {
             closeModal('recovery-modal');
         });
         
-        // Ocultar el nuevo modal de generación de contraseña al hacer clic en el botón de cerrar
         closeGeneratePasswordModalBtn.addEventListener('click', () => {
             closeModal('generate-password-modal');
         });
 
-        // Abrir el modal de generación de contraseña manual
         generatePasswordBtn.addEventListener('click', (e) => {
             e.preventDefault();
             const userEmail = document.getElementById('userEmailRecuperar').value;
             const userTelefono = document.getElementById('userTelefonoRecuperar').value;
 
-            // Validar que ambos campos están completos antes de proceder
             if (!userEmail || !userTelefono) {
                 showCustomModal("Por favor, completa todos los campos requeridos.");
                 return;
             }
 
-            userEmailToUpdate = userEmail; // Almacena el correo para su uso posterior
-            
-            // Oculta el modal de recuperación y muestra el de generación
+            userEmailToUpdate = userEmail; 
+
             closeModal('recovery-modal');
             generatePasswordModal.classList.add('is-visible');
             manualPasswordInput.value = '';
         });
 
-        // Event listener para el formulario manual
         manualPasswordForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const newPassword = manualPasswordInput.value;
-            // La validación debe ser de 5 caracteres
-            if (newPassword.length !== 5) {
-                showCustomModal("La contraseña debe tener exactamente 5 caracteres.");
+
+            if (newPassword.length !== 4) {
+                showCustomModal("La contraseña debe tener exactamente 4 caracteres.");
                 return;
             }
             await sendNewPassword(newPassword);
