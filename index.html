@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App Base</title>
+    <title>App YLOC</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
     <style>
@@ -215,8 +215,8 @@
     </div>
 
     <script>
-        const appTienda = 'ULTRA_DHO';
         const GAS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz29nU5Ra_k_RZ9BpXUp5D6YAQx3cScf_WDVHjPcJo-gOYtUQ-leW7GU6qSOM85Mbq_/exec'; // URL de tu script en Google Apps
+        const appTienda = 'CondominiumAdmin';
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
         const forgotPasswordLink = document.getElementById('forgot-password-link');
@@ -348,6 +348,7 @@
                 if (result.success) {
                         if (result.userData) {
                             localStorage.setItem('Usuario_Tienda', result.userData.Usuario_Tienda);
+                            localStorage.setItem('Usuario_Tienda_ID', result.userData.Usuario_Tienda_ID);
                             localStorage.setItem('Usuario_ID', result.userData.Usuario_ID);
                             localStorage.setItem('Usuario_Nombre', result.userData.Usuario_Nombre);
                             localStorage.setItem('Usuario_Perfil', result.userData.Usuario_Perfil);
@@ -359,7 +360,7 @@
                             console.log('Datos listos para guardar en localStorage:', result.userData);
                         }
                             loginForm.reset();
-                            showCustomModal("¡Inicio de sesión exitoso!", null, 'Inicio.html');                          
+                            showCustomModal("¡Inicio de sesión exitoso!", null, 'Base2.html');                          
                         } else {
                         showCustomModal(result.message || "Credenciales incorrectas. Por favor, inténtalo de nuevo.");
                        }
