@@ -49,7 +49,7 @@
                 <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-4">
                     <h3 class="text-2xl font-bold text-blue-400">Detalle Selección</h3>
                     <div class="flex gap-4">
-                        <button onclick="showRegisterMode()" class="text-green-400 hover:scale-110 transition-transform" title="Nuevo Registro">
+                        <button onclick="showRegisterMode()" class="hidden text-green-400 hover:scale-110 transition-transform" title="Nuevo Registro">
                             <i data-lucide="file-plus-2" class="w-6 h-6"></i>
                         </button>
                         <button onclick="showEditMode()" class="text-yellow-400 hover:scale-110 transition-transform" title="Editar Registro">
@@ -189,12 +189,65 @@
         const STORAGE_DATA = 'TABLE_DATA';
 
         document.addEventListener('DOMContentLoaded', () => {
-            if(localStorage.getItem(KEYS.CORREO)) {
-                renderProfile();
-                const form = document.getElementById('editDataForm');
-                if(form) form.onsubmit = handleEditSubmit;
-            } else {
+            // 1. SEGURIDAD: Validar sesión
+            if (!localStorage.getItem(KEYS.CORREO)) {
                 window.location.replace('index.html');
+                return;
+            }
+
+            // 2. CARGA DE DATOS DESDE LOCALSTORAGE
+            const rawData = localStorage.getItem('TABLE_DATA');
+            const rawConfig = localStorage.getItem('TABLE_CONFIG');
+
+            if (rawData && rawConfig) {
+                const data = JSON.parse(rawData);
+                const config = JSON.parse(rawConfig);
+                const isNew = data.IS_NEW === true;
+
+                // Renderizar el perfil de usuario (UI general)
+                renderProfile();
+
+                // 3. CONFIGURACIÓN SEGÚN EL MODO (NUEVO vs EDICIÓN)
+                if (isNew) {
+                    // Ajustar textos para Creación
+                    if (document.getElementById('formTitle')) 
+                        document.getElementById('formTitle').textContent = "Nuevo Registro";
+                    
+                    if (document.getElementById('formAction')) 
+                        document.getElementById('formAction').value = "registerDynamicDataTD";
+                    
+                    if (document.getElementById('submitBtn')) 
+                        document.getElementById('submitBtn').textContent = "Crear Nuevo Registro";
+
+                    // Ocultar botón de Editar del panel de Detalle (evita inconsistencias)
+                    const btnEditInView = document.querySelector('button[onclick="showEditMode()"]');
+                    if (btnEditInView) btnEditInView.classList.add('hidden');
+
+                    // Renderizar campos vacíos con lógica de autocalcular nombres
+                    renderFields(config, { TABLA_ORIGEN: data.TABLA_ORIGEN }, true);
+                    
+                    // Forzar entrada directa al panel de edición
+                    if (typeof togglePanels === 'function') {
+                        togglePanels('edit'); 
+                    }
+                } else {
+                    // Modo Edición Normal: Cargar datos existentes y renderizar campos
+                    renderFields(config, data, false);
+                    
+                    // Asegurar que el botón de editar sea visible
+                    const btnEditInView = document.querySelector('button[onclick="showEditMode()"]');
+                    if (btnEditInView) btnEditInView.classList.remove('hidden');
+                }
+
+                // 4. ASIGNACIÓN DINÁMICA DE SUBMIT
+                const form = document.getElementById('editDataForm');
+                if (form) {
+                    form.onsubmit = isNew ? handleInsertSubmit : handleEditSubmit;
+                }
+
+            } else {
+                // Si no hay datos, seguridad: volver a la tabla
+                window.location.href = 'Datos2.html';
             }
         });
 
@@ -268,100 +321,136 @@
 
         function renderFields(config, data, isNew = false) {
             const container = document.getElementById('editDataFormFields');
-            const tableName = data.TABLA_ORIGEN || "";
+            if (!container) return;
+
+            container.innerHTML = "";
+
+            const tableName = data.TABLA_ORIGEN || "TD101_BASIC";
             const tablePrefix = tableName.split('_')[0].toUpperCase();
             const pkExpectedLength = tablePrefix.length + 2;
-            
-            // CAMPO OBJETIVO
             const identityFieldName = `${tablePrefix}IDNOMBRE`;
 
-            container.innerHTML = Object.keys(config).map(colId => {
+            // 1. Mapeo y generación de campos
+            let fieldsHTML = Object.keys(config).map(colId => {
                 const field = config[colId];
                 const cleanColId = colId.toUpperCase().trim();
                 let value = isNew ? '' : (data[colId] || '');
                 
-                // 1. Ocultar PK Técnica
-                if ((cleanColId.length === pkExpectedLength) && cleanColId.startsWith(tablePrefix) && cleanColId.endsWith('ID')) {
-                    return isNew ? '' : `<input type="hidden" name="${colId}" value="${value}">`;
-                }
+                // --- BLINDAJE PK TÉCNICA ---
+                const isTechnicalPK = (cleanColId.length === pkExpectedLength) && 
+                                    cleanColId.startsWith(tablePrefix) && 
+                                    cleanColId.endsWith('ID');
+                if (isTechnicalPK) return isNew ? '' : `<input type="hidden" name="${colId}" value="${value}">`;
 
-                // 2. DETECCIÓN FORZADA DE IDENTIDAD
-                // Si el campo de la iteración actual es el IDNOMBRE, forzamos el Toggle
+                // --- LÓGICA DE BLOQUEO DE NOMBREC Y OTROS ---
+                // Bloqueamos NOMBREC (calculado), DAT01 (técnico) y cualquier marca XX
+                const isCalculatedField = cleanColId === `${tablePrefix}NOMBREC`;
+                const isSystemField = cleanColId.includes('REGISTRO') || cleanColId === `${tablePrefix}DAT01`;
+                const canEdit = isNew ? (!isCalculatedField && !isSystemField && field.editable !== false) : field.editable !== false;
+
+                // --- RENDERIZADO ESPECIAL PARA IDENTIDAD (CON TOGGLE) ---
                 if (cleanColId === identityFieldName && !isNew) {
-                    // Leemos el estado real del registro, NO de la configuración
                     const currentStatus = data[`${tablePrefix}TYPEREG`] || "Registrado";
                     const isBlocked = currentStatus === "Bloqueado";
                     return renderToggleHTML(field.label, value, currentStatus, isBlocked, tablePrefix, colId);
                 }
 
-                // 3. Renderizado normal para los demás campos
+                // --- RENDERIZADO ESTÁNDAR ---
                 const isImportant = cleanColId.includes('NOMBREC') || cleanColId.includes('DAT01');
-                const valueClass = isImportant ? 'text-[22px] text-blue-300 font-bold leading-tight' : 'text-[18px] text-gray-200 leading-tight';
-                const canEdit = isNew ? true : field.editable !== false;
-
+                const valueClass = isImportant ? 'text-[22px] text-blue-300 font-bold' : 'text-[18px] text-gray-200';
+                
+                // Añadimos ID al input para la lógica de autocalcular
                 return `
                     <div class="border-b border-gray-700/40 py-1">
                         <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
                         <div class="flex items-center min-h-[32px]">
                             ${canEdit ? 
-                                `<input type="text" name="${colId}" value="${value}" class="w-full bg-transparent outline-none border-none focus:ring-0 ${valueClass} p-0 m-0">` :
-                                `<span class="${valueClass} opacity-70">${value || '---'}</span><input type="hidden" name="${colId}" value="${value}">`
+                                `<input type="text" name="${colId}" id="input-${cleanColId}" value="${value}" 
+                                    class="w-full bg-transparent outline-none border-none focus:ring-0 ${valueClass} p-0 m-0">` :
+                                `<input type="text" name="${colId}" id="input-${cleanColId}" value="${value}" readonly 
+                                    class="w-full bg-transparent outline-none border-none focus:ring-0 ${valueClass} p-0 m-0 opacity-60 cursor-not-allowed" 
+                                    title="Campo automático o bloqueado">`
                             }
                         </div>
                     </div>`;
             }).join('');
 
+            container.innerHTML = fieldsHTML;
+
+            // --- INICIALIZACIÓN DE LÓGICAS POST-RENDER ---
+            if (window.lucide) lucide.createIcons();
+
+            // Si es un registro nuevo o edición, activamos el cálculo de NOMBREC
+            // Usamos setTimeout para asegurar que el DOM esté listo
+            setTimeout(() => {
+                if (typeof setupNombreCAutoCalculate === 'function') {
+                    setupNombreCAutoCalculate(tablePrefix);
+                }
+            }, 100);
+        }
+
+        function renderToggleHTML(label, value, status, isBlocked, prefix, colId) {
+            const displayStatus = (status === "" || status === "Registrado") ? "Registrado" : status;
+            
+            return `
+                <div class="border-b border-gray-700/40 py-1">
+                    <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${label}</span>
+                    <div class="flex items-center justify-between min-h-[32px] gap-2">
+                        <div class="flex items-center gap-2 flex-1">
+                            <input type="text" name="${colId}" value="${value}" class="bg-transparent outline-none border-none focus:ring-0 text-[22px] text-blue-300 font-bold leading-tight p-0 m-0 w-full">
+                            <span id="badge-status" class="text-[10px] px-2 py-0.5 rounded-full uppercase font-bold transition-all ${isBlocked ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'}">
+                                ${displayStatus}
+                            </span>
+                        </div>
+                        <input type="hidden" name="${prefix}TYPEREG" id="input-typereg" value="${status}">
+                        <button type="button" onclick="toggleRecordStatus('${prefix}')" class="focus:outline-none flex items-center">
+                            <i id="toggle-icon" data-lucide="${isBlocked ? 'toggle-left' : 'toggle-right'}" class="w-8 h-8 ${isBlocked ? 'text-red-500' : 'text-green-500'}"></i>
+                        </button>
+                    </div>
+                </div>`;
+        }
+                
+        function toggleRecordStatus(prefix) {
+            const input = document.getElementById('input-typereg');
+            const badge = document.getElementById('badge-status');
+            const icon = document.getElementById('toggle-icon');
+            
+            const isNowBlocking = input.value !== "Bloqueado";
+            
+            if (isNowBlocking) {
+                input.value = "Bloqueado";
+                badge.textContent = "Bloqueado";
+                badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 uppercase font-bold transition-all";
+                icon.style.color = "#ef4444";
+                icon.setAttribute('data-lucide', 'toggle-left');
+            } else {
+                input.value = ""; 
+                badge.textContent = "Registrado";
+                badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 uppercase font-bold transition-all";
+                icon.style.color = "#22c55e";
+                icon.setAttribute('data-lucide', 'toggle-right');
+            }
+            
             if(window.lucide) lucide.createIcons();
         }
 
-function renderToggleHTML(label, value, status, isBlocked, prefix, colId) {
-    const displayStatus = (status === "" || status === "Registrado") ? "Registrado" : status;
-    
-    return `
-        <div class="border-b border-gray-700/40 py-1">
-            <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${label}</span>
-            <div class="flex items-center justify-between min-h-[32px] gap-2">
-                <div class="flex items-center gap-2 flex-1">
-                    <input type="text" name="${colId}" value="${value}" class="bg-transparent outline-none border-none focus:ring-0 text-[22px] text-blue-300 font-bold leading-tight p-0 m-0 w-full">
-                    <span id="badge-status" class="text-[10px] px-2 py-0.5 rounded-full uppercase font-bold transition-all ${isBlocked ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'}">
-                        ${displayStatus}
-                    </span>
-                </div>
-                <input type="hidden" name="${prefix}TYPEREG" id="input-typereg" value="${status}">
-                <button type="button" onclick="toggleRecordStatus('${prefix}')" class="focus:outline-none flex items-center">
-                    <i id="toggle-icon" data-lucide="${isBlocked ? 'toggle-left' : 'toggle-right'}" class="w-8 h-8 ${isBlocked ? 'text-red-500' : 'text-green-500'}"></i>
-                </button>
-            </div>
-        </div>`;
-}
-        
-function toggleRecordStatus(prefix) {
-    const input = document.getElementById('input-typereg');
-    const badge = document.getElementById('badge-status');
-    const icon = document.getElementById('toggle-icon');
-    
-    const isNowBlocking = input.value !== "Bloqueado";
-    
-    if (isNowBlocking) {
-        input.value = "Bloqueado";
-        badge.textContent = "Bloqueado";
-        badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 uppercase font-bold transition-all";
-        icon.style.color = "#ef4444";
-        icon.setAttribute('data-lucide', 'toggle-left');
-    } else {
-        input.value = ""; 
-        badge.textContent = "Registrado";
-        badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 uppercase font-bold transition-all";
-        icon.style.color = "#22c55e";
-        icon.setAttribute('data-lucide', 'toggle-right');
-    }
-    
-    if(window.lucide) lucide.createIcons();
-}
+        function showViewMode() {
+            const data = JSON.parse(localStorage.getItem('TABLE_DATA') || '{}');
+            
+            // Si es un registro nuevo y el usuario cancela, no hay "Vista" a la cual volver
+            if (data.IS_NEW === true) {
+                window.location.href = 'Datos.html';
+                return;
+            }
 
-        function showViewMode() { 
-            document.getElementById('EditDataContent').classList.add('hidden'); 
-            document.getElementById('DetalleDataContent').classList.remove('hidden'); 
+            // Si no es nuevo, ejecutamos el cambio de panel normal
+            const detailPanel = document.getElementById('DetalleDataContent');
+            const editPanel = document.getElementById('EditDataContent');
+            
+            if (detailPanel && editPanel) {
+                detailPanel.classList.remove('hidden');
+                editPanel.classList.add('hidden');
+            }
         }
 
         function showRegisterMode() {
@@ -475,60 +564,143 @@ function toggleRecordStatus(prefix) {
          * Maneja registros nuevos, ediciones y cambios de estado (Toggle).
          */
 
- async function handleEditSubmit(e) {
-    e.preventDefault();
-    const submitBtn = document.getElementById('submitBtn');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = "Procesando...";
-    submitBtn.disabled = true;
+        async function handleEditSubmit(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = "Procesando...";
+            submitBtn.disabled = true;
 
-    try {
-        const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
-        const action = document.getElementById('formAction').value;
-        const tableName = currentData.TABLA_ORIGEN;
-        const tablePrefix = tableName.split('_')[0].toUpperCase();
-        
-        const headers = Object.keys(currentData).filter(k => k !== 'TABLA_ORIGEN');
-        const primaryKeyField = getTablePrimaryKey(headers, tableName);
+            try {
+                const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
+                const action = document.getElementById('formAction').value;
+                const tableName = currentData.TABLA_ORIGEN;
+                const tablePrefix = tableName.split('_')[0].toUpperCase();
+                
+                const headers = Object.keys(currentData).filter(k => k !== 'TABLA_ORIGEN');
+                const primaryKeyField = getTablePrimaryKey(headers, tableName);
 
-        const formData = new FormData(e.target);
-        const formPayload = Object.fromEntries(formData.entries());
+                const formData = new FormData(e.target);
+                const formPayload = Object.fromEntries(formData.entries());
 
-        const typeregKey = `${tablePrefix}TYPEREG`;
-        const toggleElement = document.getElementById('input-typereg');
-        
-        // Versión estable: Captura el valor del toggle o mantiene el original
-        const finalStatus = toggleElement ? toggleElement.value : (currentData[typeregKey] || "");
+                const typeregKey = `${tablePrefix}TYPEREG`;
+                const toggleElement = document.getElementById('input-typereg');
+                
+                // Versión estable: Captura el valor del toggle o mantiene el original
+                const finalStatus = toggleElement ? toggleElement.value : (currentData[typeregKey] || "");
 
-        const payload = {
-            action: action,
-            TABLA_DESTINO: tableName,
-            CAMPO_CLAVE: primaryKeyField,
-            TD101RegistroUser: localStorage.getItem(KEYS.USUARIO_ID),
-            ...formPayload,
-            [typeregKey]: finalStatus
-        };
+                const payload = {
+                    action: action,
+                    TABLA_DESTINO: tableName,
+                    CAMPO_CLAVE: primaryKeyField,
+                    TD101RegistroUser: localStorage.getItem(KEYS.USUARIO_ID),
+                    ...formPayload,
+                    [typeregKey]: finalStatus
+                };
 
-        // 1. Enviamos al servidor
-        const response = await executeSubmit(payload);
+                // 1. Enviamos al servidor
+                const response = await executeSubmit(payload);
 
-        // 2. Si la respuesta es exitosa (asumiendo que executeSubmit lanza error si falla)
-        // Actualizamos LocalStorage con los nuevos datos enviados para que el Perfil se vea al día
-        const updatedData = { ...currentData, ...formPayload, [typeregKey]: finalStatus };
-        localStorage.setItem(STORAGE_DATA, JSON.stringify(updatedData));
+                // 2. Si la respuesta es exitosa (asumiendo que executeSubmit lanza error si falla)
+                // Actualizamos LocalStorage con los nuevos datos enviados para que el Perfil se vea al día
+                const updatedData = { ...currentData, ...formPayload, [typeregKey]: finalStatus };
+                localStorage.setItem(STORAGE_DATA, JSON.stringify(updatedData));
 
-        // 3. NAVEGACIÓN: Volvemos a la vista de perfil/detalle
-        // Esto limpia el formulario y muestra los datos actualizados
-        renderProfile(); 
-        togglePanels('detail'); 
+                // 3. NAVEGACIÓN: Volvemos a la vista de perfil/detalle
+                // Esto limpia el formulario y muestra los datos actualizados
+                renderProfile(); 
+                togglePanels('detail'); 
 
-    } catch (err) {
-        console.error("Error:", err);
-    } finally {
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-    }
-}
+            } catch (err) {
+                console.error("Error:", err);
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        function setupNombreCAutoCalculate(tablePrefix) {
+            const n1 = document.getElementById(`input-${tablePrefix}NOMBRE1`);
+            const n2 = document.getElementById(`input-${tablePrefix}NOMBRE2`);
+            const nc = document.getElementById(`input-${tablePrefix}NOMBREC`);
+
+            if (!n1 || !n2 || !nc) return;
+
+            const particles = ["de los", "de la", "de", "del", "mc"];
+
+            // Lógica para NOMBRE1 (Truncar en la partícula)
+            const processNombre1 = (text) => {
+                const val = text.trim();
+                if (!val) return "";
+                const parts = val.split(/\s+/);
+                
+                for (let i = 0; i < parts.length; i++) {
+                    for (let p of particles) {
+                        const pParts = p.split(" ");
+                        // ¿La secuencia de palabras coincide con una partícula?
+                        if (parts.slice(i, i + pParts.length).join(" ").toLowerCase() === p) {
+                            // Si hay una palabra después de la partícula, la convertimos en inicial y paramos
+                            const blockBefore = parts.slice(0, i + pParts.length).join(" ");
+                            if (parts[i + pParts.length]) {
+                                const initial = parts[i + pParts.length].charAt(0).toUpperCase();
+                                return `${blockBefore} ${initial}.`; // Ej: MARIA DE LOS C.
+                            }
+                            return blockBefore;
+                        }
+                    }
+                }
+                // Si no hay partícula, tomamos el primer nombre y la inicial del segundo si existe
+                let res = parts[0];
+                if (parts[1]) res += " " + parts[1].charAt(0).toUpperCase() + ".";
+                return res;
+            };
+
+            // Lógica para NOMBRE2 (Mantener bloque de partícula + inicial de lo que siga)
+            const processNombre2 = (text) => {
+                const val = text.trim();
+                if (!val) return "";
+                
+                // Caso especial O'
+                if (val.toLowerCase().startsWith("o'")) {
+                    const parts = val.split(/\s+/);
+                    return parts[1] ? `${parts[0]} ${parts[1].charAt(0).toUpperCase()}.` : parts[0];
+                }
+
+                const parts = val.split(/\s+/);
+                for (let p of particles) {
+                    const pParts = p.split(" ");
+                    // Caso: Empieza por partícula (DE LA BAYER...)
+                    if (parts.slice(0, pParts.length).join(" ").toLowerCase() === p) {
+                        const mainBlock = parts.slice(0, pParts.length + 1).join(" ");
+                        const remaining = parts.slice(pParts.length + 1);
+                        return remaining.length > 0 ? `${mainBlock} ${remaining[0].charAt(0).toUpperCase()}.` : mainBlock;
+                    }
+                    // Caso: Contiene partícula (PEREZ DE LA ROSA)
+                    for (let i = 1; i < parts.length; i++) {
+                        if (parts.slice(i, i + pParts.length).join(" ").toLowerCase() === p) {
+                            const mainBlock = parts.slice(0, i + pParts.length + 1).join(" ");
+                            const remaining = parts.slice(i + pParts.length + 1);
+                            return remaining.length > 0 ? `${mainBlock} ${remaining[0].charAt(0).toUpperCase()}.` : mainBlock;
+                        }
+                    }
+                }
+                // Caso estándar
+                return parts[1] ? `${parts[0]} ${parts[1].charAt(0).toUpperCase()}.` : parts[0];
+            };
+
+            const calculate = () => {
+                const n1Val = processNombre1(n1.value);
+                const n2Val = processNombre2(n2.value);
+                
+                let final = n1Val;
+                if (n2Val) final += (final ? " " : "") + n2Val;
+                
+                nc.value = final.toUpperCase();
+            };
+
+            n1.addEventListener('input', calculate);
+            n2.addEventListener('input', calculate);
+        }
 
     </script>
 </body>
