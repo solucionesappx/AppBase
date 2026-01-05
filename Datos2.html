@@ -169,7 +169,7 @@
     </div>
 
     <script>
-        const KEYS={NOMBRE:'Usuario_Nombre',PERFIL:'Usuario_Perfil',CORREO:'Usuario_Correo',VIEW_MODE:'App_View_Mode',THEME:'App_Theme',TIENDA:'Usuario_Tienda',TIENDA_ID:'Usuario_Tienda_ID',USUARIO_ID:'Usuario_ID',USUARIO_ID:'INPUT_ID'};
+        const KEYS={NOMBRE:'Usuario_Nombre',PERFIL:'Usuario_Perfil',CORREO:'Usuario_Correo',VIEW_MODE:'App_View_Mode',THEME:'App_Theme',TIENDA:'Usuario_Tienda',TIENDA_ID:'Usuario_Tienda_ID',USUARIO_ID:'Usuario_ID'};
         document.addEventListener('DOMContentLoaded',()=>{if(!localStorage.getItem(KEYS.CORREO))window.location.replace('index.html');initUI();if(window.lucide)lucide.createIcons()});
         function initUI(){
             const nom = localStorage.getItem(KEYS.NOMBRE);
@@ -238,12 +238,6 @@
     </script>
 
     <script>
-        console.log("Valores de Perfil:");
-        Object.entries(KEYS).forEach(([key, storageKey]) => {
-            console.log(`${key}: ${localStorage.getItem(storageKey)}`);
-        });
-
-        // --- CONFIGURACIÓN GLOBAL ---
         const GET_URL = 'https://script.google.com/macros/s/AKfycbyVcnPmbbR9RXy6ekkvHT6ocTgm0Rsf1wxNQvQpSbEt7ubGVwBhxKqhNm0YeO_dI_XJIg/exec';
 
         const DEFAULT_TABLE_NAME = 'TD101_BASIC'; 
@@ -336,7 +330,6 @@
             const container = document.getElementById('data-table-container');
             if (!container) return;
 
-            // 1. Esqueleto de la tabla
             container.innerHTML = `
                 <table id="main-table">
                     <thead><tr id="table-header"></tr></thead>
@@ -346,14 +339,35 @@
 
             const tableHeader = document.getElementById('table-header');
             const tableBody = document.getElementById('table-body');
-            const headers = tableConfig.columnOrder || (data.length > 0 ? Object.keys(data[0]) : []);
+            
+            // 1. OBTENCIÓN DE DATOS Y PREFIJO
+            const rawHeaders = tableConfig.columnOrder || (data.length > 0 ? Object.keys(data[0]) : []);
+            const tableKey = String(currentTableName).trim().toUpperCase();
+            const tablePrefix = tableKey.split('_')[0]; // Ejemplo: TD101
 
-            // Encabezados (ID + Dinámicos)
+            // 2. FILTRADO VISUAL (Excluir NO y el ID técnico)
+            const headers = rawHeaders.filter(h => {
+                const colKey = String(h).trim().toUpperCase();
+                
+                // HARDCODE: Si es el ID técnico (ej. TD101ID), no se muestra en la tabla
+                if (colKey === `${tablePrefix}ID`) return false;
+
+                const colConfig = rawConfig.find(c => 
+                    String(c.ID_Columna || '').trim().toUpperCase() === colKey && 
+                    String(c.Tabla || '').trim().toUpperCase() === tableKey
+                );
+                
+                // Excluir si en ConfigViewTB dice "NO"
+                return colConfig ? String(colConfig.Visible_Encabezado || '').trim().toUpperCase() !== 'NO' : true;
+            });
+
+            // Encabezado de ID Visual (1, 2, 3...)
             const thId = document.createElement('th');
             thId.className = 'sticky-id-cell';
             thId.innerHTML = `<div class="header-content" style="justify-content: center;"><span>ID</span></div>`;
             tableHeader.appendChild(thId);
 
+            // Dibujar encabezados filtrados
             headers.forEach(h => {
                 const th = document.createElement('th');
                 const friendlyName = tableConfig.displayMap[h] || h;
@@ -364,39 +378,34 @@
                 tableHeader.appendChild(th);
             });
 
-            // 2. Renderizar Filas
+            // 3. RENDERIZAR FILAS
             data.forEach((row, idx) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-blue-500/10 cursor-pointer transition-colors group';
 
-                // --- EVENTO DOBLE CLIC (CON FORMATEO PREVIO) ---
                 tr.ondblclick = () => {
                     const configMap = {};
-                    const formattedRow = { ...row }; // Copia de la fila original
-                    const tableKey = String(currentTableName).trim().toUpperCase();
+                    const formattedRow = { ...row }; 
                     
-                    headers.forEach(h => {
+                    // IMPORTANTE: Al guardar en LocalStorage usamos rawHeaders (TODOS los campos)
+                    // Esto asegura que el ID viaje a FormData.html aunque no se vea aquí
+                    rawHeaders.forEach(h => {
                         const colKey = String(h).trim().toUpperCase();
-                        
-                        // --- FORMATEO DE VALOR ---
-                        // Aplicamos el formato (puntos, fechas, etc.) antes de guardar
                         formattedRow[h] = getFormattedValue(h, row[h]);
 
-                        // --- LÓGICA DE CONFIGURACIÓN ---
                         const colConfig = rawConfig.find(c => 
                             String(c.ID_Columna || '').trim().toUpperCase() === colKey && 
                             String(c.Tabla || '').trim().toUpperCase() === tableKey
                         );
                         
                         const marca = colConfig ? String(colConfig.Visible_Encabezado || '').trim().toUpperCase() : '';
-                        
-                        // Normalización de limpieza para bloqueo (incluyendo DAT01)
                         const cleanH = colKey.replace(/_/g, '');
+                        
                         const isBlocked = (marca === 'XX') || 
                                         cleanH.includes('ID') || 
                                         cleanH.includes('REGISTRO') || 
-                                        cleanH === 'TD101NOMBREC' || 
-                                        cleanH === 'TD101DAT01';
+                                        cleanH === `${tablePrefix}NOMBREC` || 
+                                        cleanH === `${tablePrefix}DAT01`;
 
                         configMap[h] = {
                             label: tableConfig.displayMap[h] || h,
@@ -404,17 +413,13 @@
                         };
                     });
 
-                    // Agregamos la metadata necesaria para el backend
                     formattedRow.TABLA_ORIGEN = currentTableName;
-
-                    // Guardamos los datos YA FORMATEADOS
                     localStorage.setItem('TABLE_CONFIG', JSON.stringify(configMap));
                     localStorage.setItem('TABLE_DATA', JSON.stringify(formattedRow));
-
                     window.location.href = 'FormData.html';
                 };
 
-                // Renderizado visual de celdas
+                // Celdas visuales (Usando el array 'headers' filtrado)
                 const tdId = document.createElement('td');
                 tdId.className = 'table-data-cell sticky-id-cell px-3 text-center';
                 tdId.textContent = idx + 1;
