@@ -45,27 +45,43 @@
         </header>
 
         <main id="main-content">
-            <div id="DetalleDataContent" class="p-6 bg-gray-800 rounded-xl border border-gray-700">
-                <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-1">
-                    <h3 class="text-3xl font-bold text-blue-400">Detalle Selección</h3>
-                    <button onclick="showEditMode()" class="text-yellow-400 hover:text-yellow-600"><i data-lucide="pencil" class="w-6 h-6"></i></button>
+            <div id="DetalleDataContent" class="p-6 bg-gray-800 rounded-xl border border-gray-700 shadow-2xl">
+                <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-4">
+                    <h3 class="text-2xl font-bold text-blue-400">Detalle Selección</h3>
+                    <div class="flex gap-4">
+                        <button onclick="showRegisterMode()" class="text-green-400 hover:scale-110 transition-transform" title="Nuevo Registro">
+                            <i data-lucide="file-plus-2" class="w-6 h-6"></i>
+                        </button>
+                        <button onclick="showEditMode()" class="text-yellow-400 hover:scale-110 transition-transform" title="Editar Registro">
+                            <i data-lucide="file-pen" class="w-6 h-6"></i>
+                        </button>
+                        </div>
                 </div>
                 <div id="perfilBodyContent" class="space-y-1 pb-20"></div>
             </div>
 
-            <div id="EditDataContent" class="p-6 bg-gray-800 rounded-xl border border-gray-700 hidden">
-                <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-1">
-                    <h2 class="text-3xl font-bold text-white">Editar Selección</h2>
-                    <button onclick="showViewMode()" class="text-red-400 hover:text-red-600"><i data-lucide="circle-x" class="w-7 h-7"></i></button>
+        <div id="EditDataContent" class="hidden p-6 bg-gray-800 rounded-xl border border-gray-700 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-4">
+                <h2 id="formTitle" class="text-2xl font-bold text-white">Editar Selección</h2>
+                
+                <div class="flex items-center gap-4">                   
+                    <button onclick="showViewMode()" class="text-red-400 hover:scale-110 transition-transform">
+                        <i data-lucide="circle-x" class="w-7 h-7"></i>
+                    </button>
                 </div>
-                <form id="editDataForm" class="space-y-1">
-                    <input type="hidden" id="Usuario_Correo_Actual" name="Usuario_Correo_Actual">               
-                    <div id="editDataFormFields" class="space-y-1"></div>
-                    <button type="submit" class="w-full bg-blue-600 mt-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition-all active:scale-95">Guardar Cambios</button>
-                </form>
-                <p class="text-sm text-gray-400 text-center pt-4 pb-12">Los campos que no sean modificados mantendrán su valor.</p>
             </div>
+            
+            <form id="editDataForm" class="space-y-1">
+                <input type="hidden" id="formAction" name="action" value="editDynamicDataTD">
+                <div id="editDataFormFields" class="space-y-1"></div>                    
+                <button id="submitBtn" type="submit" class="w-full bg-blue-600 mt-6 py-4 rounded-lg font-bold text-white hover:bg-blue-700 transition-all active:scale-95 shadow-lg">
+                    Guardar Cambios
+                </button>
+            </form>
+            <p class="text-sm text-gray-400 text-center pt-4 pb-12">Los campos que no sean modificados mantendrán su valor.</p>
+        </div>
         </main>
+
         <footer id="app-footer" class="bottom-0 h-18 border-t flex items-center justify-around px-2 py-1">
             <button class="footer-btn" data-section="Base"><i data-lucide="house-plus" class="w-6 h-6"></i><span>Base</span></button>
             <button id="btn-datos" class="footer-btn active" data-section="Datos"><i data-lucide="database" class="w-6 h-6"></i><span>Datos</span></button>
@@ -85,7 +101,7 @@
     </div>
 
     <script>
-        const KEYS={NOMBRE:'Usuario_Nombre',PERFIL:'Usuario_Perfil',CORREO:'Usuario_Correo',VIEW_MODE:'App_View_Mode',THEME:'App_Theme',TIENDA:'Usuario_Tienda',TIENDA_ID:'Usuario_Tienda_ID',USUARIO_ID:'Usuario_ID',USUARIO_ID:'INPUT_ID'};
+        const KEYS={NOMBRE:'Usuario_Nombre',PERFIL:'Usuario_Perfil',CORREO:'Usuario_Correo',VIEW_MODE:'App_View_Mode',THEME:'App_Theme',TIENDA:'Usuario_Tienda',TIENDA_ID:'Usuario_Tienda_ID',USUARIO_ID:'Usuario_ID'};
         document.addEventListener('DOMContentLoaded',()=>{if(!localStorage.getItem(KEYS.CORREO))window.location.replace('index.html');initUI();if(window.lucide)lucide.createIcons()});
         function initUI(){
             const nom = localStorage.getItem(KEYS.NOMBRE);
@@ -154,16 +170,23 @@
     </script>
 
     <script>
-        console.log("Valores de Perfil:");
+        console.group("🔍 REVISIÓN DE LOCALSTORAGE");
+        console.log("👤 Datos de Usuario (KEYS):");
         Object.entries(KEYS).forEach(([key, storageKey]) => {
-            console.log(`${key}: ${localStorage.getItem(storageKey)}`);
-        });        
-        
-        const GAS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz29nU5Ra_k_RZ9BpXUp5D6YAQx3cScf_WDVHjPcJo-gOYtUQ-leW7GU6qSOM85Mbq_/exec";
-        
-        // Nombres de las llaves en localStorage
-        const STORAGE_CONFIG = 'TABLE_CONFIG'; // Nombre agnóstico
-        const STORAGE_DATA = 'TABLE_DATA';     // Nombre agnóstico
+            console.log(`   ${key}: ${localStorage.getItem(storageKey)}`);
+        });
+
+        console.log("📊 Configuración de Tabla (TABLE_CONFIG):");
+        console.table(JSON.parse(localStorage.getItem('TABLE_CONFIG') || '{}'));
+
+        console.log("📝 Datos de la Fila (TABLE_DATA):");
+        console.table(JSON.parse(localStorage.getItem('TABLE_DATA') || '{}'));
+        console.groupEnd();
+
+        // Configuración de URLs y llaves
+        const GAS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVcnPmbbR9RXy6ekkvHT6ocTgm0Rsf1wxNQvQpSbEt7ubGVwBhxKqhNm0YeO_dI_XJIg/exec";
+        const STORAGE_CONFIG = 'TABLE_CONFIG';
+        const STORAGE_DATA = 'TABLE_DATA';
 
         document.addEventListener('DOMContentLoaded', () => {
             if(localStorage.getItem(KEYS.CORREO)) {
@@ -176,152 +199,337 @@
         });
 
         /**
-         * Renderiza la vista de lectura (Detalle)
-         * Vincula etiquetas de CONFIG con valores de DATA
+         * Identifica el campo clave único (PK) de la tabla.
          */
+        function getTablePrimaryKey(headers, tableName) {
+            const tablePrefix = tableName.split('_')[0].toUpperCase();
+            const expectedLength = tablePrefix.length + 2; 
+
+            console.log(`🔎 Buscando PK: Prefijo [${tablePrefix}], Longitud esperada [${expectedLength}]`);
+            
+            const pk = headers.find(h => {
+                const cleanH = h.trim().toUpperCase();
+                return cleanH.length === expectedLength && 
+                    cleanH.startsWith(tablePrefix) && 
+                    cleanH.endsWith('ID');
+            });
+
+            if (pk) { console.log("✅ PK Encontrada:", pk); } 
+            else { console.warn("❌ No se encontró PK. Headers:", headers); }
+
+            return pk;
+        }
+
         function renderProfile() {
             const config = JSON.parse(localStorage.getItem(STORAGE_CONFIG) || '{}');
             const data = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
             const container = document.getElementById('perfilBodyContent');
 
-            if (Object.keys(config).length === 0) {
-                container.innerHTML = `<p class="text-gray-500 italic text-center py-10">No hay datos seleccionados.</p>`;
-                return;
-            }
+            const tableName = data.TABLA_ORIGEN || "";
+            const tablePrefix = tableName.split('_')[0].toUpperCase();
+            const pkExpectedLength = tablePrefix.length + 2;
 
-            // Generamos el HTML recorriendo el mapa de configuración para mantener el orden de la tabla
+            // LEER ESTADO DIRECTAMENTE DE DATA (Independiente de config)
+            const currentStatus = data[`${tablePrefix}TYPEREG`] || "Registrado";
+            const isBlocked = currentStatus === "Bloqueado";
+
             container.innerHTML = Object.keys(config).map(colId => {
+                const cleanColId = colId.toUpperCase().trim();
+                
+                // Blindaje PK técnica
+                if ((cleanColId.length === pkExpectedLength) && cleanColId.startsWith(tablePrefix) && cleanColId.endsWith('ID')) return ''; 
+
                 const label = config[colId].label;
                 const value = data[colId] || '---';
                 
-                // Estilo resaltado para campos principales (IDs o Nombres)
-                const isImportant = colId.includes('ID') || colId.includes('NOMBREC');
+                // ¿Es este el campo donde debe ir la etiqueta?
+                const isIdentityField = cleanColId === `${tablePrefix}IDNOMBRE`;
+
+                // Lógica visual
+                const isImportant = cleanColId.includes('NOMBREC') || cleanColId.includes('DAT01') || cleanColId.includes('ID');
                 const valueClass = isImportant ? 'text-[22px] text-blue-300 font-bold leading-tight' : 'text-[18px] text-gray-200 leading-tight';
+
+                // LA CLAVE: La etiqueta se genera si el campo coincide, usando el valor 'isBlocked' calculado arriba
+                const statusTag = (isIdentityField && isBlocked) ? 
+                    `<span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 uppercase tracking-tighter font-bold">Bloqueado</span>` : '';
 
                 return `
                     <div class="border-b border-gray-700/40 py-1">
                         <span class="text-[10px] font-bold text-gray-500 uppercase block -mb-1">${label}</span>
                         <div class="flex items-center min-h-[32px]">
                             <span class="${valueClass}">${value}</span>
+                            ${statusTag}
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }).join('');
-
+            
             if(window.lucide) lucide.createIcons();
         }
 
-        function showEditMode() {
-            console.log("🟡 Iniciando showEditMode...");
-            
-            const configRaw = localStorage.getItem('TABLE_CONFIG');
-            const dataRaw = localStorage.getItem('TABLE_DATA');
-            
-            if (!configRaw || !dataRaw) {
-                console.error("❌ No se encontraron datos en localStorage");
-                return;
-            }
-
-            const config = JSON.parse(configRaw);
-            const data = JSON.parse(dataRaw);
-
-            console.log("📊 MAPA DE CONFIGURACIÓN RECIBIDO:");
-            console.table(config);
-
+        function renderFields(config, data, isNew = false) {
             const container = document.getElementById('editDataFormFields');
-            const detailContent = document.getElementById('DetalleDataContent');
-            const editContent = document.getElementById('EditDataContent');
-
-            if (detailContent) detailContent.classList.add('hidden');
-            if (editContent) editContent.classList.remove('hidden');
+            const tableName = data.TABLA_ORIGEN || "";
+            const tablePrefix = tableName.split('_')[0].toUpperCase();
+            const pkExpectedLength = tablePrefix.length + 2;
+            
+            // CAMPO OBJETIVO
+            const identityFieldName = `${tablePrefix}IDNOMBRE`;
 
             container.innerHTML = Object.keys(config).map(colId => {
-                const field = config[colId]; 
-                const value = data[colId] || '';
-                const cleanColId = colId.toUpperCase();
-
-                // --- Lógica de Estilo Unificada ---
-                const isImportant = cleanColId.includes('ID') || cleanColId.includes('NOMBREC') || cleanColId.includes('DAT01');
-                const valueClass = isImportant 
-                    ? 'text-[22px] text-blue-300 font-bold leading-tight' 
-                    : 'text-[18px] text-gray-200 leading-tight';
-
-                if (field.editable === false) {
-                    // Render como texto estático (Bloqueado)
-                    return `
-                        <div class="border-b border-gray-700/40 py-1 opacity-70">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase block -mb-1">${field.label}</span>
-                            <div class="flex items-center h-[32px]">
-                                <span class="${valueClass}">${value || '---'}</span>
-                            </div>
-                            <input type="hidden" name="${colId}" value="${value}">
-                        </div>`;
-                } else {
-                    // Render como Input (Editable)
-                    return `
-                        <div class="border-b border-blue-700/40 py-1 group hover:bg-gray-700/20 transition-colors">
-                            <label class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</label>
-                            <div class="flex items-center h-[32px]">
-                                <input type="text" name="${colId}" value="${value}" 
-                                    class="w-full bg-transparent outline-none border-none focus:ring-0 ${valueClass} p-0 m-0">
-                            </div>
-                        </div>`;
+                const field = config[colId];
+                const cleanColId = colId.toUpperCase().trim();
+                let value = isNew ? '' : (data[colId] || '');
+                
+                // 1. Ocultar PK Técnica
+                if ((cleanColId.length === pkExpectedLength) && cleanColId.startsWith(tablePrefix) && cleanColId.endsWith('ID')) {
+                    return isNew ? '' : `<input type="hidden" name="${colId}" value="${value}">`;
                 }
+
+                // 2. DETECCIÓN FORZADA DE IDENTIDAD
+                // Si el campo de la iteración actual es el IDNOMBRE, forzamos el Toggle
+                if (cleanColId === identityFieldName && !isNew) {
+                    // Leemos el estado real del registro, NO de la configuración
+                    const currentStatus = data[`${tablePrefix}TYPEREG`] || "Registrado";
+                    const isBlocked = currentStatus === "Bloqueado";
+                    return renderToggleHTML(field.label, value, currentStatus, isBlocked, tablePrefix, colId);
+                }
+
+                // 3. Renderizado normal para los demás campos
+                const isImportant = cleanColId.includes('NOMBREC') || cleanColId.includes('DAT01');
+                const valueClass = isImportant ? 'text-[22px] text-blue-300 font-bold leading-tight' : 'text-[18px] text-gray-200 leading-tight';
+                const canEdit = isNew ? true : field.editable !== false;
+
+                return `
+                    <div class="border-b border-gray-700/40 py-1">
+                        <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
+                        <div class="flex items-center min-h-[32px]">
+                            ${canEdit ? 
+                                `<input type="text" name="${colId}" value="${value}" class="w-full bg-transparent outline-none border-none focus:ring-0 ${valueClass} p-0 m-0">` :
+                                `<span class="${valueClass} opacity-70">${value || '---'}</span><input type="hidden" name="${colId}" value="${value}">`
+                            }
+                        </div>
+                    </div>`;
             }).join('');
 
             if(window.lucide) lucide.createIcons();
-            console.log("✅ Formulario de edición renderizado con fuentes sincronizadas.");
         }
+
+function renderToggleHTML(label, value, status, isBlocked, prefix, colId) {
+    const displayStatus = (status === "" || status === "Registrado") ? "Registrado" : status;
+    
+    return `
+        <div class="border-b border-gray-700/40 py-1">
+            <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${label}</span>
+            <div class="flex items-center justify-between min-h-[32px] gap-2">
+                <div class="flex items-center gap-2 flex-1">
+                    <input type="text" name="${colId}" value="${value}" class="bg-transparent outline-none border-none focus:ring-0 text-[22px] text-blue-300 font-bold leading-tight p-0 m-0 w-full">
+                    <span id="badge-status" class="text-[10px] px-2 py-0.5 rounded-full uppercase font-bold transition-all ${isBlocked ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'}">
+                        ${displayStatus}
+                    </span>
+                </div>
+                <input type="hidden" name="${prefix}TYPEREG" id="input-typereg" value="${status}">
+                <button type="button" onclick="toggleRecordStatus('${prefix}')" class="focus:outline-none flex items-center">
+                    <i id="toggle-icon" data-lucide="${isBlocked ? 'toggle-left' : 'toggle-right'}" class="w-8 h-8 ${isBlocked ? 'text-red-500' : 'text-green-500'}"></i>
+                </button>
+            </div>
+        </div>`;
+}
+        
+function toggleRecordStatus(prefix) {
+    const input = document.getElementById('input-typereg');
+    const badge = document.getElementById('badge-status');
+    const icon = document.getElementById('toggle-icon');
+    
+    const isNowBlocking = input.value !== "Bloqueado";
+    
+    if (isNowBlocking) {
+        input.value = "Bloqueado";
+        badge.textContent = "Bloqueado";
+        badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 uppercase font-bold transition-all";
+        icon.style.color = "#ef4444";
+        icon.setAttribute('data-lucide', 'toggle-left');
+    } else {
+        input.value = ""; 
+        badge.textContent = "Registrado";
+        badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 uppercase font-bold transition-all";
+        icon.style.color = "#22c55e";
+        icon.setAttribute('data-lucide', 'toggle-right');
+    }
+    
+    if(window.lucide) lucide.createIcons();
+}
 
         function showViewMode() { 
             document.getElementById('EditDataContent').classList.add('hidden'); 
             document.getElementById('DetalleDataContent').classList.remove('hidden'); 
         }
 
+        function showRegisterMode() {
+            const config = JSON.parse(localStorage.getItem(STORAGE_CONFIG));
+            const data = JSON.parse(localStorage.getItem(STORAGE_DATA));
+            
+            document.getElementById('formTitle').textContent = "Nuevo Registro";
+            document.getElementById('formAction').value = "registerDynamicDataTD";
+            document.getElementById('submitBtn').textContent = "Crear Nuevo Registro";
+
+            renderFields(config, { TABLA_ORIGEN: data.TABLA_ORIGEN }, true);
+            togglePanels('edit');
+        }
+
+        function showEditMode() {
+            const config = JSON.parse(localStorage.getItem(STORAGE_CONFIG));
+            const data = JSON.parse(localStorage.getItem(STORAGE_DATA));
+
+            document.getElementById('formTitle').textContent = "Editar Selección";
+            document.getElementById('formAction').value = "editDynamicDataTD";
+            document.getElementById('submitBtn').textContent = "Guardar Cambios";
+            
+            renderFields(config, data, false);
+            togglePanels('edit');
+        }
+
+        async function showExcludedMode() {
+            const data = JSON.parse(localStorage.getItem(STORAGE_DATA));
+            const tableName = data.TABLA_ORIGEN;
+            const pkField = getTablePrimaryKey(Object.keys(data), tableName);
+            
+            const confirm = await showSystemModal({
+                title: '¿Confirmar Bloqueo?',
+                text: `El registro con ID ${data[pkField]} será marcado como "Bloqueado".`,
+                type: 'warning',
+                confirmText: 'Sí, Bloquear'
+            });
+
+            if (confirm) {
+                const payload = {
+                    action: 'editDynamicDataTD',
+                    TABLA_DESTINO: tableName,
+                    CAMPO_CLAVE: pkField,
+                    TD101RegistroUser: localStorage.getItem(KEYS.USUARIO_ID),
+                    [pkField]: data[pkField],
+                    TD101TYPEREG: 'Bloqueado'
+                };
+                await executeSubmit(payload);
+            }
+        }
+
+        async function showRestoreMode() {
+            const data = JSON.parse(localStorage.getItem(STORAGE_DATA));
+            const tableName = data.TABLA_ORIGEN;
+            const pkField = getTablePrimaryKey(Object.keys(data), tableName);
+            
+            const confirm = await showSystemModal({
+                title: '¿Restaurar Registro?',
+                text: `El registro volverá al estado "Registrado" y será visible en todas las consultas.`,
+                type: 'confirm' // Usando la lógica de confirmación con dos botones
+            });
+
+            if (confirm) {
+                const payload = {
+                    action: 'editDynamicDataTD',
+                    TABLA_DESTINO: tableName,
+                    CAMPO_CLAVE: pkField,
+                    TD101RegistroUser: localStorage.getItem(KEYS.USUARIO_ID),
+                    [pkField]: data[pkField],
+                    TD101TYPEREG: 'Registrado' // Revertimos el estado
+                };
+
+                await executeSubmit(payload);
+            }
+        }
+
+        function togglePanels(mode) {
+            const detailPanel = document.getElementById('DetalleDataContent');
+            const editPanel = document.getElementById('EditDataContent');
+            
+            if (mode === 'edit') {
+                detailPanel.classList.add('hidden');
+                editPanel.classList.remove('hidden');
+            } else {
+                editPanel.classList.add('hidden');
+                detailPanel.classList.remove('hidden');
+            }
+        }
+
         /**
-         * Envío de datos a Google Apps Script
+         * Función centralizada de envío
          */
-        async function handleEditSubmit(e) {
-            e.preventDefault();
-            const f = e.target;
-            const submitBtn = f.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn.textContent;
-            
-            submitBtn.textContent = "Procesando...";
-            submitBtn.disabled = true;
-
-            const formData = new FormData(f);
-            const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA));
-            
-            // Combinamos los datos del formulario con la metadata (TABLA_ORIGEN)
-            const payload = {
-                action: 'editDynamicProfile',
-                Usuario_Tienda: localStorage.getItem(KEYS.TIENDA),
-                TABLA_DESTINO: currentData.TABLA_ORIGEN,
-                ...Object.fromEntries(formData.entries())
-            };
-
+        async function executeSubmit(payload) {
             try {
                 const r = await fetch(GAS_SCRIPT_URL, { method: 'POST', body: new URLSearchParams(payload) });
                 const res = await r.json();
 
                 if (res.success) {
-                    // Actualizamos el objeto DATA en local preservando la TABLA_ORIGEN
-                    const newData = { ...currentData, ...Object.fromEntries(formData.entries()) };
-                    localStorage.setItem(STORAGE_DATA, JSON.stringify(newData));
-                    
-                    await showSystemModal({title:'¡Éxito!', text:'Datos actualizados correctamente.', type:'info'});
+                    await showSystemModal({title:'¡Éxito!', text: res.message, type:'info'});
                     location.reload();
                 } else {
-                    await showSystemModal({title:'Error', text: res.message || "Error al actualizar", type:'warning'});
+                    await showSystemModal({title:'Error', text: res.message, type:'warning'});
                 }
-            } catch (err) { 
-                await showSystemModal({title:'Error', text:'Error de conexión con el servidor', type:'warning'}); 
-            } finally { 
-                submitBtn.textContent = originalBtnText; 
-                submitBtn.disabled = false; 
+            } catch (err) {
+                await showSystemModal({title:'Error', text:'Error de conexión', type:'warning'});
             }
         }
+
+        /**
+         * Procesa y envía los datos del formulario al servidor (GAS).
+         * Maneja registros nuevos, ediciones y cambios de estado (Toggle).
+         */
+
+ async function handleEditSubmit(e) {
+    e.preventDefault();
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = "Procesando...";
+    submitBtn.disabled = true;
+
+    try {
+        const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
+        const action = document.getElementById('formAction').value;
+        const tableName = currentData.TABLA_ORIGEN;
+        const tablePrefix = tableName.split('_')[0].toUpperCase();
+        
+        const headers = Object.keys(currentData).filter(k => k !== 'TABLA_ORIGEN');
+        const primaryKeyField = getTablePrimaryKey(headers, tableName);
+
+        const formData = new FormData(e.target);
+        const formPayload = Object.fromEntries(formData.entries());
+
+        const typeregKey = `${tablePrefix}TYPEREG`;
+        const toggleElement = document.getElementById('input-typereg');
+        
+        // Versión estable: Captura el valor del toggle o mantiene el original
+        const finalStatus = toggleElement ? toggleElement.value : (currentData[typeregKey] || "");
+
+        const payload = {
+            action: action,
+            TABLA_DESTINO: tableName,
+            CAMPO_CLAVE: primaryKeyField,
+            TD101RegistroUser: localStorage.getItem(KEYS.USUARIO_ID),
+            ...formPayload,
+            [typeregKey]: finalStatus
+        };
+
+        // 1. Enviamos al servidor
+        const response = await executeSubmit(payload);
+
+        // 2. Si la respuesta es exitosa (asumiendo que executeSubmit lanza error si falla)
+        // Actualizamos LocalStorage con los nuevos datos enviados para que el Perfil se vea al día
+        const updatedData = { ...currentData, ...formPayload, [typeregKey]: finalStatus };
+        localStorage.setItem(STORAGE_DATA, JSON.stringify(updatedData));
+
+        // 3. NAVEGACIÓN: Volvemos a la vista de perfil/detalle
+        // Esto limpia el formulario y muestra los datos actualizados
+        renderProfile(); 
+        togglePanels('detail'); 
+
+    } catch (err) {
+        console.error("Error:", err);
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
     </script>
 </body>
 </html>
