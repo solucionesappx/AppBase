@@ -75,27 +75,21 @@
                             <i data-lucide="building" class="w-7 h-7 text-blue-500 flex-shrink-0"></i> 
                             <div class="flex flex-col"> 
                                 <span class="text-xl font-extrabold text-blue-500 leading-none block" data-metric="total">0</span> 
-                                <span class="text-xs text-gray-300 leading-none block max-w-16">
-                                    Unidades
-                                </span> 
+                                <span class="text-xs text-gray-300 leading-none block max-w-16">Unidades</span> 
                             </div> 
                         </div> 
                         <div class="metric-card flex-1"> 
                             <i data-lucide="user-minus" class="w-6 h-6 text-red-500 flex-shrink-0"></i> 
                             <div class="flex flex-col"> 
                                 <span class="text-xl font-extrabold text-red-500 leading-none block" data-metric="Morosos">0</span> 
-                                <span class="text-xs text-gray-300 leading-none block max-w-16">
-                                    Morosos
-                                </span> 
+                                <span class="text-xs text-gray-300 leading-none block max-w-16">Morosos</span> 
                             </div> 
                         </div> 
                         <div class="metric-card flex-1"> 
                             <i data-lucide="user-check" class="w-6 h-6 text-green-500 flex-shrink-0"></i> 
                             <div class="flex flex-col"> 
                                 <span class="text-xl font-extrabold text-green-500 leading-none block" data-metric="Solventes">0</span> 
-                                <span class="text-xs text-gray-300 leading-none block max-w-16">
-                                    Solventes
-                                </span> 
+                                <span class="text-xs text-gray-300 leading-none block max-w-16">Solventes</span> 
                             </div> 
                         </div> 
                     </div>
@@ -104,10 +98,8 @@
                 <div id="search-container" class="search-actions-container">
                     <div class="search-input-wrapper">
                         <input type="text" id="search-input" placeholder="Buscar por Nombre, Apartamento,.."
-                                class="w-full rounded-xl shadow-inner
-                                        text-gray-900 dark:text-gray-100
-                                        placeholder-gray-400 focus:ring-2 focus:ring-blue-500"
-                                        autocomplete="off">
+                            class="w-full rounded-xl shadow-inner text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500"
+                            autocomplete="off">
                         <i data-lucide="search" class="search-icon w-5 h-5 text-gray-500 dark:text-gray-300"></i>
                     </div>
                     <button id="clear-search-btn" class="p-2.5 rounded-full text-red-500 hover:bg-gray-700 transition duration-150" title="Reiniciar Filtros y Ordenación">
@@ -124,29 +116,39 @@
                             <div class="relative mb-4">
                                 <i data-lucide="loader-2" class="w-10 h-10 text-blue-400 animate-spin"></i>
                             </div>
-                            <span class="text-blue-400 font-bold text-sm tracking-wider uppercase text-center">
-                                Cargando Base de Datos
-                            </span>
-                            <p class="text-gray-400 text-[10px] mt-2 text-center leading-relaxed">
-                                Sincronizando registros con GAS<br>Por favor, espere.
-                            </p>
+                            <span class="text-blue-400 font-bold text-sm tracking-wider uppercase text-center">Cargando Base de Datos</span>
+                            <p class="text-gray-400 text-[10px] mt-2 text-center leading-relaxed">Sincronizando registros con GAS<br>Por favor, espere.</p>
                         </div>
                     </div>
 
                     <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-700/30">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="layers" class="w-5 h-5 text-blue-400"></i>
-                            <select id="table-selector" class="bg-transparent text-xl font-semibold text-white focus:outline-none cursor-pointer border-none appearance-none pr-4">
-                                <option value="" disabled selected>Cargando Tablas Disponibles... </option>
-                            </select>
+    
+                    <div class="flex items-center gap-2 flex-1 min-w-0">
+                            <i data-lucide="layers" class="w-5 h-5 text-blue-400 shrink-0"></i>
+                            <div class="relative w-full max-w-[300px]"> 
+                                <select id="table-selector" 
+                                    class="bg-transparent text-xl font-semibold text-white focus:outline-none cursor-pointer border-none appearance-none pr-8 w-full truncate">
+                                    <option value="" disabled selected>Cargando Tablas Disponibles... </option>
+                                </select>
+                            </div>
                         </div>
-                        <span id="table-status-tag" class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 uppercase tracking-tighter">
-                            Buscando
-                        </span>
+
+                        <div class="flex items-center gap-3 shrink-0 ml-4">
+                            <span id="table-status-tag" 
+                                class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 uppercase tracking-tighter whitespace-nowrap">
+                                Buscando
+                            </span>
+                            
+                            <div class="h-4 w-[1px] bg-gray-700"></div> <button onclick="showRegisterMode()" 
+                                class="text-green-400 hover:scale-110 transition-transform p-1 flex items-center justify-center" 
+                                title="Nuevo Registro">
+                                <i data-lucide="file-plus-2" class="w-6 h-6"></i>
+                            </button>
+                        </div>
                     </div>
+
                     <div id="data-table-container" class="table-scroll-container"></div>
                 </div>
-                
             </div>
         </main>
 
@@ -257,6 +259,48 @@
             if(btnReload) btnReload.onclick = () => fetchData(currentTableName);
         });
     
+        function showRegisterMode() {
+            const tableKey = String(currentTableName).trim().toUpperCase();
+            const tablePrefix = tableKey.split('_')[0];
+            const configMap = {};
+            
+            // Usamos los encabezados que ya están cargados en la tabla actual
+            const headers = tableConfig.columnOrder || (originalData.length > 0 ? Object.keys(originalData[0]) : []);
+            
+            headers.forEach(h => {
+                const colKey = String(h).trim().toUpperCase();
+                const colConfig = rawConfig.find(c => 
+                    String(c.ID_Columna || '').trim().toUpperCase() === colKey && 
+                    String(c.Tabla || '').trim().toUpperCase() === tableKey
+                );
+                
+                const marca = colConfig ? String(colConfig.Visible_Encabezado || '').trim().toUpperCase() : '';
+                const cleanH = colKey.replace(/_/g, '');
+
+                // Bloqueamos lo que NO debe tocarse nunca (NOMBREC, DAT01, IDs, etc.)
+                const isBlocked = (marca === 'XX') || 
+                                cleanH.includes('REGISTRO') || 
+                                cleanH === `${tablePrefix}DAT01` || 
+                                cleanH === `${tablePrefix}NOMBREC` ||
+                                cleanH === `${tablePrefix}ID`;
+
+                configMap[h] = {
+                    label: tableConfig.displayMap[h] || h,
+                    editable: !isBlocked
+                };
+            });
+
+            // Guardamos la intención de "NUEVO"
+            localStorage.setItem('TABLE_CONFIG', JSON.stringify(configMap));
+            localStorage.setItem('TABLE_DATA', JSON.stringify({ 
+                TABLA_ORIGEN: currentTableName, 
+                IS_NEW: true 
+            }));
+            
+            // Saltamos a la página del formulario
+            window.location.href = 'FormData.html';
+        }
+
         function updateTableSelector(tables) {
             const selector = document.getElementById('table-selector');
             if (!selector) return;
@@ -519,9 +563,38 @@
                 morosos: document.querySelector('[data-metric="Morosos"]'),
                 solventes: document.querySelector('[data-metric="Solventes"]')
             };
-            if (m.total) m.total.textContent = data.length;
-            if (m.morosos) m.morosos.textContent = data.filter(r => String(r.ESTADO || '').toUpperCase() === 'MOROSO').length;
-            if (m.solventes) m.solventes.textContent = data.filter(r => String(r.ESTADO || '').toUpperCase() === 'SOLVENTE').length;
+
+            // 1. Obtener el prefijo dinámicamente (Primeros 5 caracteres, ej: TD101)
+            // Usamos currentTableName que es la variable global que controla la tabla activa
+            const tablePrefix = String(currentTableName || '').substring(0, 5).toUpperCase();
+            const typeRegField = `${tablePrefix}TYPEREG`;
+
+            // 2. Filtrar los registros que NO están bloqueados
+            // Si por alguna razón la tabla no tiene el campo TYPEREG, 
+            // el filtro simplemente dejará pasar todos los registros.
+            const activeData = data.filter(r => {
+                const regStatus = String(r[typeRegField] || '').trim().toUpperCase();
+                return regStatus !== 'BLOQUEADO';
+            });
+
+            // 3. Renderizar métricas basadas solo en data activa
+            if (m.total) {
+                m.total.textContent = activeData.length;
+            }
+
+            if (m.morosos) {
+                const countMorosos = activeData.filter(r => 
+                    String(r.ESTADO || '').trim().toUpperCase() === 'MOROSO'
+                ).length;
+                m.morosos.textContent = countMorosos;
+            }
+
+            if (m.solventes) {
+                const countSolventes = activeData.filter(r => 
+                    String(r.ESTADO || '').trim().toUpperCase() === 'SOLVENTE'
+                ).length;
+                m.solventes.textContent = countSolventes;
+            }
         }
 
         function getFormattedValue(key, value) {
