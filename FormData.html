@@ -252,6 +252,14 @@
             }
         });
 
+        // Función auxiliar para obtener la lista de IDs de la tabla principal
+        function getValidMainIDs() {
+            // Aquí puedes obtenerlos de un objeto global donde guardes la lista de registros 
+            // o del localStorage si guardaste la tabla completa.
+            const fullDataTable = JSON.parse(localStorage.getItem('FULL_DATA_TD101') || '[]');
+            return fullDataTable.map(row => row.TD101ID); 
+        }
+        
         /**
          * Identifica el campo clave único (PK) de la tabla.
          */
