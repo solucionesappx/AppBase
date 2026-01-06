@@ -242,6 +242,7 @@
                 // 4. ASIGNACIÓN DINÁMICA DE SUBMIT
                 const form = document.getElementById('editDataForm');
                 if (form) {
+                    // Si isNew es true, usa handleInsertSubmit, de lo contrario handleEditSubmit
                     form.onsubmit = isNew ? handleInsertSubmit : handleEditSubmit;
                 }
 
@@ -319,6 +320,9 @@
             if(window.lucide) lucide.createIcons();
         }
 
+        /**
+         * Renderiza los campos del formulario de edición/creación.
+         */
         function renderFields(config, data, isNew = false) {
             const container = document.getElementById('editDataFormFields');
             if (!container) return;
@@ -330,20 +334,23 @@
             const pkExpectedLength = tablePrefix.length + 2;
             const identityFieldName = `${tablePrefix}IDNOMBRE`;
 
-            // 1. Mapeo y generación de campos
             let fieldsHTML = Object.keys(config).map(colId => {
                 const field = config[colId];
                 const cleanColId = colId.toUpperCase().trim();
                 let value = isNew ? '' : (data[colId] || '');
                 
-                // --- BLINDAJE PK TÉCNICA ---
+                // --- BLINDAJE PK TÉCNICA (Limpieza de formato) ---
                 const isTechnicalPK = (cleanColId.length === pkExpectedLength) && 
                                     cleanColId.startsWith(tablePrefix) && 
                                     cleanColId.endsWith('ID');
-                if (isTechnicalPK) return isNew ? '' : `<input type="hidden" name="${colId}" value="${value}">`;
+                
+                if (isTechnicalPK) {
+                    // Limpiar puntos de miles si existen para el valor técnico
+                    const cleanIdValue = String(value).replace(/[.,\s]/g, '');
+                    return isNew ? '' : `<input type="hidden" name="${colId}" value="${cleanIdValue}">`;
+                }
 
-                // --- LÓGICA DE BLOQUEO DE NOMBREC Y OTROS ---
-                // Bloqueamos NOMBREC (calculado), DAT01 (técnico) y cualquier marca XX
+                // --- LÓGICA DE BLOQUEO DE CAMPOS ---
                 const isCalculatedField = cleanColId === `${tablePrefix}NOMBREC`;
                 const isSystemField = cleanColId.includes('REGISTRO') || cleanColId === `${tablePrefix}DAT01`;
                 const canEdit = isNew ? (!isCalculatedField && !isSystemField && field.editable !== false) : field.editable !== false;
@@ -359,34 +366,171 @@
                 const isImportant = cleanColId.includes('NOMBREC') || cleanColId.includes('DAT01');
                 const valueClass = isImportant ? 'text-[22px] text-blue-300 font-bold' : 'text-[18px] text-gray-200';
                 
-                // Añadimos ID al input para la lógica de autocalcular
                 return `
                     <div class="border-b border-gray-700/40 py-1">
                         <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
                         <div class="flex items-center min-h-[32px]">
-                            ${canEdit ? 
-                                `<input type="text" name="${colId}" id="input-${cleanColId}" value="${value}" 
-                                    class="w-full bg-transparent outline-none border-none focus:ring-0 ${valueClass} p-0 m-0">` :
-                                `<input type="text" name="${colId}" id="input-${cleanColId}" value="${value}" readonly 
-                                    class="w-full bg-transparent outline-none border-none focus:ring-0 ${valueClass} p-0 m-0 opacity-60 cursor-not-allowed" 
-                                    title="Campo automático o bloqueado">`
-                            }
+                            <input type="text" name="${colId}" id="input-${cleanColId}" value="${value}" 
+                                ${!canEdit ? 'readonly' : ''}
+                                class="w-full bg-transparent outline-none border-none focus:ring-0 ${valueClass} p-0 m-0 ${!canEdit ? 'opacity-60 cursor-not-allowed' : ''}" 
+                                ${!canEdit ? 'title="Campo automático o bloqueado"' : ''}>
                         </div>
                     </div>`;
             }).join('');
 
             container.innerHTML = fieldsHTML;
 
-            // --- INICIALIZACIÓN DE LÓGICAS POST-RENDER ---
             if (window.lucide) lucide.createIcons();
 
-            // Si es un registro nuevo o edición, activamos el cálculo de NOMBREC
-            // Usamos setTimeout para asegurar que el DOM esté listo
             setTimeout(() => {
                 if (typeof setupNombreCAutoCalculate === 'function') {
                     setupNombreCAutoCalculate(tablePrefix);
                 }
             }, 100);
+        }
+
+        /**
+         * Maneja el envío de datos para la EDICIÓN.
+         */
+        async function handleEditSubmit(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = "Procesando...";
+            submitBtn.disabled = true;
+
+            try {
+                const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
+                const action = document.getElementById('formAction').value;
+                const tableName = currentData.TABLA_ORIGEN;
+                const tablePrefix = tableName.split('_')[0].toUpperCase();
+                
+                const headers = Object.keys(currentData).filter(k => k !== 'TABLA_ORIGEN');
+                const primaryKeyField = getTablePrimaryKey(headers, tableName);
+
+                const formData = new FormData(e.target);
+                const formPayload = Object.fromEntries(formData.entries());
+
+                // --- SANITIZACIÓN CRÍTICA DEL ID ---
+                // Buscamos el ID en el form o en el storage y le quitamos puntos/espacios
+                let idValue = formPayload[primaryKeyField] || currentData[primaryKeyField];
+                if (idValue) idValue = String(idValue).replace(/[.,\s]/g, '');
+
+                if (!idValue && action === "editDynamicDataTD") {
+                    throw new Error("No se localizó el ID para actualizar el registro.");
+                }
+
+                const typeregKey = `${tablePrefix}TYPEREG`;
+                const toggleElement = document.getElementById('input-typereg');
+                const finalStatus = toggleElement ? toggleElement.value : (currentData[typeregKey] || "");
+
+                const payload = {
+                    action: action,
+                    TABLA_DESTINO: tableName,
+                    CAMPO_CLAVE: primaryKeyField,
+                    [primaryKeyField]: idValue, // Aseguramos que el ID vaya limpio
+                    TD101RegistroUser: localStorage.getItem(KEYS.USUARIO_ID),
+                    ...formPayload,
+                    [typeregKey]: finalStatus
+                };
+
+                // Ejecutar envío
+                await executeSubmit(payload);
+
+                // Actualizar LocalStorage con los nuevos valores para la vista de detalle
+                const updatedData = { ...currentData, ...formPayload, [typeregKey]: finalStatus };
+                updatedData[primaryKeyField] = idValue; // Guardar ID limpio
+                localStorage.setItem(STORAGE_DATA, JSON.stringify(updatedData));
+
+                renderProfile(); 
+                togglePanels('detail'); 
+
+            } catch (err) {
+                console.error("Error en handleEditSubmit:", err);
+                showSystemModal({ title: 'Error', text: err.message, type: 'warning' });
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        /**
+         * Maneja el envío de datos para un NUEVO REGISTRO.
+         */
+        async function handleInsertSubmit(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = "Procesando...";
+            submitBtn.disabled = true;
+
+            try {
+                const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
+                const currentConfig = JSON.parse(localStorage.getItem(STORAGE_CONFIG) || '{}');
+                
+                // 1. Identificación de Tabla y Prefijo
+                const tableName = currentData.TABLA_ORIGEN || "TD101_BASIC"; 
+                const tablePrefix = tableName.split('_')[0].toUpperCase();
+
+                // 2. Identificación de PK
+                const headers = Object.keys(currentConfig).length > 0 ? Object.keys(currentConfig) : Object.keys(currentData);
+                const primaryKeyField = getTablePrimaryKey(headers, tableName);
+
+                // 3. Captura de datos del formulario
+                const formData = new FormData(e.target);
+                const formPayload = Object.fromEntries(formData.entries());
+
+                // 4. Inyección de Campos Críticos
+                const tiendaId = localStorage.getItem(KEYS.TIENDA_ID);
+                if (!tiendaId) throw new Error("No se encontró el ID de Localidad (TIENDA_ID).");
+
+                const payload = {
+                    action: "registerDynamicDataTD",
+                    TABLA_DESTINO: tableName,
+                    CAMPO_CLAVE: primaryKeyField,
+                    // --- AJUSTE DE VÍNCULO ---
+                    // Siempre enviamos TD101LOC para mantener la relación entre tablas
+                    "TD101LOC": tiendaId, 
+                    [`${tablePrefix}RegistroUser`]: localStorage.getItem(KEYS.USUARIO_ID),
+                    ...formPayload
+                };
+
+                // --- 📊 VALIDACIÓN EN CONSOLA ---
+                console.group("🚀 ENVÍO DE NUEVO REGISTRO (VINCULADO)");
+                console.log("Tabla Destino:", tableName);
+                console.log("Vínculo Fijo:", "TD101LOC =", tiendaId);
+                console.table(payload);
+                console.groupEnd();
+
+                // 5. Envío a GAS
+                const response = await fetch(GAS_SCRIPT_URL, { 
+                    method: 'POST', 
+                    body: new URLSearchParams(payload) 
+                });
+                
+                const res = await response.json();
+
+                if (res.success) {
+                    await showSystemModal({title: '¡Éxito!', text: `Registro creado en ${tableName}`, type: 'info'});
+                    
+                    localStorage.setItem(STORAGE_DATA, JSON.stringify({
+                        ...res.data,
+                        TABLA_ORIGEN: tableName,
+                        IS_NEW: false
+                    }));
+
+                    window.location.reload();
+                } else {
+                    await showSystemModal({title: 'Error', text: res.message, type: 'warning'});
+                }
+
+            } catch (err) {
+                console.error("❌ Error:", err);
+                showSystemModal({ title: 'Error', text: err.message, type: 'warning' });
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
         }
 
         function renderToggleHTML(label, value, status, isBlocked, prefix, colId) {
@@ -556,66 +700,6 @@
                 }
             } catch (err) {
                 await showSystemModal({title:'Error', text:'Error de conexión', type:'warning'});
-            }
-        }
-
-        /**
-         * Procesa y envía los datos del formulario al servidor (GAS).
-         * Maneja registros nuevos, ediciones y cambios de estado (Toggle).
-         */
-
-        async function handleEditSubmit(e) {
-            e.preventDefault();
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = "Procesando...";
-            submitBtn.disabled = true;
-
-            try {
-                const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
-                const action = document.getElementById('formAction').value;
-                const tableName = currentData.TABLA_ORIGEN;
-                const tablePrefix = tableName.split('_')[0].toUpperCase();
-                
-                const headers = Object.keys(currentData).filter(k => k !== 'TABLA_ORIGEN');
-                const primaryKeyField = getTablePrimaryKey(headers, tableName);
-
-                const formData = new FormData(e.target);
-                const formPayload = Object.fromEntries(formData.entries());
-
-                const typeregKey = `${tablePrefix}TYPEREG`;
-                const toggleElement = document.getElementById('input-typereg');
-                
-                // Versión estable: Captura el valor del toggle o mantiene el original
-                const finalStatus = toggleElement ? toggleElement.value : (currentData[typeregKey] || "");
-
-                const payload = {
-                    action: action,
-                    TABLA_DESTINO: tableName,
-                    CAMPO_CLAVE: primaryKeyField,
-                    TD101RegistroUser: localStorage.getItem(KEYS.USUARIO_ID),
-                    ...formPayload,
-                    [typeregKey]: finalStatus
-                };
-
-                // 1. Enviamos al servidor
-                const response = await executeSubmit(payload);
-
-                // 2. Si la respuesta es exitosa (asumiendo que executeSubmit lanza error si falla)
-                // Actualizamos LocalStorage con los nuevos datos enviados para que el Perfil se vea al día
-                const updatedData = { ...currentData, ...formPayload, [typeregKey]: finalStatus };
-                localStorage.setItem(STORAGE_DATA, JSON.stringify(updatedData));
-
-                // 3. NAVEGACIÓN: Volvemos a la vista de perfil/detalle
-                // Esto limpia el formulario y muestra los datos actualizados
-                renderProfile(); 
-                togglePanels('detail'); 
-
-            } catch (err) {
-                console.error("Error:", err);
-            } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
             }
         }
 
