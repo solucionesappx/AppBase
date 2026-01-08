@@ -237,6 +237,12 @@
             return `${formatDate(v)} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
         }
         function logout(){localStorage.clear();window.location.href='index.html'}
+        
+        console.group("🔍 REVISIÓN DE LOCALSTORAGE");
+        console.log("👤 Datos de Usuario (KEYS):");
+        Object.entries(KEYS).forEach(([key, storageKey]) => {
+            console.log(`   ${key}: ${localStorage.getItem(storageKey)}`);
+        });
     </script>
 
     <script>
@@ -264,11 +270,13 @@
             const tablePrefix = tableKey.split('_')[0];
             const configMap = {};
             
-            // Usamos los encabezados que ya están cargados en la tabla actual
-            const headers = tableConfig.columnOrder || (originalData.length > 0 ? Object.keys(originalData[0]) : []);
+            // Obtenemos todos los encabezados reales de la hoja
+            const rawHeaders = tableConfig.columnOrder || (originalData.length > 0 ? Object.keys(originalData[0]) : []);
             
-            headers.forEach(h => {
+            rawHeaders.forEach(h => {
                 const colKey = String(h).trim().toUpperCase();
+                
+                // Buscar configuración en ConfigViewTB
                 const colConfig = rawConfig.find(c => 
                     String(c.ID_Columna || '').trim().toUpperCase() === colKey && 
                     String(c.Tabla || '').trim().toUpperCase() === tableKey
@@ -277,7 +285,15 @@
                 const marca = colConfig ? String(colConfig.Visible_Encabezado || '').trim().toUpperCase() : '';
                 const cleanH = colKey.replace(/_/g, '');
 
-                // Bloqueamos lo que NO debe tocarse nunca (NOMBREC, DAT01, IDs, etc.)
+                // REGLA DE FILTRADO PARA EL FORMULARIO:
+                // 1. Si es el ID técnico (ej. TD101ID), se incluye pero se bloquea (esencial para el backend)
+                // 2. Si la marca es 'XX', se incluye pero se bloquea.
+                // 3. Si la marca es 'NO', NO SE INCLUYE en el configMap (no sale en el formulario).
+                // 4. Si la marca está vacía, se incluye y es editable.
+
+                if (marca === 'NO') return; // Exclusión total del formulario
+
+                // Definir si es bloqueado (no editable)
                 const isBlocked = (marca === 'XX') || 
                                 cleanH.includes('REGISTRO') || 
                                 cleanH === `${tablePrefix}DAT01` || 
@@ -290,14 +306,12 @@
                 };
             });
 
-            // Guardamos la intención de "NUEVO"
             localStorage.setItem('TABLE_CONFIG', JSON.stringify(configMap));
             localStorage.setItem('TABLE_DATA', JSON.stringify({ 
                 TABLA_ORIGEN: currentTableName, 
                 IS_NEW: true 
             }));
             
-            // Saltamos a la página del formulario
             window.location.href = 'FormData.html';
         }
 
@@ -318,169 +332,186 @@
         }
 
         async function fetchData(tableName) {
+            // 1. Bloqueo de UI y Preparación
             const selector = document.getElementById('table-selector');
             if (selector) selector.disabled = true; 
             
-            toggleGlobalLoader(true); 
+            // Si tienes una función de loader, la activamos
+            if (typeof toggleGlobalLoader === 'function') toggleGlobalLoader(true); 
 
             const userTienda = localStorage.getItem(KEYS.TIENDA) || 'DEFAULT';
-            const url = `${GET_URL}?tableName=${tableName}&userTienda=${userTienda}`;
+            
+            // Construcción de la URL con parámetros para el nuevo doGet
+            const url = `${GET_URL}?tableName=${encodeURIComponent(tableName)}&userTienda=${encodeURIComponent(userTienda)}`;
 
             try {
                 const response = await fetch(url);
+                
+                if (!response.ok) throw new Error(`Error de red: ${response.status}`);
+                
                 const res = await response.json();
 
                 if (res.success) {
+                    // 2. Sincronización de Variables Globales
                     currentTableName = tableName;
-                    originalData = res.data;
+                    originalData = res.data || [];
                     
-                    // --- CAPTURA DE CONFIGURACIÓN DEL BACKEND ---
-                    // Asumimos que el backend envía la hoja ConfigViewTB en res.config
+                    /** * VITAL: Captura de ConfigViewTB enviada desde el Backend.
+                     * Sin esto, renderTable no puede mapear nombres amigables ni filtrar campos 'NO'.
+                     */
                     rawConfig = res.config || []; 
 
+                    // 3. Limpieza de interfaz para la nueva carga
                     currentSearchTerm = "";
                     const searchInput = document.getElementById('search-input');
                     if (searchInput) searchInput.value = "";
 
+                    // 4. Actualización del Selector (Lista de tablas dinámicas)
                     if (res.availableTables) {
                         updateTableSelector(res.availableTables);
                     }
 
+                    // 5. Actualización de etiquetas de estado y valor del selector
                     updateStatusTag(tableName);
                     if (selector) selector.value = tableName;
 
-                    tableConfig.columnOrder = res.columnOrder;
-                    tableConfig.displayMap = res.displayMap;
+                    /**
+                     * 6. Configuración de Metadatos de la Tabla.
+                     * Si el backend no envía orden o mapas específicos, usamos los de la data.
+                     */
+                    tableConfig.columnOrder = res.columnOrder || (originalData.length > 0 ? Object.keys(originalData[0]) : []);
+                    tableConfig.displayMap = res.displayMap || {};
                     tableConfig.alignMap = res.alignMap || {};
 
+                    // 7. Renderizado Final
+                    // Aquí es donde tu renderTable usará el rawConfig recién cargado.
                     renderTable(originalData);
                     updateMetrics(originalData);
                     
+                    // Refrescar iconos de Lucide si están presentes
                     if (window.lucide) lucide.createIcons();
                     
                 } else {
-                    showSystemModal({ title: 'Error', text: res.error, type: 'warning' });
+                    // Manejo de errores lógicos del servidor (ej. tabla no encontrada)
+                    const errorMsg = res.message || res.error || "Error desconocido en el servidor";
+                    if (typeof showSystemModal === 'function') {
+                        showSystemModal({ title: 'Atención', text: errorMsg, type: 'warning' });
+                    } else {
+                        alert("Error: " + errorMsg);
+                    }
                 }
             } catch (err) {
-                console.error("Error:", err);
-                showSystemModal({ title: 'Error de Red', text: "Fallo de conexión", type: 'warning' });
+                console.error("Error crítico en fetchData:", err);
+                if (typeof showSystemModal === 'function') {
+                    showSystemModal({ title: 'Error de Conexión', text: "No se pudo establecer comunicación con el servidor.", type: 'warning' });
+                }
             } finally {
+                // 8. Desbloqueo de UI
                 if (selector) selector.disabled = false; 
-                toggleGlobalLoader(false);
+                if (typeof toggleGlobalLoader === 'function') toggleGlobalLoader(false);
             }
         }
 
-        function renderTable(data) {
-            const container = document.getElementById('data-table-container');
-            if (!container) return;
+function renderTable(data) {
+    const container = document.getElementById('data-table-container');
+    if (!container) return;
 
-            container.innerHTML = `
-                <table id="main-table">
-                    <thead><tr id="table-header"></tr></thead>
-                    <tbody id="table-body"></tbody>
-                </table>
-            `;
+    container.innerHTML = `
+        <table id="main-table">
+            <thead><tr id="table-header"></tr></thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    `;
 
-            const tableHeader = document.getElementById('table-header');
-            const tableBody = document.getElementById('table-body');
+    const tableHeader = document.getElementById('table-header');
+    const tableBody = document.getElementById('table-body');
+    const tableKey = String(currentTableName).trim().toUpperCase();
+    const tablePrefix = tableKey.split('_')[0];
+
+    // 1. HEADERS VISUALES (Usamos columnOrder filtrado del backend)
+    const headers = tableConfig.columnOrder; 
+
+    // Columna ID Visual (Contador)
+    const thId = document.createElement('th');
+    thId.className = 'sticky-id-cell';
+    thId.innerHTML = `<div class="header-content" style="justify-content: center;"><span>#</span></div>`;
+    tableHeader.appendChild(thId);
+
+    // Dibujar columnas autorizadas por el backend
+    headers.forEach(h => {
+        // Ocultar ID técnico de la vista de tabla, pero se mantiene en el objeto de datos
+        if (h.toUpperCase() === `${tablePrefix}ID`) return;
+
+        const th = document.createElement('th');
+        const friendlyName = tableConfig.displayMap[h] || h;
+        
+        let iconName = sortConfig.key === h ? (sortConfig.direction === 'desc' ? 'chevron-down' : 'chevron-up') : 'chevrons-up-down';
+        
+        th.innerHTML = `
+            <div class="header-content" style="justify-content: center;">
+                <span>${friendlyName}</span>
+                <i data-lucide="${iconName}" class="w-4 h-4 opacity-30"></i>
+            </div>`;
+        th.onclick = () => handleSort(h);
+        tableHeader.appendChild(th);
+    });
+
+    // 2. FILAS Y LÓGICA DE FORMULARIO
+    data.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-blue-500/10 cursor-pointer transition-colors group';
+
+        tr.ondblclick = () => {
+            const configMap = {};
             
-            // 1. OBTENCIÓN DE DATOS Y PREFIJO
-            const rawHeaders = tableConfig.columnOrder || (data.length > 0 ? Object.keys(data[0]) : []);
-            const tableKey = String(currentTableName).trim().toUpperCase();
-            const tablePrefix = tableKey.split('_')[0]; // Ejemplo: TD101
-
-            // 2. FILTRADO VISUAL (Excluir NO y el ID técnico)
-            const headers = rawHeaders.filter(h => {
-                const colKey = String(h).trim().toUpperCase();
-                
-                // HARDCODE: Si es el ID técnico (ej. TD101ID), no se muestra en la tabla
-                if (colKey === `${tablePrefix}ID`) return false;
-
-                const colConfig = rawConfig.find(c => 
-                    String(c.ID_Columna || '').trim().toUpperCase() === colKey && 
-                    String(c.Tabla || '').trim().toUpperCase() === tableKey
-                );
-                
-                // Excluir si en ConfigViewTB dice "NO"
-                return colConfig ? String(colConfig.Visible_Encabezado || '').trim().toUpperCase() !== 'NO' : true;
-            });
-
-            // Encabezado de ID Visual (1, 2, 3...)
-            const thId = document.createElement('th');
-            thId.className = 'sticky-id-cell';
-            thId.innerHTML = `<div class="header-content" style="justify-content: center;"><span>ID</span></div>`;
-            tableHeader.appendChild(thId);
-
-            // Dibujar encabezados filtrados
             headers.forEach(h => {
-                const th = document.createElement('th');
-                const friendlyName = tableConfig.displayMap[h] || h;
-                let iconName = sortConfig.key === h ? (sortConfig.direction === 'desc' ? 'chevron-down' : 'chevron-up') : 'chevrons-up-down';
-                let iconClass = sortConfig.key === h ? 'opacity-100 text-blue-400' : 'opacity-30';
-                th.innerHTML = `<div class="header-content" style="justify-content: center;"><span>${friendlyName}</span><i data-lucide="${iconName}" class="w-4 h-4 ${iconClass}"></i></div>`;
-                th.onclick = () => handleSort(h);
-                tableHeader.appendChild(th);
-            });
+                const colKey = h.toUpperCase();
+                const colConfig = rawConfig.find(c => c.ID_Columna === h);
+                const marca = colConfig ? colConfig.Visible_Encabezado.toUpperCase() : '';
 
-            // 3. RENDERIZAR FILAS
-            data.forEach((row, idx) => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-blue-500/10 cursor-pointer transition-colors group';
+                const isPK = colKey === `${tablePrefix}ID`;
+                const isBlocked = (marca === 'XX') || isPK || colKey.includes('REGISTRO') || colKey.includes('DAT01');
 
-                tr.ondblclick = () => {
-                    const configMap = {};
-                    const formattedRow = { ...row }; 
-                    
-                    // IMPORTANTE: Al guardar en LocalStorage usamos rawHeaders (TODOS los campos)
-                    // Esto asegura que el ID viaje a FormData.html aunque no se vea aquí
-                    rawHeaders.forEach(h => {
-                        const colKey = String(h).trim().toUpperCase();
-                        formattedRow[h] = getFormattedValue(h, row[h]);
+                // DETECCIÓN DE TIPO SELECT: Si termina en ID y no es la PK
+                const isSelect = h.endsWith('ID') && !isPK;
 
-                        const colConfig = rawConfig.find(c => 
-                            String(c.ID_Columna || '').trim().toUpperCase() === colKey && 
-                            String(c.Tabla || '').trim().toUpperCase() === tableKey
-                        );
-                        
-                        const marca = colConfig ? String(colConfig.Visible_Encabezado || '').trim().toUpperCase() : '';
-                        const cleanH = colKey.replace(/_/g, '');
-                        
-                        const isBlocked = (marca === 'XX') || 
-                                        cleanH.includes('ID') || 
-                                        cleanH.includes('REGISTRO') || 
-                                        cleanH === `${tablePrefix}NOMBREC` || 
-                                        cleanH === `${tablePrefix}DAT01`;
-
-                        configMap[h] = {
-                            label: tableConfig.displayMap[h] || h,
-                            editable: !isBlocked
-                        };
-                    });
-
-                    formattedRow.TABLA_ORIGEN = currentTableName;
-                    localStorage.setItem('TABLE_CONFIG', JSON.stringify(configMap));
-                    localStorage.setItem('TABLE_DATA', JSON.stringify(formattedRow));
-                    window.location.href = 'FormData.html';
+                configMap[h] = {
+                    label: tableConfig.displayMap[h] || h,
+                    editable: !isBlocked,
+                    type: isSelect ? 'select' : 'text'
                 };
-
-                // Celdas visuales (Usando el array 'headers' filtrado)
-                const tdId = document.createElement('td');
-                tdId.className = 'table-data-cell sticky-id-cell px-3 text-center';
-                tdId.textContent = idx + 1;
-                tr.appendChild(tdId);
-
-                headers.forEach(h => {
-                    const td = document.createElement('td');
-                    td.className = 'table-data-cell px-3';
-                    td.style.textAlign = tableConfig.alignMap[h] || 'left';
-                    td.innerHTML = highlightText(getFormattedValue(h, row[h]), typeof currentSearchTerm !== 'undefined' ? currentSearchTerm : "");
-                    tr.appendChild(td);
-                });
-                tableBody.appendChild(tr);
             });
 
-            if (window.lucide) lucide.createIcons();
-        }
+            // Persistencia para FormData.html
+            localStorage.setItem('TABLE_CONFIG', JSON.stringify(configMap));
+            localStorage.setItem('TABLE_DATA', JSON.stringify({ ...row, TABLA_ORIGEN: currentTableName }));
+            window.location.href = 'FormData.html';
+        };
+
+        // Celda ID Visual
+        const tdId = document.createElement('td');
+        tdId.className = 'table-data-cell sticky-id-cell text-center';
+        tdId.textContent = idx + 1;
+        tr.appendChild(tdId);
+
+        // Celdas de Datos
+        headers.forEach(h => {
+            if (h.toUpperCase() === `${tablePrefix}ID`) return;
+            const td = document.createElement('td');
+            td.className = 'table-data-cell px-3';
+            td.style.textAlign = tableConfig.alignMap[h] || 'left';
+            
+            // Usamos formato de moneda/fecha si la función existe
+            const val = typeof getFormattedValue === 'function' ? getFormattedValue(h, row[h]) : row[h];
+            td.innerHTML = highlightText(val, typeof currentSearchTerm !== 'undefined' ? currentSearchTerm : "");
+            tr.appendChild(td);
+        });
+
+        tableBody.appendChild(tr);
+    });
+
+    if (window.lucide) lucide.createIcons();
+}
 
         // --- MÉTODOS DE APOYO (Sin cambios significativos) ---
         function updateStatusTag(tableName) {
