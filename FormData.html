@@ -27,6 +27,9 @@
         .light-mode .modal-content { box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .hidden { display:none; }
         .btn-disabled { opacity: 0.3 !important;cursor: not-allowed !important;pointer-events: none !important;filter: grayscale(1); }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .hidden { display: none !important; }
     </style>
     <style>
         /* ESTILOS ESPECÍFICOS DE LA SECCIÓN (SPA FormData) */
@@ -44,7 +47,18 @@
             </div>
         </header>
 
-        <main id="main-content">
+        <main id="main-content" class="relative"> <div id="global-loader" class="hidden absolute inset-0 z-[100] flex items-center justify-center rounded-xl bg-gray-900/60 backdrop-blur-sm">
+                <div class="flex flex-col items-center p-8 bg-gray-800/95 border border-blue-500/40 rounded-2xl shadow-2xl min-w-[320px] transform -translate-y-10">
+                    <div class="relative mb-4">
+                        <i data-lucide="loader-2" class="w-10 h-10 text-blue-400 animate-spin"></i>
+                    </div>
+                    <span class="text-blue-400 font-bold text-sm tracking-wider uppercase text-center">Cargando Base de Datos</span>
+                    <p class="text-gray-400 text-[10px] mt-2 text-center leading-relaxed">
+                        Sincronizando registros con Google Sheets<br>Por favor, espere.
+                    </p>
+                </div>
+            </div>
+
             <div id="DetalleDataContent" class="p-6 bg-gray-800 rounded-xl border border-gray-700 shadow-2xl">
                 <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-4">
                     <h3 class="text-2xl font-bold text-blue-400">Detalle Selección</h3>
@@ -55,31 +69,38 @@
                         <button onclick="showEditMode()" class="text-yellow-400 hover:scale-110 transition-transform" title="Editar Registro">
                             <i data-lucide="file-pen" class="w-6 h-6"></i>
                         </button>
-                        </div>
+                    </div>
                 </div>
                 <div id="perfilBodyContent" class="space-y-1 pb-20"></div>
             </div>
 
-        <div id="EditDataContent" class="hidden p-6 bg-gray-800 rounded-xl border border-gray-700 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-4">
-                <h2 id="formTitle" class="text-2xl font-bold text-white">Editar Selección</h2>
-                
-                <div class="flex items-center gap-4">                   
-                    <button onclick="showViewMode()" class="text-red-400 hover:scale-110 transition-transform">
-                        <i data-lucide="circle-x" class="w-7 h-7"></i>
-                    </button>
+            <div id="EditDataContent" class="hidden p-6 bg-gray-800 rounded-xl border border-gray-700 shadow-2xl">
+                <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-4">
+                    <h2 id="formTitle" class="text-2xl font-bold text-white">Editar Selección</h2>
+                    <div class="flex items-center gap-4">                   
+                        <button onclick="showViewMode()" class="text-red-400 hover:scale-110 transition-transform">
+                            <i data-lucide="circle-x" class="w-7 h-7"></i>
+                        </button>
+                    </div>
                 </div>
+                
+                <form id="editDataForm" class="space-y-1">
+                    <input type="hidden" id="formAction" name="action" value="editDynamicDataTD">
+                    
+                    <div id="editDataFormFields" class="space-y-1">
+                        </div>                   
+
+                    <button id="submitBtn" type="submit" class="w-full bg-blue-600 mt-6 py-4 rounded-lg font-bold text-white hover:bg-blue-700 transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2">
+                        <span>Guardar Cambios</span>
+                        <i data-lucide="save" class="w-5 h-5"></i>
+                    </button>
+                </form>
+                
+                <p class="text-sm text-gray-400 text-center pt-4 pb-12">
+                    Los campos que no sean modificados mantendrán su valor original.
+                </p>
             </div>
-            
-            <form id="editDataForm" class="space-y-1">
-                <input type="hidden" id="formAction" name="action" value="editDynamicDataTD">
-                <div id="editDataFormFields" class="space-y-1"></div>                    
-                <button id="submitBtn" type="submit" class="w-full bg-blue-600 mt-6 py-4 rounded-lg font-bold text-white hover:bg-blue-700 transition-all active:scale-95 shadow-lg">
-                    Guardar Cambios
-                </button>
-            </form>
-            <p class="text-sm text-gray-400 text-center pt-4 pb-12">Los campos que no sean modificados mantendrán su valor.</p>
-        </div>
+
         </main>
 
         <footer id="app-footer" class="bottom-0 h-18 border-t flex items-center justify-around px-2 py-1">
@@ -188,7 +209,7 @@
         const STORAGE_CONFIG = 'TABLE_CONFIG';
         const STORAGE_DATA = 'TABLE_DATA';
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => { // Se agrega async aquí
             // 1. SEGURIDAD: Validar sesión
             if (!localStorage.getItem(KEYS.CORREO)) {
                 window.location.replace('index.html');
@@ -203,6 +224,15 @@
                 const data = JSON.parse(rawData);
                 const config = JSON.parse(rawConfig);
                 const isNew = data.IS_NEW === true;
+                const tableName = data.TABLA_ORIGEN || "";
+
+                // --- NUEVO: PRECARGA DE DATOS DE LA MADRE ---
+                // Solo si la tabla actual NO es la madre, necesitamos traer los datos de la madre para los selects
+                if (tableName !== "TD101_BASIC") {
+                    if (typeof toggleGlobalLoader === 'function') toggleGlobalLoader(true);
+                    await fetchMasterData(); // Espera a que termine la descarga antes de seguir
+                    if (typeof toggleGlobalLoader === 'function') toggleGlobalLoader(false);
+                }
 
                 // Renderizar el perfil de usuario (UI general)
                 renderProfile();
@@ -219,22 +249,21 @@
                     if (document.getElementById('submitBtn')) 
                         document.getElementById('submitBtn').textContent = "Crear Nuevo Registro";
 
-                    // Ocultar botón de Editar del panel de Detalle (evita inconsistencias)
+                    // Ocultar botón de Editar del panel de Detalle
                     const btnEditInView = document.querySelector('button[onclick="showEditMode()"]');
                     if (btnEditInView) btnEditInView.classList.add('hidden');
 
-                    // Renderizar campos vacíos con lógica de autocalcular nombres
-                    renderFields(config, { TABLA_ORIGEN: data.TABLA_ORIGEN }, true);
+                    // Renderizar campos vacíos (Ahora con datos de la madre listos en localStorage)
+                    renderFields(config, { TABLA_ORIGEN: tableName }, true);
                     
                     // Forzar entrada directa al panel de edición
                     if (typeof togglePanels === 'function') {
                         togglePanels('edit'); 
                     }
                 } else {
-                    // Modo Edición Normal: Cargar datos existentes y renderizar campos
+                    // Modo Edición Normal
                     renderFields(config, data, false);
                     
-                    // Asegurar que el botón de editar sea visible
                     const btnEditInView = document.querySelector('button[onclick="showEditMode()"]');
                     if (btnEditInView) btnEditInView.classList.remove('hidden');
                 }
@@ -242,15 +271,45 @@
                 // 4. ASIGNACIÓN DINÁMICA DE SUBMIT
                 const form = document.getElementById('editDataForm');
                 if (form) {
-                    // Si isNew es true, usa handleInsertSubmit, de lo contrario handleEditSubmit
                     form.onsubmit = isNew ? handleInsertSubmit : handleEditSubmit;
                 }
 
             } else {
-                // Si no hay datos, seguridad: volver a la tabla
                 window.location.href = 'Datos2.html';
             }
         });
+
+        function getMasterDataForSelect() {
+            const fullDataTable = JSON.parse(localStorage.getItem('FULL_DATA_TD101') || '[]');
+            return fullDataTable.map(row => {
+                return {
+                    id: row.TD101ID,
+                    // Priorizamos IDNOMBRE (ej: "101 - Juan"), si no existe usamos NOMBREC, sino el ID solo
+                    nombre: row.TD101IDNOMBRE || row.TD101NOMBREC || `Registro ${row.TD101ID}`
+                };
+            });
+        }
+
+        function hydrateSelectFromMaster(fieldName, currentValue) {
+            const selectElement = document.getElementById(`select-${fieldName}`);
+            if (!selectElement) return;
+
+            const masterData = getMasterDataForSelect();
+            
+            let optionsHTML = '<option value="">-- Seleccionar Registro --</option>';
+            
+            if (masterData.length > 0) {
+                optionsHTML += masterData.map(item => {
+                    // Comparamos el valor actual para dejarlo seleccionado
+                    const isSelected = String(item.id) === String(currentValue) ? 'selected' : '';
+                    return `<option value="${item.id}" ${isSelected}>${item.nombre}</option>`;
+                }).join('');
+            } else {
+                optionsHTML = `<option value="">⚠️ No se encontraron datos en TD101</option>`;
+            }
+
+            selectElement.innerHTML = optionsHTML;
+        }
 
         // Función auxiliar para obtener la lista de IDs de la tabla principal
         function getValidMainIDs() {
@@ -259,7 +318,106 @@
             const fullDataTable = JSON.parse(localStorage.getItem('FULL_DATA_TD101') || '[]');
             return fullDataTable.map(row => row.TD101ID); 
         }
+
+        /**
+         * Solicita al backend los valores únicos de una columna de la tabla maestra.
+         * Implementa un caché temporal para evitar peticiones redundantes.
+         */
+        async function getValidMainValues(fieldName) {
+            const cacheKey = `cache_unique_${fieldName}`;
+            
+            // 1. Intentar obtener del caché de sesión (dura mientras la pestaña esté abierta)
+            const cachedData = sessionStorage.getItem(cacheKey);
+            if (cachedData) {
+                console.log(`📦 Usando caché para: ${fieldName}`);
+                return JSON.parse(cachedData);
+            }
+
+            // 2. Si no hay caché, solicitar al Backend
+            try {
+                console.log(`🌐 Consultando Backend para valores de: ${fieldName}`);
+                // Construcción de URL con parámetros
+                const url = `${GAS_SCRIPT_URL}?action=getUniqueValues&table=TD101_BASIC&column=${fieldName}`;
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Error en la respuesta de red");
+                
+                const res = await response.json();
+
+                if (res.success && Array.isArray(res.data)) {
+                    // Guardar en caché antes de retornar
+                    sessionStorage.setItem(cacheKey, JSON.stringify(res.data));
+                    return res.data;
+                } else {
+                    console.warn("Advertencia Backend:", res.message);
+                    return [];
+                }
+            } catch (err) {
+                console.error("❌ Fallo al obtener valores únicos:", err);
+                return [];
+            }
+        }
+
+        /**
+         * Función auxiliar para garantizar que los datos de TD101 estén disponibles
+         */
+/**
+ * Carga los datos de la tabla maestra con sistema de caché 
+ * para reducir el tiempo de espera y latencia.
+ */
+async function fetchMasterData() {
+    const MASTER_TABLE = "TD101_BASIC";
+    const cacheKey = 'FULL_DATA_TD101';
+    const cacheTimeKey = 'TD101_TIMESTAMP';
+    const cacheDuration = 5 * 60 * 1000; // 5 minutos de caché (ajustable)
+    
+    const userTienda = localStorage.getItem(KEYS.TIENDA) || 'DEFAULT';
+    
+    // 1. VERIFICACIÓN DE CACHÉ
+    const lastFetch = localStorage.getItem(cacheTimeKey);
+    const cachedData = localStorage.getItem(cacheKey);
+    const now = Date.now();
+
+    if (cachedData && lastFetch && (now - lastFetch < cacheDuration)) {
+        console.log("🚀 Cargando desde caché local (Instantáneo)");
+        return JSON.parse(cachedData);
+    }
+
+    // 2. SI NO HAY CACHÉ O EXPIRÓ, MOSTRAR LOADER Y PEDIR AL SERVIDOR
+    const loader = document.getElementById('form-loader');
+    if (loader) loader.style.display = 'flex';
+
+    const url = `${GAS_SCRIPT_URL}?action=getTableData&tableName=${MASTER_TABLE}&userTienda=${userTienda}&ignoreVisibility=true`;
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Error en la red");
         
+        const res = await response.json();
+
+        if (res.success && res.data) {
+            // Guardar en LocalStorage para la próxima vez
+            localStorage.setItem(cacheKey, JSON.stringify(res.data));
+            localStorage.setItem(cacheTimeKey, now.toString());
+            
+            console.log("✅ Datos maestros actualizados desde el servidor");
+            return res.data;
+        } else {
+            throw new Error(res.error || "Datos no recibidos");
+        }
+    } catch (err) {
+        console.error("❌ Error al precargar tabla madre:", err);
+        // Si el fetch falla pero tenemos algo en caché (aunque viejo), lo usamos como respaldo
+        if (cachedData) {
+            console.warn("Usando datos de caché antiguos por fallo en servidor");
+            return JSON.parse(cachedData);
+        }
+    } finally {
+        // El loader se oculta normalmente en la función principal después de renderFields
+    }
+    return [];
+}
+
         /**
          * Identifica el campo clave único (PK) de la tabla.
          */
@@ -283,37 +441,36 @@
         }
 
         function renderProfile() {
-            const config = JSON.parse(localStorage.getItem(STORAGE_CONFIG) || '{}');
-            const data = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
+            const config = JSON.parse(localStorage.getItem('TABLE_CONFIG') || '{}');
+            const data = JSON.parse(localStorage.getItem('TABLE_DATA') || '{}');
             const container = document.getElementById('perfilBodyContent');
 
             const tableName = data.TABLA_ORIGEN || "";
             const tablePrefix = tableName.split('_')[0].toUpperCase();
             const pkExpectedLength = tablePrefix.length + 2;
 
-            // LEER ESTADO DIRECTAMENTE DE DATA (Independiente de config)
-            const currentStatus = data[`${tablePrefix}TYPEREG`] || "Registrado";
+            // LEER ESTADO: Buscamos el campo que termina en TYPEREG
+            const currentStatus = data[`${tablePrefix}TYPEREG`] || "";
             const isBlocked = currentStatus === "Bloqueado";
 
             container.innerHTML = Object.keys(config).map(colId => {
                 const cleanColId = colId.toUpperCase().trim();
                 
-                // Blindaje PK técnica
+                // No mostrar la PK técnica en el perfil
                 if ((cleanColId.length === pkExpectedLength) && cleanColId.startsWith(tablePrefix) && cleanColId.endsWith('ID')) return ''; 
 
                 const label = config[colId].label;
                 const value = data[colId] || '---';
                 
-                // ¿Es este el campo donde debe ir la etiqueta?
+                // Identificar el campo de identidad para poner la etiqueta al lado
                 const isIdentityField = cleanColId === `${tablePrefix}IDNOMBRE`;
 
-                // Lógica visual
                 const isImportant = cleanColId.includes('NOMBREC') || cleanColId.includes('DAT01') || cleanColId.includes('ID');
                 const valueClass = isImportant ? 'text-[22px] text-blue-300 font-bold leading-tight' : 'text-[18px] text-gray-200 leading-tight';
 
-                // LA CLAVE: La etiqueta se genera si el campo coincide, usando el valor 'isBlocked' calculado arriba
+                // Generar el HTML de la etiqueta si corresponde
                 const statusTag = (isIdentityField && isBlocked) ? 
-                    `<span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 uppercase tracking-tighter font-bold">Bloqueado</span>` : '';
+                    `<span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 uppercase tracking-tighter font-bold shadow-sm">Bloqueado</span>` : '';
 
                 return `
                     <div class="border-b border-gray-700/40 py-1">
@@ -329,72 +486,127 @@
         }
 
         /**
-         * Renderiza los campos del formulario de edición/creación.
+         * Renderiza los campos y gestiona la carga asíncrona de referencias TD101.
          */
-        function renderFields(config, data, isNew = false) {
-            const container = document.getElementById('editDataFormFields');
-            if (!container) return;
+function renderFields(config, data, isNew = false) {
+    const container = document.getElementById('editDataFormFields');
+    if (!container) return;
+    container.innerHTML = "";
 
-            container.innerHTML = "";
+    const tableName = data.TABLA_ORIGEN || "TD101_BASIC";
+    const tablePrefix = tableName.split('_')[0].toUpperCase();
+    const MASTER_PREFIX = "TD101";
+    const isEditingMaster = (tableName === "TD101_BASIC");
 
-            const tableName = data.TABLA_ORIGEN || "TD101_BASIC";
-            const tablePrefix = tableName.split('_')[0].toUpperCase();
-            const pkExpectedLength = tablePrefix.length + 2;
-            const identityFieldName = `${tablePrefix}IDNOMBRE`;
+    const selectHydrations = [];
 
-            let fieldsHTML = Object.keys(config).map(colId => {
-                const field = config[colId];
-                const cleanColId = colId.toUpperCase().trim();
-                let value = isNew ? '' : (data[colId] || '');
+    let fieldsHTML = Object.keys(config).map(colId => {
+        const field = config[colId];
+        const cleanColId = colId.toUpperCase().trim();
+        let value = isNew ? '' : (data[colId] || '');
+
+        // Detección de referencia a TD101
+        const isReferenceField = !isEditingMaster && cleanColId.startsWith(MASTER_PREFIX);
+        
+        const isCalculatedField = cleanColId === `${tablePrefix}NOMBREC`;
+        const isSystemField = cleanColId.includes('REGISTRO') || cleanColId === `${tablePrefix}DAT01`;
+        const canEdit = isNew ? (!isCalculatedField && !isSystemField && field.editable !== false) : field.editable !== false;
+
+        // --- RENDERIZADO SELECT (REFERENCIAS) ---
+        if (isReferenceField && canEdit) {
+            // Guardamos ID y el nombre exacto de la columna para la hidratación
+            selectHydrations.push({ elementId: `select-${cleanColId}`, columnName: cleanColId, current: value });
+            
+            return `
+                <div class="border-b border-gray-700/40 py-1">
+                    <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
+                    <select name="${colId}" id="select-${cleanColId}" 
+                        class="w-full bg-gray-800 text-blue-300 outline-none border-none focus:ring-0 text-[18px] font-bold p-0 m-0 cursor-pointer appearance-none">
+                        <option value="${value}" class="bg-gray-800 text-white">${value || 'Seleccione...'}</option>
+                    </select>
+                </div>`;
+        }
+
+        // --- RENDERIZADO NORMAL ---
+        const pkField = `${tablePrefix}ID`;
+        if (cleanColId === pkField) return isNew ? '' : `<input type="hidden" name="${colId}" value="${value}">`;
+
+        const valueClass = cleanColId.includes('NOMBREC') || cleanColId.includes('DAT01') ? 'text-[22px] text-blue-300 font-bold' : 'text-[18px] text-gray-200';
+
+        return `
+            <div class="border-b border-gray-700/40 py-1">
+                <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
+                <input type="text" name="${colId}" value="${value}" 
+                    ${!canEdit ? 'readonly' : ''}
+                    class="w-full bg-transparent outline-none border-none focus:ring-0 ${valueClass} p-0 m-0 ${!canEdit ? 'opacity-60' : ''}">
+            </div>`;
+    }).join('');
+
+    container.innerHTML = fieldsHTML;
+
+    // IMPORTANTE: Hidratar después de inyectar el HTML
+    selectHydrations.forEach(item => {
+        hydrateSpecificSelect(item.elementId, item.columnName, item.current);
+    });
+
+    if (window.lucide) lucide.createIcons();
+}
+
+function hydrateSpecificSelect(elementId, columnName, currentValue) {
+    const selectElement = document.getElementById(elementId);
+    if (!selectElement) return;
+
+    const fullDataTable = JSON.parse(localStorage.getItem('FULL_DATA_TD101') || '[]');
+    
+    // VALIDACIÓN CRÍTICA:
+    // Verificamos si al menos un registro de la madre contiene la columna solicitada
+    const columnExists = fullDataTable.length > 0 && fullDataTable[0].hasOwnProperty(columnName);
+
+    if (!columnExists) {
+        console.warn(`⚠️ La columna ${columnName} no fue enviada por el servidor para TD101_BASIC.`);
+        selectElement.innerHTML = `<option value="${currentValue}" selected>${currentValue || 'Dato no disponible'}</option>`;
+        selectElement.classList.add('opacity-50', 'cursor-not-allowed');
+        return;
+    }
+
+    const uniqueValues = [...new Set(fullDataTable.map(row => row[columnName]))]
+        .filter(val => val !== undefined && val !== null && val !== "")
+        .sort();
+
+    let optionsHTML = `<option value="" class="bg-gray-800 text-gray-400">-- Seleccionar --</option>`;
+    
+    optionsHTML += uniqueValues.map(val => {
+        const isSelected = String(val).trim() === String(currentValue).trim() ? 'selected' : '';
+        return `<option value="${val}" ${isSelected} class="bg-gray-800 text-white">${val}</option>`;
+    }).join('');
+
+    selectElement.innerHTML = optionsHTML;
+}
+
+        async function hydrateSelectField(fieldName, currentValue) {
+            const selectElement = document.getElementById(`select-${fieldName}`);
+            if (!selectElement) return;
+
+            try {
+                // Obtenemos los valores únicos (ya tiene lógica de caché en tu script)
+                const values = await getValidMainValues(fieldName);
                 
-                // --- BLINDAJE PK TÉCNICA (Limpieza de formato) ---
-                const isTechnicalPK = (cleanColId.length === pkExpectedLength) && 
-                                    cleanColId.startsWith(tablePrefix) && 
-                                    cleanColId.endsWith('ID');
+                let optionsHTML = '<option value="">-- Seleccione --</option>';
                 
-                if (isTechnicalPK) {
-                    // Limpiar puntos de miles si existen para el valor técnico
-                    const cleanIdValue = String(value).replace(/[.,\s]/g, '');
-                    return isNew ? '' : `<input type="hidden" name="${colId}" value="${cleanIdValue}">`;
+                if (values && values.length > 0) {
+                    optionsHTML += values.map(val => {
+                        const isSelected = String(val) === String(currentValue) ? 'selected' : '';
+                        return `<option value="${val}" ${isSelected}>${val}</option>`;
+                    }).join('');
+                } else {
+                    optionsHTML = `<option value="${currentValue}">${currentValue || 'Sin datos'}</option>`;
                 }
 
-                // --- LÓGICA DE BLOQUEO DE CAMPOS ---
-                const isCalculatedField = cleanColId === `${tablePrefix}NOMBREC`;
-                const isSystemField = cleanColId.includes('REGISTRO') || cleanColId === `${tablePrefix}DAT01`;
-                const canEdit = isNew ? (!isCalculatedField && !isSystemField && field.editable !== false) : field.editable !== false;
-
-                // --- RENDERIZADO ESPECIAL PARA IDENTIDAD (CON TOGGLE) ---
-                if (cleanColId === identityFieldName && !isNew) {
-                    const currentStatus = data[`${tablePrefix}TYPEREG`] || "Registrado";
-                    const isBlocked = currentStatus === "Bloqueado";
-                    return renderToggleHTML(field.label, value, currentStatus, isBlocked, tablePrefix, colId);
-                }
-
-                // --- RENDERIZADO ESTÁNDAR ---
-                const isImportant = cleanColId.includes('NOMBREC') || cleanColId.includes('DAT01');
-                const valueClass = isImportant ? 'text-[22px] text-blue-300 font-bold' : 'text-[18px] text-gray-200';
-                
-                return `
-                    <div class="border-b border-gray-700/40 py-1">
-                        <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
-                        <div class="flex items-center min-h-[32px]">
-                            <input type="text" name="${colId}" id="input-${cleanColId}" value="${value}" 
-                                ${!canEdit ? 'readonly' : ''}
-                                class="w-full bg-transparent outline-none border-none focus:ring-0 ${valueClass} p-0 m-0 ${!canEdit ? 'opacity-60 cursor-not-allowed' : ''}" 
-                                ${!canEdit ? 'title="Campo automático o bloqueado"' : ''}>
-                        </div>
-                    </div>`;
-            }).join('');
-
-            container.innerHTML = fieldsHTML;
-
-            if (window.lucide) lucide.createIcons();
-
-            setTimeout(() => {
-                if (typeof setupNombreCAutoCalculate === 'function') {
-                    setupNombreCAutoCalculate(tablePrefix);
-                }
-            }, 100);
+                selectElement.innerHTML = optionsHTML;
+            } catch (err) {
+                console.error(`Error hidratando ${fieldName}:`, err);
+                selectElement.innerHTML = `<option value="">Error al cargar</option>`;
+            }
         }
 
         /**
@@ -567,6 +779,7 @@
             const badge = document.getElementById('badge-status');
             const icon = document.getElementById('toggle-icon');
             
+            // Si el valor actual no es Bloqueado, ahora lo será
             const isNowBlocking = input.value !== "Bloqueado";
             
             if (isNowBlocking) {
@@ -576,7 +789,7 @@
                 icon.style.color = "#ef4444";
                 icon.setAttribute('data-lucide', 'toggle-left');
             } else {
-                input.value = ""; 
+                input.value = ""; // O "Registrado", según prefieras en tu BD
                 badge.textContent = "Registrado";
                 badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 uppercase font-bold transition-all";
                 icon.style.color = "#22c55e";
@@ -692,9 +905,6 @@
             }
         }
 
-        /**
-         * Función centralizada de envío
-         */
         async function executeSubmit(payload) {
             try {
                 const r = await fetch(GAS_SCRIPT_URL, { method: 'POST', body: new URLSearchParams(payload) });
