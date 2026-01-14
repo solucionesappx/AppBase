@@ -358,69 +358,42 @@
             }
         }
 
-        /**
-         * Función auxiliar para garantizar que los datos de TD101 estén disponibles
-         */
-/**
- * Carga los datos de la tabla maestra con sistema de caché 
- * para reducir el tiempo de espera y latencia.
- */
-async function fetchMasterData() {
-    const MASTER_TABLE = "TD101_BASIC";
-    const cacheKey = 'FULL_DATA_TD101';
-    const cacheTimeKey = 'TD101_TIMESTAMP';
-    const cacheDuration = 5 * 60 * 1000; // 5 minutos de caché (ajustable)
-    
-    const userTienda = localStorage.getItem(KEYS.TIENDA) || 'DEFAULT';
-    
-    // 1. VERIFICACIÓN DE CACHÉ
-    const lastFetch = localStorage.getItem(cacheTimeKey);
-    const cachedData = localStorage.getItem(cacheKey);
-    const now = Date.now();
+        async function fetchMasterData() {
+            const userTienda = localStorage.getItem(KEYS.TIENDA) || 'DEFAULT';
+            const now = Date.now();
+            const cacheDuration = 5 * 60 * 1000;
 
-    if (cachedData && lastFetch && (now - lastFetch < cacheDuration)) {
-        console.log("🚀 Cargando desde caché local (Instantáneo)");
-        return JSON.parse(cachedData);
-    }
+            // Lista de tablas maestras a precargar
+            const tablesToFetch = [
+                { name: "TD101_BASIC", cacheKey: "FULL_DATA_TD101", timeKey: "TD101_TIMESTAMP" },
+                { name: "TV001_VALORES", cacheKey: "FULL_DATA_TV001", timeKey: "TV001_TIMESTAMP" }
+            ];
 
-    // 2. SI NO HAY CACHÉ O EXPIRÓ, MOSTRAR LOADER Y PEDIR AL SERVIDOR
-    const loader = document.getElementById('form-loader');
-    if (loader) loader.style.display = 'flex';
+            for (const table of tablesToFetch) {
+                const cachedData = localStorage.getItem(table.cacheKey);
+                const lastFetch = localStorage.getItem(table.timeKey);
 
-    const url = `${GAS_SCRIPT_URL}?action=getTableData&tableName=${MASTER_TABLE}&userTienda=${userTienda}&ignoreVisibility=true`;
+                // Solo pedimos al servidor si no hay caché o si expiró
+                if (!cachedData || !lastFetch || (now - lastFetch > cacheDuration)) {
+                    console.log(`🌐 Solicitando tabla maestra: ${table.name}`);
+                    const url = `${GAS_SCRIPT_URL}?action=getTableData&tableName=${table.name}&userTienda=${userTienda}&ignoreVisibility=true`;
 
-    try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Error en la red");
-        
-        const res = await response.json();
-
-        if (res.success && res.data) {
-            // Guardar en LocalStorage para la próxima vez
-            localStorage.setItem(cacheKey, JSON.stringify(res.data));
-            localStorage.setItem(cacheTimeKey, now.toString());
-            
-            console.log("✅ Datos maestros actualizados desde el servidor");
-            return res.data;
-        } else {
-            throw new Error(res.error || "Datos no recibidos");
+                    try {
+                        const response = await fetch(url);
+                        const res = await response.json();
+                        if (res.success && res.data) {
+                            localStorage.setItem(table.cacheKey, JSON.stringify(res.data));
+                            localStorage.setItem(table.timeKey, now.toString());
+                        }
+                    } catch (err) {
+                        console.error(`❌ Error al cargar ${table.name}:`, err);
+                    }
+                } else {
+                    console.log(`🚀 ${table.name} cargada desde caché local`);
+                }
+            }
         }
-    } catch (err) {
-        console.error("❌ Error al precargar tabla madre:", err);
-        // Si el fetch falla pero tenemos algo en caché (aunque viejo), lo usamos como respaldo
-        if (cachedData) {
-            console.warn("Usando datos de caché antiguos por fallo en servidor");
-            return JSON.parse(cachedData);
-        }
-    } finally {
-        // El loader se oculta normalmente en la función principal después de renderFields
-    }
-    return [];
-}
 
-        /**
-         * Identifica el campo clave único (PK) de la tabla.
-         */
         function getTablePrimaryKey(headers, tableName) {
             const tablePrefix = tableName.split('_')[0].toUpperCase();
             const expectedLength = tablePrefix.length + 2; 
@@ -485,103 +458,147 @@ async function fetchMasterData() {
             if(window.lucide) lucide.createIcons();
         }
 
-        /**
-         * Renderiza los campos y gestiona la carga asíncrona de referencias TD101.
-         */
-function renderFields(config, data, isNew = false) {
-    const container = document.getElementById('editDataFormFields');
-    if (!container) return;
-    container.innerHTML = "";
+        function renderFields(config, data, isNew = false) {
+            const container = document.getElementById('editDataFormFields');
+            if (!container) return;
+            container.innerHTML = "";
 
-    const tableName = data.TABLA_ORIGEN || "TD101_BASIC";
-    const tablePrefix = tableName.split('_')[0].toUpperCase();
-    const MASTER_PREFIX = "TD101";
-    const isEditingMaster = (tableName === "TD101_BASIC");
-
-    const selectHydrations = [];
-
-    let fieldsHTML = Object.keys(config).map(colId => {
-        const field = config[colId];
-        const cleanColId = colId.toUpperCase().trim();
-        let value = isNew ? '' : (data[colId] || '');
-
-        // Detección de referencia a TD101
-        const isReferenceField = !isEditingMaster && cleanColId.startsWith(MASTER_PREFIX);
-        
-        const isCalculatedField = cleanColId === `${tablePrefix}NOMBREC`;
-        const isSystemField = cleanColId.includes('REGISTRO') || cleanColId === `${tablePrefix}DAT01`;
-        const canEdit = isNew ? (!isCalculatedField && !isSystemField && field.editable !== false) : field.editable !== false;
-
-        // --- RENDERIZADO SELECT (REFERENCIAS) ---
-        if (isReferenceField && canEdit) {
-            // Guardamos ID y el nombre exacto de la columna para la hidratación
-            selectHydrations.push({ elementId: `select-${cleanColId}`, columnName: cleanColId, current: value });
+            const tableName = data.TABLA_ORIGEN || "TD101_BASIC";
+            const tablePrefix = tableName.split('_')[0].toUpperCase();
             
-            return `
-                <div class="border-b border-gray-700/40 py-1">
-                    <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
-                    <select name="${colId}" id="select-${cleanColId}" 
-                        class="w-full bg-gray-800 text-blue-300 outline-none border-none focus:ring-0 text-[18px] font-bold p-0 m-0 cursor-pointer appearance-none">
-                        <option value="${value}" class="bg-gray-800 text-white">${value || 'Seleccione...'}</option>
-                    </select>
-                </div>`;
+            // --- NUEVO: Obtener datos maestros de TV001 para validación de campos ---
+            const tv001Valores = JSON.parse(localStorage.getItem('FULL_DATA_TV001') || '[]');
+
+            const selectHydrations = [];
+
+            let fieldsHTML = Object.keys(config).map(colId => {
+                const field = config[colId];
+                const cleanColId = colId.toUpperCase().trim();
+                let value = isNew ? '' : (data[colId] || '');
+
+                // Lógica de bloqueo de campos de sistema
+                const isCalculatedField = cleanColId === `${tablePrefix}NOMBREC`;
+                const isSystemField = cleanColId.includes('REGISTRO') || cleanColId === `${tablePrefix}DAT01`;
+                const canEdit = isNew ? (!isCalculatedField && !isSystemField && field.editable !== false) : field.editable !== false;
+
+                // --- NUEVO: Detección dinámica basada en TV001_VALORES ---
+                // Buscamos si el nombre del campo actual existe en la columna Encabezado_Tabla
+                const masterMatch = tv001Valores.filter(row => 
+                    row.Encabezado_Tabla && row.Encabezado_Tabla.toUpperCase().trim() === cleanColId
+                );
+
+                if (masterMatch.length > 0 && canEdit) {
+                    // Si hay coincidencia, preparamos la hidratación con los Valores_Encabezado
+                    const uniqueOptions = masterMatch.map(m => m.Valores_Encabezado).filter(v => v);
+                    
+                    selectHydrations.push({ 
+                        elementId: `select-${cleanColId}`, 
+                        options: uniqueOptions, 
+                        current: value 
+                    });
+
+                    return `
+                        <div class="border-b border-gray-700/40 py-1">
+                            <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
+                            <select name="${colId}" id="select-${cleanColId}" 
+                                class="w-full bg-gray-800 text-blue-300 outline-none border-none focus:ring-0 text-[18px] font-bold p-0 m-0 cursor-pointer appearance-none">
+                                <option value="${value}" class="bg-gray-800 text-white">${value || 'Seleccione...'}</option>
+                            </select>
+                        </div>`;
+                }
+
+                // --- RENDERIZADO NORMAL (Si no está en TV001) ---
+                const pkField = `${tablePrefix}ID`;
+                if (cleanColId === pkField) return isNew ? '' : `<input type="hidden" name="${colId}" value="${value}">`;
+
+                const valueClass = cleanColId.includes('NOMBREC') || cleanColId.includes('DAT01') ? 'text-[22px] text-blue-300 font-bold' : 'text-[18px] text-gray-200';
+
+                return `
+                    <div class="border-b border-gray-700/40 py-1">
+                        <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
+                        <input type="text" name="${colId}" value="${value}" 
+                            ${!canEdit ? 'readonly' : ''}
+                            class="w-full bg-transparent outline-none border-none focus:ring-0 ${valueClass} p-0 m-0 ${!canEdit ? 'opacity-60' : ''}">
+                    </div>`;
+            }).join('');
+
+            container.innerHTML = fieldsHTML;
+
+            // Hidratar los selects generados dinámicamente
+// Proceso de hidratación inteligente
+            selectHydrations.forEach(item => {
+                const selectElement = document.getElementById(item.elementId);
+                if (!selectElement) return;
+
+                let optionsHTML = `<option value="">-- Seleccionar --</option>`;
+
+                if (item.type === 'MASTER_ID') {
+                    // Lógica para TD101 (Se mantiene igual)
+                    const uniqueValues = [...new Set(td101Master.map(row => row[item.columnName]))].filter(v => v).sort();
+                    optionsHTML += uniqueValues.map(val => {
+                        const isSelected = String(val).trim() === String(item.current).trim() ? 'selected' : '';
+                        return `<option value="${val}" ${isSelected} class="bg-gray-800 text-white">${val}</option>`;
+                    }).join('');
+                } else {
+                    // --- NUEVA LÓGICA PARA TV001 (Parseo de JSON) ---
+                    // item.options contiene los valores de la columna Valores_Encabezado
+                    let flatOptions = [];
+                    
+                    item.options.forEach(optSource => {
+                        try {
+                            // Intentamos parsear si es un string JSON (ej: '["VALOR1", "VALOR2"]')
+                            const parsed = typeof optSource === 'string' ? JSON.parse(optSource) : optSource;
+                            if (Array.isArray(parsed)) {
+                                flatOptions = flatOptions.concat(parsed);
+                            } else {
+                                flatOptions.push(optSource);
+                            }
+                        } catch (e) {
+                            // Si no es JSON válido, lo tratamos como un valor simple
+                            flatOptions.push(optSource);
+                        }
+                    });
+
+                    // Limpiamos duplicados y valores vacíos
+                    const cleanOptions = [...new Set(flatOptions)].filter(v => v).sort();
+
+                    optionsHTML += cleanOptions.map(val => {
+                        const isSelected = String(val).trim() === String(item.current).trim() ? 'selected' : '';
+                        return `<option value="${val}" ${isSelected} class="bg-gray-800 text-white">${val}</option>`;
+                    }).join('');
+                }
+                selectElement.innerHTML = optionsHTML;
+            });
         }
 
-        // --- RENDERIZADO NORMAL ---
-        const pkField = `${tablePrefix}ID`;
-        if (cleanColId === pkField) return isNew ? '' : `<input type="hidden" name="${colId}" value="${value}">`;
+        function hydrateSpecificSelect(elementId, columnName, currentValue) {
+            const selectElement = document.getElementById(elementId);
+            if (!selectElement) return;
 
-        const valueClass = cleanColId.includes('NOMBREC') || cleanColId.includes('DAT01') ? 'text-[22px] text-blue-300 font-bold' : 'text-[18px] text-gray-200';
+            const fullDataTable = JSON.parse(localStorage.getItem('FULL_DATA_TD101') || '[]');
+            
+            const columnExists = fullDataTable.length > 0 && fullDataTable[0].hasOwnProperty(columnName);
 
-        return `
-            <div class="border-b border-gray-700/40 py-1">
-                <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
-                <input type="text" name="${colId}" value="${value}" 
-                    ${!canEdit ? 'readonly' : ''}
-                    class="w-full bg-transparent outline-none border-none focus:ring-0 ${valueClass} p-0 m-0 ${!canEdit ? 'opacity-60' : ''}">
-            </div>`;
-    }).join('');
+            if (!columnExists) {
+                console.warn(`⚠️ La columna ${columnName} no fue enviada por el servidor para TD101_BASIC.`);
+                selectElement.innerHTML = `<option value="${currentValue}" selected>${currentValue || 'Dato no disponible'}</option>`;
+                selectElement.classList.add('opacity-50', 'cursor-not-allowed');
+                return;
+            }
 
-    container.innerHTML = fieldsHTML;
+            const uniqueValues = [...new Set(fullDataTable.map(row => row[columnName]))]
+                .filter(val => val !== undefined && val !== null && val !== "")
+                .sort();
 
-    // IMPORTANTE: Hidratar después de inyectar el HTML
-    selectHydrations.forEach(item => {
-        hydrateSpecificSelect(item.elementId, item.columnName, item.current);
-    });
+            let optionsHTML = `<option value="" class="bg-gray-800 text-gray-400">-- Seleccionar --</option>`;
+            
+            optionsHTML += uniqueValues.map(val => {
+                const isSelected = String(val).trim() === String(currentValue).trim() ? 'selected' : '';
+                return `<option value="${val}" ${isSelected} class="bg-gray-800 text-white">${val}</option>`;
+            }).join('');
 
-    if (window.lucide) lucide.createIcons();
-}
-
-function hydrateSpecificSelect(elementId, columnName, currentValue) {
-    const selectElement = document.getElementById(elementId);
-    if (!selectElement) return;
-
-    const fullDataTable = JSON.parse(localStorage.getItem('FULL_DATA_TD101') || '[]');
-    
-    // VALIDACIÓN CRÍTICA:
-    // Verificamos si al menos un registro de la madre contiene la columna solicitada
-    const columnExists = fullDataTable.length > 0 && fullDataTable[0].hasOwnProperty(columnName);
-
-    if (!columnExists) {
-        console.warn(`⚠️ La columna ${columnName} no fue enviada por el servidor para TD101_BASIC.`);
-        selectElement.innerHTML = `<option value="${currentValue}" selected>${currentValue || 'Dato no disponible'}</option>`;
-        selectElement.classList.add('opacity-50', 'cursor-not-allowed');
-        return;
-    }
-
-    const uniqueValues = [...new Set(fullDataTable.map(row => row[columnName]))]
-        .filter(val => val !== undefined && val !== null && val !== "")
-        .sort();
-
-    let optionsHTML = `<option value="" class="bg-gray-800 text-gray-400">-- Seleccionar --</option>`;
-    
-    optionsHTML += uniqueValues.map(val => {
-        const isSelected = String(val).trim() === String(currentValue).trim() ? 'selected' : '';
-        return `<option value="${val}" ${isSelected} class="bg-gray-800 text-white">${val}</option>`;
-    }).join('');
-
-    selectElement.innerHTML = optionsHTML;
-}
+            selectElement.innerHTML = optionsHTML;
+        }
 
         async function hydrateSelectField(fieldName, currentValue) {
             const selectElement = document.getElementById(`select-${fieldName}`);
@@ -609,6 +626,8 @@ function hydrateSpecificSelect(elementId, columnName, currentValue) {
             }
         }
 
+        </script>
+        <script>
         /**
          * Maneja el envío de datos para la EDICIÓN.
          */
