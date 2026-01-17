@@ -254,18 +254,6 @@
             n2.addEventListener('input', calculate);
         }
 
-        console.group("🔍 REVISIÓN DE LOCALSTORAGE");
-        console.log("👤 Datos de Usuario (KEYS):");
-        Object.entries(KEYS).forEach(([key, storageKey]) => {
-            console.log(`   ${key}: ${localStorage.getItem(storageKey)}`);
-        });
-
-        console.log("📊 Configuración de Tabla (TABLE_CONFIG):");
-        console.table(JSON.parse(localStorage.getItem('TABLE_CONFIG') || '{}'));
-
-        console.log("📝 Datos de la Fila (TABLE_DATA):");
-        console.table(JSON.parse(localStorage.getItem('TABLE_DATA') || '{}'));
-        console.groupEnd();
 
     </script>
 
@@ -274,370 +262,334 @@
         const STORAGE_CONFIG = 'TABLE_CONFIG';
         const STORAGE_DATA = 'TABLE_DATA';
 
-        document.addEventListener('DOMContentLoaded', async () => { // Se agrega async aquí
+        document.addEventListener('DOMContentLoaded', async () => { 
             if (!localStorage.getItem(KEYS.CORREO)) {
                 window.location.replace('index.html');
                 return;
             }
-            const rawData = localStorage.getItem('TABLE_DATA');
-            const rawConfig = localStorage.getItem('TABLE_CONFIG');
+
+            const rawData = localStorage.getItem(STORAGE_DATA);
+            const rawConfig = localStorage.getItem(STORAGE_CONFIG);
+
             if (rawData && rawConfig) {
                 const data = JSON.parse(rawData);
                 const config = JSON.parse(rawConfig);
                 const isNew = data.IS_NEW === true;
-                const tableName = data.TABLA_ORIGEN || "";
+                const tableName = data.TABLA_ORIGEN || "TD101_BASIC";
+
+                // Carga inicial de catálogos si no es la tabla básica
                 if (tableName !== "TD101_BASIC") {
-                    if (typeof toggleGlobalLoader === 'function') toggleGlobalLoader(true);
-                    await fetchMasterData(); // Espera a que termine la descarga antes de seguir
-                    if (typeof toggleGlobalLoader === 'function') toggleGlobalLoader(false);
+                    if (window.toggleGlobalLoader) toggleGlobalLoader(true);
+                    await fetchMasterData();
+                    if (window.toggleGlobalLoader) toggleGlobalLoader(false);
                 }
+
                 renderProfile();
+
                 if (isNew) {
-                    if (document.getElementById('formTitle')) 
-                        document.getElementById('formTitle').textContent = "Nuevo Registro";                   
-                    if (document.getElementById('formAction')) 
-                        document.getElementById('formAction').value = "registerDynamicDataTD";                   
-                    if (document.getElementById('submitBtn')) 
-                        document.getElementById('submitBtn').textContent = "Crear Nuevo Registro";
-                    const btnEditInView = document.querySelector('button[onclick="showEditMode()"]');
-                    if (btnEditInView) btnEditInView.classList.add('hidden');
+                    document.getElementById('formTitle').textContent = "Nuevo Registro";
+                    document.getElementById('formAction').value = "registerDynamicDataTD";
+                    document.getElementById('submitBtn').textContent = "Crear Nuevo Registro";
+                    const btnEdit = document.querySelector('button[onclick="showEditMode()"]');
+                    if (btnEdit) btnEdit.classList.add('hidden');
+                    
                     renderFields(config, { TABLA_ORIGEN: tableName }, true);
-                    if (typeof togglePanels === 'function') {
-                        togglePanels('edit'); 
-                    }
+                    togglePanels('edit');
                 } else {
-                    renderFields(config, data, false); 
-                    const btnEditInView = document.querySelector('button[onclick="showEditMode()"]');
-                    if (btnEditInView) btnEditInView.classList.remove('hidden');
+                    renderFields(config, data, false);
                 }
+
                 const form = document.getElementById('editDataForm');
-                if (form) {
-                    form.onsubmit = isNew ? handleInsertSubmit : handleEditSubmit;
-                }
+                if (form) form.onsubmit = isNew ? handleInsertSubmit : handleEditSubmit;
+
             } else {
                 window.location.href = 'Datos2.html';
             }
         });
 
-        function getMasterDataForSelect() {
-            const fullDataTable = JSON.parse(localStorage.getItem('FULL_DATA_TD101') || '[]');
-            return fullDataTable.map(row => {
-                return {
-                    id: row.TD101ID,
-                    nombre: row.TD101IDNOMBRE || row.TD101NOMBREC || `Registro ${row.TD101ID}`
-                };
-            });
-        }
-
-        function hydrateSelectFromMaster(fieldName, currentValue) {
-            const selectElement = document.getElementById(`select-${fieldName}`);
-            if (!selectElement) return;
-            const masterData = getMasterDataForSelect();
-            let optionsHTML = '<option value="">-- Seleccionar Registro --</option>';
-            if (masterData.length > 0) {
-                optionsHTML += masterData.map(item => {
-                    const isSelected = String(item.id) === String(currentValue) ? 'selected' : '';
-                    return `<option value="${item.id}" ${isSelected}>${item.nombre}</option>`;
-                }).join('');
-            } else {
-                optionsHTML = `<option value="">⚠️ No se encontraron datos en TD101</option>`;
-            }
-            selectElement.innerHTML = optionsHTML;
-        }
-
-        function getValidMainIDs() {
-            const fullDataTable = JSON.parse(localStorage.getItem('FULL_DATA_TD101') || '[]');
-            return fullDataTable.map(row => row.TD101ID); 
-        }
-
-        async function getValidMainValues(fieldName) {
-            const cacheKey = `cache_unique_${fieldName}`;
-            const cachedData = sessionStorage.getItem(cacheKey);
-            if (cachedData) {
-                console.log(`📦 Usando caché para: ${fieldName}`);
-                return JSON.parse(cachedData);
-            }
-            try {
-                console.log(`🌐 Consultando Backend para valores de: ${fieldName}`);
-                const url = `${GAS_SCRIPT_URL}?action=getUniqueValues&table=TD101_BASIC&column=${fieldName}`;                
-                const response = await fetch(url);
-                if (!response.ok) throw new Error("Error en la respuesta de red");               
-                const res = await response.json();
-                if (res.success && Array.isArray(res.data)) {
-                    sessionStorage.setItem(cacheKey, JSON.stringify(res.data));
-                    return res.data;
-                } else {
-                    console.warn("Advertencia Backend:", res.message);
-                    return [];
-                }
-            } catch (err) {
-                console.error("❌ Fallo al obtener valores únicos:", err);
-                return [];
-            }
-        }
+        // --- LÓGICA DE DATOS Y RENDERIZADO ---
 
         async function fetchMasterData() {
             const userTienda = localStorage.getItem(KEYS.TIENDA) || 'DEFAULT';
             const now = Date.now();
             const cacheDuration = 5 * 60 * 1000;
-            const tablesToFetch = [
-                { name: "TD101_BASIC", cacheKey: "FULL_DATA_TD101", timeKey: "TD101_TIMESTAMP" },
-                { name: "TV001_VALORES", cacheKey: "FULL_DATA_TV001", timeKey: "TV001_TIMESTAMP" }
+            const tables = [
+                { name: "TD101_BASIC", key: "FULL_DATA_TD101", time: "TD101_TIMESTAMP" },
+                { name: "TV001_VALORES", key: "FULL_DATA_TV001", time: "TV001_TIMESTAMP" }
             ];
-            for (const table of tablesToFetch) {
-                const cachedData = localStorage.getItem(table.cacheKey);
-                const lastFetch = localStorage.getItem(table.timeKey);
-                if (!cachedData || !lastFetch || (now - lastFetch > cacheDuration)) {
-                    console.log(`🌐 Solicitando tabla maestra: ${table.name}`);
-                    const url = `${GAS_SCRIPT_URL}?action=getTableData&tableName=${table.name}&userTienda=${userTienda}&ignoreVisibility=true`;
+
+            for (const t of tables) {
+                const lastFetch = localStorage.getItem(t.time);
+                if (!localStorage.getItem(t.key) || (now - lastFetch > cacheDuration)) {
                     try {
-                        const response = await fetch(url);
-                        const res = await response.json();
-                        if (res.success && res.data) {
-                            localStorage.setItem(table.cacheKey, JSON.stringify(res.data));
-                            localStorage.setItem(table.timeKey, now.toString());
+                        const r = await fetch(`${GAS_SCRIPT_URL}?action=getTableData&tableName=${t.name}&userTienda=${userTienda}&ignoreVisibility=true`);
+                        const res = await r.json();
+                        if (res.success) {
+                            localStorage.setItem(t.key, JSON.stringify(res.data));
+                            localStorage.setItem(t.time, now.toString());
                         }
-                    } catch (err) {
-                        console.error(`❌ Error al cargar ${table.name}:`, err);
-                    }
-                } else {
-                    console.log(`🚀 ${table.name} cargada desde caché local`);
+                    } catch (e) { console.error("Error cargando maestro:", t.name, e); }
                 }
             }
         }
 
         function getTablePrimaryKey(headers, tableName) {
-            const tablePrefix = tableName.split('_')[0].toUpperCase();
-            const expectedLength = tablePrefix.length + 2; 
-            console.log(`🔎 Buscando PK: Prefijo [${tablePrefix}], Longitud esperada [${expectedLength}]`);            
-            const pk = headers.find(h => {
-                const cleanH = h.trim().toUpperCase();
-                return cleanH.length === expectedLength && 
-                    cleanH.startsWith(tablePrefix) && 
-                    cleanH.endsWith('ID');
-            });
-            if (pk) { console.log("✅ PK Encontrada:", pk); } 
-            else { console.warn("❌ No se encontró PK. Headers:", headers); }
-            return pk;
+            const prefix = tableName.split('_')[0].toUpperCase();
+            return headers.find(h => h.trim().toUpperCase() === `${prefix}ID`) || headers[0];
         }
 
         function renderProfile() {
-            const config = JSON.parse(localStorage.getItem('TABLE_CONFIG') || '{}');
-            const data = JSON.parse(localStorage.getItem('TABLE_DATA') || '{}');
+            const config = JSON.parse(localStorage.getItem(STORAGE_CONFIG) || '{}');
+            const data = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
             const container = document.getElementById('perfilBodyContent');
-            const tableName = data.TABLA_ORIGEN || "";
-            const tablePrefix = tableName.split('_')[0].toUpperCase();
-            const pkExpectedLength = tablePrefix.length + 2;
-            const currentStatus = data[`${tablePrefix}TYPEREG`] || "";
-            const isBlocked = currentStatus === "Bloqueado";
+            const prefix = (data.TABLA_ORIGEN || "").split('_')[0].toUpperCase();
+            
+            const isBlocked = data[`${prefix}TYPEREG`] === "Bloqueado";
+
             container.innerHTML = Object.keys(config).map(colId => {
-                const cleanColId = colId.toUpperCase().trim();
-                if ((cleanColId.length === pkExpectedLength) && cleanColId.startsWith(tablePrefix) && cleanColId.endsWith('ID')) return ''; 
+                const cleanId = colId.toUpperCase().trim();
+                if (cleanId === `${prefix}ID`) return ''; // Ocultar ID en vista perfil
+
                 const label = config[colId].label;
                 const value = data[colId] || '---';
-                const isIdentityField = cleanColId === `${tablePrefix}IDNOMBRE`;
-                const isImportant = cleanColId.includes('NOMBREC') || cleanColId.includes('DAT01') || cleanColId.includes('ID');
-                const valueClass = isImportant ? 'text-[22px] text-blue-300 font-bold leading-tight' : 'text-[18px] text-gray-200 leading-tight';
-                const statusTag = (isIdentityField && isBlocked) ? 
-                    `<span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 uppercase tracking-tighter font-bold shadow-sm">Bloqueado</span>` : '';
+                const isIdentity = cleanId === `${prefix}IDNOMBRE`;
+                
+                const valueClass = cleanId.includes('NOMBREC') || cleanId.includes('DAT01') 
+                    ? 'text-[22px] text-blue-300 font-bold' 
+                    : 'text-[18px] text-gray-200';
+
+                const badge = (isIdentity && isBlocked) ? 
+                    `<span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 uppercase font-bold">Bloqueado</span>` : '';
+
                 return `
                     <div class="border-b border-gray-700/40 py-1">
                         <span class="text-[10px] font-bold text-gray-500 uppercase block -mb-1">${label}</span>
                         <div class="flex items-center min-h-[32px]">
                             <span class="${valueClass}">${value}</span>
-                            ${statusTag}
+                            ${badge}
                         </div>
                     </div>`;
-            }).join('');           
+            }).join('');
             if(window.lucide) lucide.createIcons();
         }
 
-        function renderFields(config, data, isNew = false) {
-            const container = document.getElementById('editDataFormFields');
-            if (!container) return;
-            container.innerHTML = "";
+function renderFields(config, data, isNew = false) {
+    const container = document.getElementById('editDataFormFields');
+    if (!container) return;
 
-            const tableName = data.TABLA_ORIGEN || "TD101_BASIC";
-            const tablePrefix = tableName.split('_')[0].toUpperCase();
-            const tv001Valores = JSON.parse(localStorage.getItem('FULL_DATA_TV001') || '[]');
-            
-            // 1. Obtener el estatus actual del registro
-            const statusKey = `${tablePrefix}TYPEREG`;
-            const currentStatus = data[statusKey] || "Registrado";
-            const isBlocked = currentStatus === "Bloqueado";
+    // 1. Contexto de tabla y prefijo
+    const tableName = data.TABLA_ORIGEN || "TD101_BASIC";
+    const prefix = tableName.split('_')[0].toUpperCase();
+    
+    // 2. Manejo de Estatus (Evita el "undefined" visual)
+    const statusKey = `${prefix}TYPEREG`;
+    const currentStatus = data[statusKey] || ""; // Si no existe, string vacío
+    const isBlocked = currentStatus === "Bloqueado";
 
-            const selectHydrations = [];
+    // 3. Recursos externos
+    const tv001 = JSON.parse(localStorage.getItem('FULL_DATA_TV001') || '[]');
+    const selectHydrations = [];
 
-            let fieldsHTML = Object.keys(config).map(colId => {
-                const field = config[colId];
-                const cleanColId = colId.toUpperCase().trim();
-                let value = isNew ? '' : (data[colId] || '');
-                
-                // --- INYECCIÓN DE ESTATUS EN EL CAMPO DE IDENTIDAD ---
-                // Si el campo es IDNOMBRE, inyectamos el Toggle especial
-                if (cleanColId === `${tablePrefix}IDNOMBRE`) {
-                    return renderToggleHTML(field.label, value, currentStatus, isBlocked, tablePrefix, colId);
-                }
+    // 4. Generación de HTML
+    container.innerHTML = Object.keys(config).map(colId => {
+        const field = config[colId];
+        const cleanId = colId.toUpperCase().trim();
+        let value = isNew ? '' : (data[colId] || '');
 
-                const isCalculatedField = cleanColId === `${tablePrefix}NOMBREC`;
-                const isSystemField = cleanColId.includes('REGISTRO') || cleanColId === `${tablePrefix}DAT01`;
-                const canEdit = isNew ? (!isCalculatedField && !isSystemField && field.editable !== false) : field.editable !== false;
+        // --- CASO A: CAMPO DE IDENTIDAD CON TOGGLE (IDNOMBRE) ---
+        if (cleanId === `${prefix}IDNOMBRE`) {
+            return renderToggleHTML(field.label, value, currentStatus, isBlocked, prefix, colId);
+        }
 
-                const masterMatch = tv001Valores.filter(row => 
-                    row.Encabezado_Tabla && row.Encabezado_Tabla.toUpperCase().trim() === cleanColId
-                );
+        // --- CASO B: PRIMARY KEY (OCULTO) ---
+        if (cleanId === `${prefix}ID`) {
+            return isNew ? '' : `<input type="hidden" name="${colId}" value="${value}">`;
+        }
 
-                if (masterMatch.length > 0 && canEdit) {
-                    const uniqueOptions = masterMatch.map(m => m.Valores_Encabezado).filter(v => v);  
-                    selectHydrations.push({ 
-                        elementId: `select-${cleanColId}`, 
-                        options: uniqueOptions, 
-                        current: value 
-                    });
-                    return `
-                        <div class="border-b border-gray-700/40 py-1">
-                            <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
-                            <select name="${colId}" id="select-${cleanColId}" 
-                                class="w-full bg-gray-800 text-blue-300 outline-none border-none focus:ring-0 text-[18px] font-bold p-0 m-0 cursor-pointer appearance-none">
-                                <option value="${value}" class="bg-gray-800 text-white">${value || 'Seleccione...'}</option>
-                            </select>
-                        </div>`;
-                }
+        // --- LÓGICA DE EDICIÓN Y ESTILOS ---
+        const isCalculated = cleanId.includes('NOMBREC');
+        const isSystem = cleanId.includes('REGISTRO') || cleanId === `${prefix}DAT01`;
+        
+        // El campo DAT01 suele ser de sistema pero podrías quererlo editable en New
+        const canEdit = isNew 
+            ? (!isCalculated && !cleanId.includes('REGISTRO') && field.editable !== false) 
+            : field.editable !== false;
 
-                const pkField = `${tablePrefix}ID`;
-                if (cleanColId === pkField) return isNew ? '' : `<input type="hidden" name="${colId}" value="${value}">`;
+        // --- CASO C: SELECTORES (CATÁLOGOS TV001) ---
+        const masterMatch = tv001.filter(row => 
+            row.Encabezado_Tabla && row.Encabezado_Tabla.toUpperCase().trim() === cleanId
+        );
 
-                const valueClass = cleanColId.includes('NOMBREC') || cleanColId.includes('DAT01') ? 'text-[22px] text-blue-300 font-bold' : 'text-[18px] text-gray-200';
-                
-                return `
-                    <div class="border-b border-gray-700/40 py-1">
-                        <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
-                        <input type="text" name="${colId}" value="${value}" 
-                            ${!canEdit ? 'readonly' : ''}
-                            class="w-full bg-transparent outline-none border-none focus:ring-0 ${valueClass} p-0 m-0 ${!canEdit ? 'opacity-60' : ''}">
-                    </div>`;
-            }).join('');
+        if (masterMatch.length > 0 && canEdit) {
+            selectHydrations.push({ 
+                id: `select-${cleanId}`, 
+                options: masterMatch.map(m => m.Valores_Encabezado), 
+                current: value 
+            });
+            return `
+                <div class="border-b border-gray-700/40 py-1">
+                    <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
+                    <select name="${colId}" id="select-${cleanId}" 
+                        class="w-full bg-gray-800 text-blue-300 outline-none border-none text-[18px] font-bold p-0 appearance-none cursor-pointer">
+                        <option value="${value}">${value || 'Seleccione...'}</option>
+                    </select>
+                </div>`;
+        }
 
-            container.innerHTML = fieldsHTML;
+        // --- CASO D: INPUT NORMAL (TEXTO/NÚMEROS) ---
+        const isImportant = cleanId.includes('NOMBREC') || cleanId.includes('DAT01');
+        const textClass = isImportant ? 'text-blue-300 font-bold text-[20px]' : 'text-gray-200 text-[18px]';
 
-            // 2. Inicializar iconos de Lucide (necesario para el toggle)
-            if(window.lucide) lucide.createIcons();
+        return `
+            <div class="border-b border-gray-700/40 py-1">
+                <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
+                <input type="text" name="${colId}" value="${value}" 
+                    ${!canEdit ? 'readonly' : ''}
+                    class="w-full bg-transparent outline-none border-none ${textClass} p-0 m-0 ${!canEdit ? 'opacity-60' : ''}">
+            </div>`;
+    }).join('');
 
-            // 3. Hidratación de selects
-            selectHydrations.forEach(item => {
-                const selectElement = document.getElementById(item.elementId);
-                if (!selectElement) return;
-                
-                let flatOptions = [];                   
-                item.options.forEach(optSource => {
-                    try {
-                        const parsed = typeof optSource === 'string' && optSource.startsWith('[') ? JSON.parse(optSource) : optSource;
-                        if (Array.isArray(parsed)) flatOptions = flatOptions.concat(parsed);
-                        else flatOptions.push(optSource);
-                    } catch (e) { flatOptions.push(optSource); }
+    // 5. Inicialización post-render
+    if (window.lucide) lucide.createIcons();
+    hydrateAllSelects(selectHydrations);
+}
+
+        function hydrateAllSelects(hydrations) {
+            hydrations.forEach(item => {
+                const el = document.getElementById(item.id);
+                if (!el) return;
+                const flat = item.options.flatMap(opt => {
+                    try { return (typeof opt === 'string' && opt.startsWith('[')) ? JSON.parse(opt) : opt; } catch { return opt; }
                 });
-
-                const cleanOptions = [...new Set(flatOptions)].filter(v => v).sort();
-                let optionsHTML = `<option value="">-- Seleccionar --</option>`;
-                optionsHTML += cleanOptions.map(val => {
-                    const isSelected = String(val).trim() === String(item.current).trim() ? 'selected' : '';
-                    return `<option value="${val}" ${isSelected} class="bg-gray-800 text-white">${val}</option>`;
-                }).join('');
-                selectElement.innerHTML = optionsHTML;
+                const unique = [...new Set(flat)].filter(Boolean).sort();
+                el.innerHTML = `<option value="">-- Seleccionar --</option>` + 
+                    unique.map(val => `<option value="${val}" ${String(val).trim() === String(item.current).trim() ? 'selected' : ''}>${val}</option>`).join('');
             });
         }
 
-        function hydrateSpecificSelect(elementId, columnName, currentValue) {
-            const selectElement = document.getElementById(elementId);
-            if (!selectElement) return;
-            const fullDataTable = JSON.parse(localStorage.getItem('FULL_DATA_TD101') || '[]');           
-            const columnExists = fullDataTable.length > 0 && fullDataTable[0].hasOwnProperty(columnName);
-            if (!columnExists) {
-                console.warn(`⚠️ La columna ${columnName} no fue enviada por el servidor para TD101_BASIC.`);
-                selectElement.innerHTML = `<option value="${currentValue}" selected>${currentValue || 'Dato no disponible'}</option>`;
-                selectElement.classList.add('opacity-50', 'cursor-not-allowed');
-                return;
-            }
-            const uniqueValues = [...new Set(fullDataTable.map(row => row[columnName]))]
-                .filter(val => val !== undefined && val !== null && val !== "")
-                .sort();
-            let optionsHTML = `<option value="" class="bg-gray-800 text-gray-400">-- Seleccionar --</option>`;           
-            optionsHTML += uniqueValues.map(val => {
-                const isSelected = String(val).trim() === String(currentValue).trim() ? 'selected' : '';
-                return `<option value="${val}" ${isSelected} class="bg-gray-800 text-white">${val}</option>`;
-            }).join('');
-            selectElement.innerHTML = optionsHTML;
+        // --- MANEJO DE FORMULARIOS ---
+
+async function handleEditSubmit(e) {
+    e.preventDefault();
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = "Procesando...";
+    submitBtn.disabled = true;
+
+    try {
+        // 1. Obtener contexto de la tabla y datos actuales
+        const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
+        const tableName = currentData.TABLA_ORIGEN || "TD101_BASIC";
+        const tablePrefix = tableName.split('_')[0].toUpperCase();
+        
+        // 2. Determinar la llave primaria de la tabla
+        const headers = Object.keys(currentData).filter(k => k !== 'TABLA_ORIGEN');
+        const primaryKeyField = getTablePrimaryKey(headers, tableName);
+        
+        // 3. Capturar datos del formulario
+        const formData = new FormData(e.target);
+        const formEntries = Object.fromEntries(formData.entries());
+
+        // 4. Unión de datos: preservamos lo que no está en el form (Integridad de campos como DAT01)
+        const fullPayload = { ...currentData, ...formEntries };
+
+        // 5. Limpieza técnica del ID para búsqueda en el backend
+        let idValue = fullPayload[primaryKeyField];
+        if (idValue) idValue = String(idValue).replace(/[.,\s]/g, '');
+
+        // 6. Manejo del Estatus (TYPEREG)
+        const typeregKey = `${tablePrefix}TYPEREG`;
+        const toggleElement = document.getElementById('input-typereg');
+        const finalStatus = toggleElement ? toggleElement.value : (currentData[typeregKey] || "");
+
+        // 7. Construcción del Objeto Final para el Backend
+        const requestData = {
+            action: "editDynamicDataTD",
+            TABLA_DESTINO: tableName,
+            CAMPO_CLAVE: primaryKeyField,
+            [primaryKeyField]: idValue,
+            ...fullPayload,
+            [typeregKey]: finalStatus,
+            currentUser: localStorage.getItem(KEYS.USUARIO_ID) || "UserSys"
+        };
+
+        // Limpieza de metadatos locales antes del envío
+        delete requestData.TABLA_ORIGEN;
+        delete requestData.IS_NEW;
+
+        // --- BLOQUE DE DIAGNÓSTICO ---
+        console.group("🔍 DEPURACIÓN DE ENVÍO LOCAL");
+        console.log("Tabla:", tableName);
+        console.log("Payload Final:", requestData);
+        console.log("Estado:", finalStatus);
+        console.groupEnd();
+
+        // 8. Envío al Servidor (GAS)
+        const response = await fetch(GAS_SCRIPT_URL, { 
+            method: 'POST', 
+            body: new URLSearchParams(requestData) 
+        });
+        
+        const res = await response.json();
+
+        if (res.success) {
+            // Actualizar LocalStorage con los nuevos datos
+            localStorage.setItem(STORAGE_DATA, JSON.stringify({
+                ...fullPayload,
+                [typeregKey]: finalStatus,
+                TABLA_ORIGEN: tableName,
+                IS_NEW: false
+            }));
+
+            // USAMOS 'info' PARA COMPATIBILIDAD CON PLANTILLA GLOBAL
+            await showSystemModal({ 
+                title: 'Éxito', 
+                text: 'Datos sincronizados correctamente', 
+                type: 'info' 
+            });
+
+            window.location.reload();
+        } else {
+            throw new Error(res.message);
         }
 
-        async function hydrateSelectField(fieldName, currentValue) {
-            const selectElement = document.getElementById(`select-${fieldName}`);
-            if (!selectElement) return;
-            try {
-                const values = await getValidMainValues(fieldName);               
-                let optionsHTML = '<option value="">-- Seleccione --</option>';               
-                if (values && values.length > 0) {
-                    optionsHTML += values.map(val => {
-                        const isSelected = String(val) === String(currentValue) ? 'selected' : '';
-                        return `<option value="${val}" ${isSelected}>${val}</option>`;
-                    }).join('');
-                } else {
-                    optionsHTML = `<option value="${currentValue}">${currentValue || 'Sin datos'}</option>`;
-                }
-                selectElement.innerHTML = optionsHTML;
-            } catch (err) {
-                console.error(`Error hidratando ${fieldName}:`, err);
-                selectElement.innerHTML = `<option value="">Error al cargar</option>`;
-            }
-        }
+    } catch (err) {
+        console.error("Error en sincronización:", err);
+        // La plantilla global sí soporta 'warning'
+        showSystemModal({ 
+            title: 'Error', 
+            text: err.message || 'Error de conexión', 
+            type: 'warning' 
+        });
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+}
 
     </script>
 
     <script>
-        async function handleEditSubmit(e) {
-            e.preventDefault();
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = "Procesando...";
-            submitBtn.disabled = true;
-            try {
-                const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
-                const action = document.getElementById('formAction').value;
-                const tableName = currentData.TABLA_ORIGEN;
-                const tablePrefix = tableName.split('_')[0].toUpperCase();               
-                const headers = Object.keys(currentData).filter(k => k !== 'TABLA_ORIGEN');
-                const primaryKeyField = getTablePrimaryKey(headers, tableName);
-                const formData = new FormData(e.target);
-                const formPayload = Object.fromEntries(formData.entries());
-                let idValue = formPayload[primaryKeyField] || currentData[primaryKeyField];
-                if (idValue) idValue = String(idValue).replace(/[.,\s]/g, '');
-                if (!idValue && action === "editDynamicDataTD") {
-                    throw new Error("No se localizó el ID para actualizar el registro.");
-                }
-                const typeregKey = `${tablePrefix}TYPEREG`;
-                const toggleElement = document.getElementById('input-typereg');
-                const finalStatus = toggleElement ? toggleElement.value : (currentData[typeregKey] || "");
-                const payload = {
-                    action: action,
-                    TABLA_DESTINO: tableName,
-                    CAMPO_CLAVE: primaryKeyField,
-                    [primaryKeyField]: idValue, // Aseguramos que el ID vaya limpio
-                    TD101RegistroUser: localStorage.getItem(KEYS.USUARIO_ID),
-                    ...formPayload,
-                    [typeregKey]: finalStatus
-                };
-                await executeSubmit(payload);
-                const updatedData = { ...currentData, ...formPayload, [typeregKey]: finalStatus };
-                updatedData[primaryKeyField] = idValue; // Guardar ID limpio
-                localStorage.setItem(STORAGE_DATA, JSON.stringify(updatedData));
-                renderProfile(); 
-                togglePanels('detail'); 
-            } catch (err) {
-                console.error("Error en handleEditSubmit:", err);
-                showSystemModal({ title: 'Error', text: err.message, type: 'warning' });
-            } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }
+
+        function toggleRecordStatus(prefix) {
+            const input = document.getElementById('input-typereg');
+            const badge = document.getElementById('badge-status');
+            const icon = document.getElementById('toggle-icon');
+            const isNowBlocking = input.value !== "Bloqueado";
+            if (isNowBlocking) {
+                input.value = "Bloqueado";
+                badge.textContent = "Bloqueado";
+                badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 uppercase font-bold transition-all";
+                icon.style.color = "#ef4444";
+                icon.setAttribute('data-lucide', 'toggle-left');
+            } else {
+                input.value = ""; // O "Registrado", según prefieras en tu BD
+                badge.textContent = "Registrado";
+                badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 uppercase font-bold transition-all";
+                icon.style.color = "#22c55e";
+                icon.setAttribute('data-lucide', 'toggle-right');
+            }           
+            if(window.lucide) lucide.createIcons();
         }
 
         async function handleInsertSubmit(e) {
@@ -695,7 +647,7 @@
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
             }
-        }
+        }        
 
         function renderToggleHTML(label, value, status, isBlocked, prefix, colId) {
             const displayStatus = (status === "" || status === "Registrado") ? "Registrado" : status;           
@@ -716,28 +668,7 @@
                     </div>
                 </div>`;
         }
-                
-        function toggleRecordStatus(prefix) {
-            const input = document.getElementById('input-typereg');
-            const badge = document.getElementById('badge-status');
-            const icon = document.getElementById('toggle-icon');
-            const isNowBlocking = input.value !== "Bloqueado";
-            if (isNowBlocking) {
-                input.value = "Bloqueado";
-                badge.textContent = "Bloqueado";
-                badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 uppercase font-bold transition-all";
-                icon.style.color = "#ef4444";
-                icon.setAttribute('data-lucide', 'toggle-left');
-            } else {
-                input.value = ""; // O "Registrado", según prefieras en tu BD
-                badge.textContent = "Registrado";
-                badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 uppercase font-bold transition-all";
-                icon.style.color = "#22c55e";
-                icon.setAttribute('data-lucide', 'toggle-right');
-            }           
-            if(window.lucide) lucide.createIcons();
-        }
-
+             
         function showViewMode() {
             const data = JSON.parse(localStorage.getItem('TABLE_DATA') || '{}');
             if (data.IS_NEW === true) {
