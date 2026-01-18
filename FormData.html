@@ -63,7 +63,7 @@
                 <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-4">
                     <h3 class="text-2xl font-bold text-blue-400">Detalle Selección</h3>
                     <div class="flex gap-4">
-                        <button onclick="showRegisterMode()" class="hidden text-green-400 hover:scale-110 transition-transform" title="Nuevo Registro">
+                        <button onclick="showRegisterMode()" class="text-green-400 hover:scale-110 transition-transform" title="Nuevo Registro">
                             <i data-lucide="file-plus-2" class="w-6 h-6"></i>
                         </button>
                         <button onclick="showEditMode()" class="text-yellow-400 hover:scale-110 transition-transform" title="Editar Registro">
@@ -253,8 +253,6 @@
             n1.addEventListener('input', calculate);
             n2.addEventListener('input', calculate);
         }
-
-
     </script>
 
     <script>
@@ -472,99 +470,37 @@ function renderFields(config, data, isNew = false) {
 async function handleEditSubmit(e) {
     e.preventDefault();
     const submitBtn = document.getElementById('submitBtn');
-    const originalText = submitBtn.textContent;
     submitBtn.textContent = "Procesando...";
     submitBtn.disabled = true;
 
-    try {
-        // 1. Obtener contexto de la tabla y datos actuales
-        const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
-        const tableName = currentData.TABLA_ORIGEN || "TD101_BASIC";
-        const tablePrefix = tableName.split('_')[0].toUpperCase();
-        
-        // 2. Determinar la llave primaria de la tabla
-        const headers = Object.keys(currentData).filter(k => k !== 'TABLA_ORIGEN');
-        const primaryKeyField = getTablePrimaryKey(headers, tableName);
-        
-        // 3. Capturar datos del formulario
-        const formData = new FormData(e.target);
-        const formEntries = Object.fromEntries(formData.entries());
+    const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
+    const tableName = currentData.TABLA_ORIGEN || "TD101_BASIC";
+    const tablePrefix = tableName.split('_')[0].toUpperCase();
+    const headers = Object.keys(currentData).filter(k => k !== 'TABLA_ORIGEN');
+    const primaryKeyField = getTablePrimaryKey(headers, tableName);
+    
+    const formData = new FormData(e.target);
+    const formEntries = Object.fromEntries(formData.entries());
 
-        // 4. Unión de datos: preservamos lo que no está en el form (Integridad de campos como DAT01)
-        const fullPayload = { ...currentData, ...formEntries };
+    const payload = {
+        action: "editDynamicDataTD",
+        TABLA_DESTINO: tableName,
+        CAMPO_CLAVE: primaryKeyField,
+        ...currentData,
+        ...formEntries,
+        [`${tablePrefix}TYPEREG`]: document.getElementById('input-typereg')?.value || currentData[`${tablePrefix}TYPEREG`],
+        currentUser: localStorage.getItem(KEYS.USUARIO_ID) || "UserSys"
+    };
 
-        // 5. Limpieza técnica del ID para búsqueda en el backend
-        let idValue = fullPayload[primaryKeyField];
-        if (idValue) idValue = String(idValue).replace(/[.,\s]/g, '');
+    delete payload.TABLA_ORIGEN;
+    delete payload.IS_NEW;
 
-        // 6. Manejo del Estatus (TYPEREG)
-        const typeregKey = `${tablePrefix}TYPEREG`;
-        const toggleElement = document.getElementById('input-typereg');
-        const finalStatus = toggleElement ? toggleElement.value : (currentData[typeregKey] || "");
-
-        // 7. Construcción del Objeto Final para el Backend
-        const requestData = {
-            action: "editDynamicDataTD",
-            TABLA_DESTINO: tableName,
-            CAMPO_CLAVE: primaryKeyField,
-            [primaryKeyField]: idValue,
-            ...fullPayload,
-            [typeregKey]: finalStatus,
-            currentUser: localStorage.getItem(KEYS.USUARIO_ID) || "UserSys"
-        };
-
-        // Limpieza de metadatos locales antes del envío
-        delete requestData.TABLA_ORIGEN;
-        delete requestData.IS_NEW;
-
-        // --- BLOQUE DE DIAGNÓSTICO ---
-        console.group("🔍 DEPURACIÓN DE ENVÍO LOCAL");
-        console.log("Tabla:", tableName);
-        console.log("Payload Final:", requestData);
-        console.log("Estado:", finalStatus);
-        console.groupEnd();
-
-        // 8. Envío al Servidor (GAS)
-        const response = await fetch(GAS_SCRIPT_URL, { 
-            method: 'POST', 
-            body: new URLSearchParams(requestData) 
-        });
-        
-        const res = await response.json();
-
-        if (res.success) {
-            // Actualizar LocalStorage con los nuevos datos
-            localStorage.setItem(STORAGE_DATA, JSON.stringify({
-                ...fullPayload,
-                [typeregKey]: finalStatus,
-                TABLA_ORIGEN: tableName,
-                IS_NEW: false
-            }));
-
-            // USAMOS 'info' PARA COMPATIBILIDAD CON PLANTILLA GLOBAL
-            await showSystemModal({ 
-                title: 'Éxito', 
-                text: 'Datos sincronizados correctamente', 
-                type: 'info' 
-            });
-
-            window.location.reload();
-        } else {
-            throw new Error(res.message);
-        }
-
-    } catch (err) {
-        console.error("Error en sincronización:", err);
-        // La plantilla global sí soporta 'warning'
-        showSystemModal({ 
-            title: 'Error', 
-            text: err.message || 'Error de conexión', 
-            type: 'warning' 
-        });
-    } finally {
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-    }
+    // Llamamos a la función centralizada
+    await executeSubmit(payload, 'Actualización');
+    
+    // El botón se restaura si algo falla (si tiene éxito, la página se recarga)
+    submitBtn.textContent = "Guardar Cambios";
+    submitBtn.disabled = false;
 }
 
     </script>
@@ -592,62 +528,52 @@ async function handleEditSubmit(e) {
             if(window.lucide) lucide.createIcons();
         }
 
-        async function handleInsertSubmit(e) {
-            e.preventDefault();
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = "Procesando...";
-            submitBtn.disabled = true;
-            try {
-                const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
-                const currentConfig = JSON.parse(localStorage.getItem(STORAGE_CONFIG) || '{}');
-                const tableName = currentData.TABLA_ORIGEN || "TD101_BASIC"; 
-                const tablePrefix = tableName.split('_')[0].toUpperCase();
-                const headers = Object.keys(currentConfig).length > 0 ? Object.keys(currentConfig) : Object.keys(currentData);
-                const primaryKeyField = getTablePrimaryKey(headers, tableName);
-                const formData = new FormData(e.target);
-                const formPayload = Object.fromEntries(formData.entries());
-                const tiendaId = localStorage.getItem(KEYS.TIENDA_ID);
-                if (!tiendaId) throw new Error("No se encontró el ID de Localidad (TIENDA_ID).");
-                const payload = {
-                    action: "registerDynamicDataTD",
-                    TABLA_DESTINO: tableName,
-                    CAMPO_CLAVE: primaryKeyField,
-                    "TD101LOC": tiendaId, 
-                    [`${tablePrefix}RegistroUser`]: localStorage.getItem(KEYS.USUARIO_ID),
-                    ...formPayload
-                };
+async function handleInsertSubmit(e) {
+    e.preventDefault();
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = "Procesando...";
+    submitBtn.disabled = true;
 
-                console.group("🚀 ENVÍO DE NUEVO REGISTRO (VINCULADO)");
-                console.log("Tabla Destino:", tableName);
-                console.log("Vínculo Fijo:", "TD101LOC =", tiendaId);
-                console.table(payload);
-                console.groupEnd();
+    try {
+        const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
+        const currentConfig = JSON.parse(localStorage.getItem(STORAGE_CONFIG) || '{}');
+        const tableName = currentData.TABLA_ORIGEN || "TD101_BASIC"; 
+        const tablePrefix = tableName.split('_')[0].toUpperCase();
+        
+        // Determinar headers y primary key
+        const headers = Object.keys(currentConfig).length > 0 ? Object.keys(currentConfig) : Object.keys(currentData);
+        const primaryKeyField = getTablePrimaryKey(headers, tableName);
+        
+        const formData = new FormData(e.target);
+        const formPayload = Object.fromEntries(formData.entries());
+        const tiendaId = localStorage.getItem(KEYS.TIENDA_ID);
+        
+        if (!tiendaId) throw new Error("No se encontró el ID de Localidad (TIENDA_ID).");
 
-                const response = await fetch(GAS_SCRIPT_URL, { 
-                    method: 'POST', 
-                    body: new URLSearchParams(payload) 
-                });               
-                const res = await response.json();
-                if (res.success) {
-                    await showSystemModal({title: '¡Éxito!', text: `Registro creado en ${tableName}`, type: 'info'});                   
-                    localStorage.setItem(STORAGE_DATA, JSON.stringify({
-                        ...res.data,
-                        TABLA_ORIGEN: tableName,
-                        IS_NEW: false
-                    }));
-                    window.location.reload();
-                } else {
-                    await showSystemModal({title: 'Error', text: res.message, type: 'warning'});
-                }
-            } catch (err) {
-                console.error("❌ Error:", err);
-                showSystemModal({ title: 'Error', text: err.message, type: 'warning' });
-            } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }
-        }        
+        // Construcción del Payload
+        const payload = {
+            action: "registerDynamicDataTD",
+            TABLA_DESTINO: tableName,
+            CAMPO_CLAVE: primaryKeyField,
+            "TD101LOC": tiendaId, 
+            [`${tablePrefix}RegistroUser`]: localStorage.getItem(KEYS.USUARIO_ID) || "UserSys",
+            ...formPayload
+        };
+
+        // --- DELEGACIÓN A LA FUNCIÓN CENTRAL ---
+        // Pasamos el payload y el título deseado para el modal
+        await executeSubmit(payload, 'Nuevo Registro');
+
+    } catch (err) {
+        console.error("❌ Error:", err);
+        showSystemModal({ title: 'Error', text: err.message, type: 'warning' });
+    } finally {
+        // En caso de error (porque si hay éxito la página se recarga), restauramos el botón
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+}      
 
         function renderToggleHTML(label, value, status, isBlocked, prefix, colId) {
             const displayStatus = (status === "" || status === "Registrado") ? "Registrado" : status;           
@@ -760,20 +686,50 @@ async function handleEditSubmit(e) {
             }
         }
 
-        async function executeSubmit(payload) {
-            try {
-                const r = await fetch(GAS_SCRIPT_URL, { method: 'POST', body: new URLSearchParams(payload) });
-                const res = await r.json();
-                if (res.success) {
-                    await showSystemModal({title:'¡Éxito!', text: res.message, type:'info'});
-                    location.reload();
-                } else {
-                    await showSystemModal({title:'Error', text: res.message, type:'warning'});
-                }
-            } catch (err) {
-                await showSystemModal({title:'Error', text:'Error de conexión', type:'warning'});
+// Función centralizada para comunicación con GAS
+async function executeSubmit(payload, customTitle = '¡Éxito!') {
+    try {
+        const r = await fetch(GAS_SCRIPT_URL, { 
+            method: 'POST', 
+            body: new URLSearchParams(payload) 
+        });
+        const res = await r.json();
+
+        if (res.success) {
+            // Si el backend devuelve nuevos datos (como el ID generado), los guardamos
+            if (res.data) {
+                const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
+                localStorage.setItem(STORAGE_DATA, JSON.stringify({
+                    ...currentData,
+                    ...res.data,
+                    IS_NEW: false
+                }));
             }
+
+            // Usamos res.message directamente del backend
+            await showSystemModal({
+                title: customTitle, 
+                text: res.message, 
+                type: 'info' // Compatible con tu plantilla
+            });
+            
+            location.reload();
+        } else {
+            await showSystemModal({
+                title: 'Error', 
+                text: res.message, 
+                type: 'warning'
+            });
         }
+    } catch (err) {
+        console.error("Error de red:", err);
+        await showSystemModal({
+            title: 'Error', 
+            text: 'Error de conexión con el servidor', 
+            type: 'warning'
+        });
+    }
+}
     </script>
 </body>
 </html>
