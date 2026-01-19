@@ -445,24 +445,21 @@
             const tableBody = document.getElementById('table-body');
             const tableKey = String(currentTableName).trim().toUpperCase();
             const tablePrefix = tableKey.split('_')[0];
-
-            // 1. HEADERS VISUALES (Usamos columnOrder filtrado del backend)
             const headers = tableConfig.columnOrder; 
 
-            // Columna ID Visual (Contador)
+            // 1. DIBUJAR ENCABEZADOS (HEADERS)
+            // Aquí NO sabemos si una fila está bloqueada o no, solo definimos las columnas.
             const thId = document.createElement('th');
             thId.className = 'sticky-id-cell';
             thId.innerHTML = `<div class="header-content" style="justify-content: center;"><span>#</span></div>`;
             tableHeader.appendChild(thId);
 
-            // Dibujar columnas autorizadas por el backend
             headers.forEach(h => {
-                // Ocultar ID técnico de la vista de tabla, pero se mantiene en el objeto de datos
-                if (h.toUpperCase() === `${tablePrefix}ID`) return;
+                const cleanH = h.toUpperCase();
+                if (cleanH === `${tablePrefix}ID` || cleanH.endsWith('TYPEREG')) return;
 
                 const th = document.createElement('th');
                 const friendlyName = tableConfig.displayMap[h] || h;
-                
                 let iconName = sortConfig.key === h ? (sortConfig.direction === 'desc' ? 'chevron-down' : 'chevron-up') : 'chevrons-up-down';
                 
                 th.innerHTML = `
@@ -474,52 +471,65 @@
                 tableHeader.appendChild(th);
             });
 
-            // 2. FILAS Y LÓGICA DE FORMULARIO
+            // 2. DIBUJAR FILAS (DATA)
             data.forEach((row, idx) => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-blue-500/10 cursor-pointer transition-colors group';
+                
+                // Identificamos el bloqueo AQUÍ, donde tenemos acceso a 'row'
+                const typeRegKey = Object.keys(row).find(k => k.toUpperCase().endsWith('TYPEREG'));
+                const isBlocked = typeRegKey && String(row[typeRegKey]).toUpperCase() === 'BLOQUEADO';
 
+                // Aplicamos clases de Tailwind: si está bloqueado, texto rojo y fondo rojizo tenue
+                tr.className = `cursor-pointer transition-colors group ${
+                    isBlocked 
+                    ? 'opacity-80 bg-red-500/5 text-red-500 hover:bg-red-500/10 hover:opacity-100' 
+                    : 'hover:bg-blue-500/10'
+                }`;
+
+                // Evento Doble Click
                 tr.ondblclick = () => {
                     const configMap = {};
-                    
                     headers.forEach(h => {
                         const colKey = h.toUpperCase();
                         const colConfig = rawConfig.find(c => c.ID_Columna === h);
                         const marca = colConfig ? colConfig.Visible_Encabezado.toUpperCase() : '';
-
                         const isPK = colKey === `${tablePrefix}ID`;
-                        const isBlocked = (marca === 'XX') || isPK || colKey.includes('REGISTRO') || colKey.includes('DAT01');
-
-                        // DETECCIÓN DE TIPO SELECT: Si termina en ID y no es la PK
+                        const isTechnical = (marca === 'XX') || isPK || colKey.includes('REGISTRO') || colKey.includes('DAT01');
                         const isSelect = h.endsWith('ID') && !isPK;
 
                         configMap[h] = {
                             label: tableConfig.displayMap[h] || h,
-                            editable: !isBlocked,
+                            editable: !isTechnical,
                             type: isSelect ? 'select' : 'text'
                         };
                     });
-
-                    // Persistencia para FormData.html
                     localStorage.setItem('TABLE_CONFIG', JSON.stringify(configMap));
                     localStorage.setItem('TABLE_DATA', JSON.stringify({ ...row, TABLA_ORIGEN: currentTableName }));
                     window.location.href = 'FormData.html';
                 };
 
-                // Celda ID Visual
+                // Celda ID Visual (#)
                 const tdId = document.createElement('td');
                 tdId.className = 'table-data-cell sticky-id-cell text-center';
+                // Si quieres que el número también sea rojo cuando está bloqueado:
+                if (isBlocked) tdId.style.color = '#ef4444'; 
                 tdId.textContent = idx + 1;
                 tr.appendChild(tdId);
 
-                // Celdas de Datos
+                // 3. DIBUJAR CELDAS DE DATOS
                 headers.forEach(h => {
-                    if (h.toUpperCase() === `${tablePrefix}ID`) return;
+                    const cleanH = h.toUpperCase();
+                    if (cleanH === `${tablePrefix}ID` || cleanH.endsWith('TYPEREG')) return;
+
                     const td = document.createElement('td');
                     td.className = 'table-data-cell px-3';
                     td.style.textAlign = tableConfig.alignMap[h] || 'left';
                     
-                    // Usamos formato de moneda/fecha si la función existe
+                    // Forzamos el color rojo en el estilo de la celda si está bloqueado
+                    if (isBlocked) {
+                        td.style.color = '#ef4444';
+                    }
+
                     const val = typeof getFormattedValue === 'function' ? getFormattedValue(h, row[h]) : row[h];
                     td.innerHTML = highlightText(val, typeof currentSearchTerm !== 'undefined' ? currentSearchTerm : "");
                     tr.appendChild(td);
