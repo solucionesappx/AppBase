@@ -576,30 +576,6 @@
             return stringText.replace(regex, '<span class="search-highlight">$1</span>');
         }
 
-        function applyFiltersAndSort() {
-            let processedData = [...originalData];
-            if (currentSearchTerm) {
-                processedData = processedData.filter(row => {
-                    return Object.keys(row).some(key => {
-                        const visibleValue = String(getFormattedValue(key, row[key])).toLowerCase();
-                        return visibleValue.includes(currentSearchTerm);
-                    });
-                });
-            }
-            if (sortConfig.key && sortConfig.direction) {
-                processedData.sort((a, b) => {
-                    let valA = a[sortConfig.key], valB = b[sortConfig.key];
-                    let numA = parseFloat(String(valA).replace(',', '.')), numB = parseFloat(String(valB).replace(',', '.'));
-                    if (!isNaN(numA) && !isNaN(numB)) { valA = numA; valB = numB; }
-                    else { valA = String(valA).toLowerCase(); valB = String(valB).toLowerCase(); }
-                    if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
-                    if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
-                    return 0;
-                });
-            }
-            renderTable(processedData);
-        }
-
         function handleSort(key) {
             if (sortConfig.key === key) {
                 sortConfig.direction = (sortConfig.direction === 'desc') ? 'asc' : 'desc';
@@ -617,36 +593,30 @@
                 solventes: document.querySelector('[data-metric="Solventes"]')
             };
 
-            // 1. Obtener el prefijo dinámicamente (Primeros 5 caracteres, ej: TD101)
-            // Usamos currentTableName que es la variable global que controla la tabla activa
-            const tablePrefix = String(currentTableName || '').substring(0, 5).toUpperCase();
-            const typeRegField = `${tablePrefix}TYPEREG`;
+            if (!data || !Array.isArray(data)) return;
 
-            // 2. Filtrar los registros que NO están bloqueados
-            // Si por alguna razón la tabla no tiene el campo TYPEREG, 
-            // el filtro simplemente dejará pasar todos los registros.
+            const keys = data.length > 0 ? Object.keys(data[0]) : [];
+            const typeRegField = keys.find(k => k.toUpperCase().endsWith('TYPEREG'));
+            const estadoField = keys.find(k => k.toUpperCase().endsWith('ESTADO')) || 'ESTADO';
+
             const activeData = data.filter(r => {
+                if (!typeRegField) return true; // Si no existe la columna de control, pasan todos
                 const regStatus = String(r[typeRegField] || '').trim().toUpperCase();
                 return regStatus !== 'BLOQUEADO';
             });
 
-            // 3. Renderizar métricas basadas solo en data activa
-            if (m.total) {
-                m.total.textContent = activeData.length;
-            }
+            if (m.total) m.total.textContent = activeData.length;
 
             if (m.morosos) {
-                const countMorosos = activeData.filter(r => 
-                    String(r.ESTADO || '').trim().toUpperCase() === 'MOROSO'
+                m.morosos.textContent = activeData.filter(r => 
+                    String(r[estadoField] || '').trim().toUpperCase() === 'MOROSO'
                 ).length;
-                m.morosos.textContent = countMorosos;
             }
 
             if (m.solventes) {
-                const countSolventes = activeData.filter(r => 
-                    String(r.ESTADO || '').trim().toUpperCase() === 'SOLVENTE'
+                m.solventes.textContent = activeData.filter(r => 
+                    String(r[estadoField] || '').trim().toUpperCase() === 'SOLVENTE'
                 ).length;
-                m.solventes.textContent = countSolventes;
             }
         }
 
@@ -655,13 +625,8 @@
 
             const cleanKey = String(key).toUpperCase();
             
-            // 1. Lógica para Fechas (Detecta cualquier columna que contenga "REGISTRODATA" o "FECHA")
-            if (cleanKey.includes('REGISTRODATA')) {
-                return formatDateTime(value);
-            }
-            if (cleanKey.includes('FECHA')) {
-            return formatDate(value);
-        }
+            if (cleanKey.includes('REGISTRODATA')) { return formatDateTime(value);}
+            if (cleanKey.includes('FECHA')) { return formatDate(value);}
             const isPotentiallyNumber = typeof value === 'number' || 
                 (!isNaN(parseFloat(value)) && isFinite(value) && String(value).length < 15);
             if (isPotentiallyNumber && !cleanKey.includes('ID') && !cleanKey.includes('DATA')) {
@@ -669,6 +634,34 @@
             }
             return value;
         }
+
+        function applyFiltersAndSort() {
+            let processedData = [...originalData];
+
+            if (currentSearchTerm) {
+                processedData = processedData.filter(row => {
+                    return Object.keys(row).some(key => {
+                        const visibleValue = String(getFormattedValue(key, row[key])).toLowerCase();
+                        return visibleValue.includes(currentSearchTerm);
+                    });
+                });
+            }
+            
+            if (sortConfig.key && sortConfig.direction) {
+                processedData.sort((a, b) => {
+                    let valA = a[sortConfig.key], valB = b[sortConfig.key];
+                    let numA = parseFloat(String(valA).replace(',', '.')), numB = parseFloat(String(valB).replace(',', '.'));
+                    if (!isNaN(numA) && !isNaN(numB)) { valA = numA; valB = numB; }
+                    else { valA = String(valA).toLowerCase(); valB = String(valB).toLowerCase(); }
+                    if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+                    if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }
+            updateMetrics(processedData); 
+            renderTable(processedData);
+        }
+
     </script>
 </body>
 </html>
