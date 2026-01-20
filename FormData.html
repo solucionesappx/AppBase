@@ -58,10 +58,9 @@
                     </p>
                 </div>
             </div>
-
             <div id="DetalleDataContent" class="p-6 bg-gray-800 rounded-xl border border-gray-700 shadow-2xl">
                 <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-4">
-                    <h3 class="text-2xl font-bold text-blue-400">Detalle Selección</h3>
+                    <h3 id="viewTitle" class="text-2xl font-bold text-blue-400">Detalle Selección</h3>
                     <div class="flex gap-4">
                         <button onclick="showRegisterMode()" class="text-green-400 hover:scale-110 transition-transform" title="Nuevo Registro">
                             <i data-lucide="file-plus-2" class="w-6 h-6"></i>
@@ -73,7 +72,6 @@
                 </div>
                 <div id="perfilBodyContent" class="space-y-1 pb-20"></div>
             </div>
-
             <div id="EditDataContent" class="hidden p-6 bg-gray-800 rounded-xl border border-gray-700 shadow-2xl">
                 <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-4">
                     <h2 id="formTitle" class="text-2xl font-bold text-white">Editar Selección</h2>
@@ -82,25 +80,19 @@
                             <i data-lucide="circle-x" class="w-7 h-7"></i>
                         </button>
                     </div>
-                </div>
-                
+                </div>               
                 <form id="editDataForm" class="space-y-1">
-                    <input type="hidden" id="formAction" name="action" value="editDynamicDataTD">
-                    
-                    <div id="editDataFormFields" class="space-y-1">
-                        </div>                   
-
+                    <input type="hidden" id="formAction" name="action" value="editDynamicDataTD">                   
+                    <div id="editDataFormFields" class="space-y-1"></div>                   
                     <button id="submitBtn" type="submit" class="w-full bg-blue-600 mt-6 py-4 rounded-lg font-bold text-white hover:bg-blue-700 transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2">
                         <span>Guardar Cambios</span>
                         <i data-lucide="save" class="w-5 h-5"></i>
                     </button>
-                </form>
-                
+                </form>               
                 <p class="text-sm text-gray-400 text-center pt-4 pb-12">
                     Los campos que no sean modificados mantendrán su valor original.
                 </p>
             </div>
-
         </main>
 
         <footer id="app-footer" class="bottom-0 h-18 border-t flex items-center justify-around px-2 py-1">
@@ -187,10 +179,22 @@
             if (isNaN(d.getTime())) return v;
             return `${formatDate(v)} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
         }
+        function getFormattedValue(key, value) {
+            if (value === null || value === undefined || value === '') return '';
+            const cleanKey = String(key).toUpperCase();           
+            if (cleanKey.includes('REGISTRODATA')) { return formatDateTime(value);}
+            if (cleanKey.includes('FECHA')) { return formatDate(value);}
+            const isPotentiallyNumber = typeof value === 'number' || 
+                (!isNaN(parseFloat(value)) && isFinite(value) && String(value).length < 15);
+            if (isPotentiallyNumber && !cleanKey.includes('ID') && !cleanKey.includes('DATA')) {
+                return formatNumberWithDots(value);}
+            return value;
+        }
         function logout(){localStorage.clear();window.location.href='index.html'}
 
     </script>
-    ><script>
+
+    <script>
         function setupNombreCAutoCalculate(tablePrefix) {
             const n1 = document.getElementById(`input-${tablePrefix}NOMBRE1`);
             const n2 = document.getElementById(`input-${tablePrefix}NOMBRE2`);
@@ -253,6 +257,20 @@
             n1.addEventListener('input', calculate);
             n2.addEventListener('input', calculate);
         }
+
+console.group("🔍 REVISIÓN DE LOCALSTORAGE");
+console.log("👤 Datos de Usuario (KEYS):");
+Object.entries(KEYS).forEach(([key, storageKey]) => {
+    console.log(`   ${key}: ${localStorage.getItem(storageKey)}`);
+});
+
+console.log("📊 Configuración de Tabla (TABLE_CONFIG):");
+console.table(JSON.parse(localStorage.getItem('TABLE_CONFIG') || '{}'));
+
+console.log("📝 Datos de la Fila (TABLE_DATA):");
+console.table(JSON.parse(localStorage.getItem('TABLE_DATA') || '{}'));
+console.groupEnd();
+
     </script>
 
     <script>
@@ -273,50 +291,90 @@
                 const data = JSON.parse(rawData);
                 const config = JSON.parse(rawConfig);
                 const isNew = data.IS_NEW === true;
-                const tableName = data.TABLA_ORIGEN || "TD101_BASIC";
-
-                // Carga inicial de catálogos si no es la tabla básica
-                if (tableName !== "TD101_BASIC") {
-                    if (window.toggleGlobalLoader) toggleGlobalLoader(true);
-                    await fetchMasterData();
-                    if (window.toggleGlobalLoader) toggleGlobalLoader(false);
+                const tableName = data.TABLA_ORIGEN;
+                
+                if (!tableName) {
+                    console.error("Error: No se definió la tabla de origen.");
+                    window.location.href = 'Datos2.html';
+                    return;
                 }
 
-                renderProfile();
-
+                if (window.toggleGlobalLoader) toggleGlobalLoader(true);
+                await fetchMasterData(tableName);
+                if (window.toggleGlobalLoader) toggleGlobalLoader(false);
+                renderProfile();               
+                const friendlyName = getFriendlyTableName(tableName);
+                const viewTitleEl = document.getElementById('viewTitle');
+                if (viewTitleEl) {
+                    viewTitleEl.textContent = `Detalle Selección: ${friendlyName}`;
+                }
+                
+                const form = document.getElementById('editDataForm');
                 if (isNew) {
-                    document.getElementById('formTitle').textContent = "Nuevo Registro";
+                    const friendlyName = getFriendlyTableName(tableName);
+                    document.getElementById('formTitle').textContent = `Nuevo Registro: ${friendlyName}`;
+                    
                     document.getElementById('formAction').value = "registerDynamicDataTD";
                     document.getElementById('submitBtn').textContent = "Crear Nuevo Registro";
                     const btnEdit = document.querySelector('button[onclick="showEditMode()"]');
+
                     if (btnEdit) btnEdit.classList.add('hidden');
                     
                     renderFields(config, { TABLA_ORIGEN: tableName }, true);
                     togglePanels('edit');
+                    if (form) form.onsubmit = handleInsertSubmit;
                 } else {
                     renderFields(config, data, false);
+                    if (form) form.onsubmit = handleEditSubmit;
                 }
-
-                const form = document.getElementById('editDataForm');
-                if (form) form.onsubmit = isNew ? handleInsertSubmit : handleEditSubmit;
 
             } else {
                 window.location.href = 'Datos2.html';
             }
         });
 
-        // --- LÓGICA DE DATOS Y RENDERIZADO ---
+        async function loadTableNames() {
+            const tienda = localStorage.getItem(KEYS.TIENDA) || 'DEFAULT';
+            try {
+                const r = await fetch(`${GAS_SCRIPT_URL}?action=getTableFriendlyNames&appTienda=${tienda}`);
+                const res = await r.json();
+                if (res.success) {
+                    // Guardamos el mapa de nombres amigables
+                    localStorage.setItem('TABLE_FRIENDLY_NAMES', JSON.stringify(res.data));
+                }
+            } catch (e) { console.error("Error cargando nombres amigables", e); }
+        }
 
-        async function fetchMasterData() {
+        function getFriendlyTableName(technicalName) {
+            const raw = localStorage.getItem('TABLE_FRIENDLY_NAMES');
+            const friendlyNames = JSON.parse(raw || '{}');
+            return friendlyNames[technicalName]?.label || technicalName;
+        }
+
+        function updateFormTitle(technicalName, isNew = false) {
+            const label = getFriendlyTableName(technicalName);
+            const formTitleEl = document.getElementById('formTitle');
+            if (formTitleEl) {
+                const accion = isNew ? "Nuevo Registro" : "Editar Selección";
+                formTitleEl.textContent = `${accion}: ${label}`;
+            }
+        }
+
+        async function fetchMasterData(currentTable) {
             const userTienda = localStorage.getItem(KEYS.TIENDA) || 'DEFAULT';
             const now = Date.now();
             const cacheDuration = 5 * 60 * 1000;
-            const tables = [
-                { name: "TD101_BASIC", key: "FULL_DATA_TD101", time: "TD101_TIMESTAMP" },
-                { name: "TV001_VALORES", key: "FULL_DATA_TV001", time: "TV001_TIMESTAMP" }
-            ];
+            const tablesToFetch = [{ name: "TV001_VALORES", key: "FULL_DATA_TV001", time: "TV001_TIMESTAMP" }];
 
-            for (const t of tables) {
+            if (currentTable && currentTable !== "TV001_VALORES") {
+                tablesToFetch.push({ 
+                    name: currentTable, 
+                    key: `FULL_DATA_${currentTable.split('_')[0]}`, 
+                    time: `${currentTable.split('_')[0]}_TIMESTAMP` 
+                });
+            }
+
+            for (const t of tablesToFetch) {
                 const lastFetch = localStorage.getItem(t.time);
                 if (!localStorage.getItem(t.key) || (now - lastFetch > cacheDuration)) {
                     try {
@@ -346,21 +404,21 @@
 
             container.innerHTML = Object.keys(config).map(colId => {
                 const cleanId = colId.toUpperCase().trim();
-                if (cleanId === `${prefix}ID`) return ''; // Ocultar ID en vista perfil
+                if (cleanId === `${prefix}ID` || cleanId === `${prefix}TYPEREG`) return ''; // Ocultar ID y TYPEREG en vista perfil
 
                 const label = config[colId].label;
                 const value = data[colId] || '---';
                 const isIdentity = cleanId === `${prefix}IDNOMBRE`;
                 
-                const valueClass = cleanId.includes('NOMBREC') || cleanId.includes('DAT01') 
+                const valueClass = cleanId.includes('NOMBREC') || cleanId.includes('DAT01') || cleanId.includes('IDNOMBRE')
                     ? 'text-[22px] text-blue-300 font-bold' 
                     : 'text-[18px] text-gray-200';
 
                 const badge = (isIdentity && isBlocked) ? 
                     `<span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 uppercase font-bold">Bloqueado</span>` : '';
-
+// etiquetas de campos input modo VIEW
                 return `
-                    <div class="border-b border-gray-700/40 py-1">
+                    <div class="border-b border-gray-700/40 py-1"> 
                         <span class="text-[10px] font-bold text-gray-500 uppercase block -mb-1">${label}</span>
                         <div class="flex items-center min-h-[32px]">
                             <span class="${valueClass}">${value}</span>
@@ -371,86 +429,86 @@
             if(window.lucide) lucide.createIcons();
         }
 
-function renderFields(config, data, isNew = false) {
-    const container = document.getElementById('editDataFormFields');
-    if (!container) return;
+        function renderFields(config, data, isNew = false) {
+            const container = document.getElementById('editDataFormFields');
+            if (!container) return;
 
-    // 1. Contexto de tabla y prefijo
-    const tableName = data.TABLA_ORIGEN || "TD101_BASIC";
-    const prefix = tableName.split('_')[0].toUpperCase();
-    
-    // 2. Manejo de Estatus (Evita el "undefined" visual)
-    const statusKey = `${prefix}TYPEREG`;
-    const currentStatus = data[statusKey] || ""; // Si no existe, string vacío
-    const isBlocked = currentStatus === "Bloqueado";
+            // 1. Contexto de tabla y prefijo
+            const tableName = data.TABLA_ORIGEN || "TD101_BASIC";
+            const prefix = tableName.split('_')[0].toUpperCase();
+            
+            // 2. Manejo de Estatus (Evita el "undefined" visual)
+            const statusKey = `${prefix}TYPEREG`;
+            const currentStatus = data[statusKey] || ""; // Si no existe, string vacío
+            const isBlocked = currentStatus === "Bloqueado";
 
-    // 3. Recursos externos
-    const tv001 = JSON.parse(localStorage.getItem('FULL_DATA_TV001') || '[]');
-    const selectHydrations = [];
+            // 3. Recursos externos
+            const tv001 = JSON.parse(localStorage.getItem('FULL_DATA_TV001') || '[]');
+            const selectHydrations = [];
 
-    // 4. Generación de HTML
-    container.innerHTML = Object.keys(config).map(colId => {
-        const field = config[colId];
-        const cleanId = colId.toUpperCase().trim();
-        let value = isNew ? '' : (data[colId] || '');
+            // 4. Generación de HTML
+            container.innerHTML = Object.keys(config).map(colId => {
+                const field = config[colId];
+                const cleanId = colId.toUpperCase().trim();
+                let value = isNew ? '' : (data[colId] || '');
 
-        // --- CASO A: CAMPO DE IDENTIDAD CON TOGGLE (IDNOMBRE) ---
-        if (cleanId === `${prefix}IDNOMBRE`) {
-            return renderToggleHTML(field.label, value, currentStatus, isBlocked, prefix, colId);
+                // --- CASO A: CAMPO DE IDENTIDAD CON TOGGLE (IDNOMBRE) ---
+                if (cleanId === `${prefix}IDNOMBRE`) {
+                    return renderToggleHTML(field.label, value, currentStatus, isBlocked, prefix, colId);
+                }
+
+                // --- CASO B: PRIMARY KEY (OCULTO) ---
+                if (cleanId === `${prefix}ID`) {
+                    return isNew ? '' : `<input type="hidden" name="${colId}" value="${value}">`;
+                }
+
+                // --- LÓGICA DE EDICIÓN Y ESTILOS ---
+                const isCalculated = cleanId.includes('NOMBREC');
+                const isSystem = cleanId.includes('REGISTRO') || cleanId === `${prefix}DAT01`;
+                
+                // El campo DAT01 suele ser de sistema pero podrías quererlo editable en New
+                const canEdit = isNew 
+                    ? (!isCalculated && !cleanId.includes('REGISTRO') && field.editable !== false) 
+                    : field.editable !== false;
+
+                // --- CASO C: SELECTORES (CATÁLOGOS TV001) ---
+                const masterMatch = tv001.filter(row => 
+                    row.Encabezado_Tabla && row.Encabezado_Tabla.toUpperCase().trim() === cleanId
+                );
+
+                if (masterMatch.length > 0 && canEdit) {
+                    selectHydrations.push({ 
+                        id: `select-${cleanId}`, 
+                        options: masterMatch.map(m => m.Valores_Encabezado), 
+                        current: value 
+                    });
+                    return `
+                        <div class="border-b border-gray-700/40 py-1">
+                            <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
+                            <select name="${colId}" id="select-${cleanId}" 
+                                class="w-full bg-gray-800 text-blue-300 outline-none border-none text-[18px] font-bold p-0 appearance-none cursor-pointer">
+                                <option value="${value}">${value || 'Seleccione...'}</option>
+                            </select>
+                        </div>`;
+                }
+
+                // --- CASO D: INPUT NORMAL (TEXTO/NÚMEROS) ---
+                const isImportant = cleanId.includes('NOMBREC') || cleanId.includes('DAT01');
+                const textClass = isImportant ? 'text-blue-300 font-bold text-[22px]' : 'text-gray-200 text-[18px]';
+
+                return `
+                    <div class="border-b border-gray-700/40 py-1">
+                        <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
+                        <input type="text" name="${colId}" value="${value}" 
+                            ${!canEdit ? 'readonly' : ''}
+                            class="w-full bg-transparent outline-none border-none ${textClass} p-0 m-0 ${!canEdit ? 'opacity-60' : ''}">
+                    </div>`;
+            }).join('');
+
+            // 5. Inicialización post-render
+            if (window.lucide) lucide.createIcons();
+            hydrateAllSelects(selectHydrations);
         }
-
-        // --- CASO B: PRIMARY KEY (OCULTO) ---
-        if (cleanId === `${prefix}ID`) {
-            return isNew ? '' : `<input type="hidden" name="${colId}" value="${value}">`;
-        }
-
-        // --- LÓGICA DE EDICIÓN Y ESTILOS ---
-        const isCalculated = cleanId.includes('NOMBREC');
-        const isSystem = cleanId.includes('REGISTRO') || cleanId === `${prefix}DAT01`;
-        
-        // El campo DAT01 suele ser de sistema pero podrías quererlo editable en New
-        const canEdit = isNew 
-            ? (!isCalculated && !cleanId.includes('REGISTRO') && field.editable !== false) 
-            : field.editable !== false;
-
-        // --- CASO C: SELECTORES (CATÁLOGOS TV001) ---
-        const masterMatch = tv001.filter(row => 
-            row.Encabezado_Tabla && row.Encabezado_Tabla.toUpperCase().trim() === cleanId
-        );
-
-        if (masterMatch.length > 0 && canEdit) {
-            selectHydrations.push({ 
-                id: `select-${cleanId}`, 
-                options: masterMatch.map(m => m.Valores_Encabezado), 
-                current: value 
-            });
-            return `
-                <div class="border-b border-gray-700/40 py-1">
-                    <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
-                    <select name="${colId}" id="select-${cleanId}" 
-                        class="w-full bg-gray-800 text-blue-300 outline-none border-none text-[18px] font-bold p-0 appearance-none cursor-pointer">
-                        <option value="${value}">${value || 'Seleccione...'}</option>
-                    </select>
-                </div>`;
-        }
-
-        // --- CASO D: INPUT NORMAL (TEXTO/NÚMEROS) ---
-        const isImportant = cleanId.includes('NOMBREC') || cleanId.includes('DAT01');
-        const textClass = isImportant ? 'text-blue-300 font-bold text-[20px]' : 'text-gray-200 text-[18px]';
-
-        return `
-            <div class="border-b border-gray-700/40 py-1">
-                <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
-                <input type="text" name="${colId}" value="${value}" 
-                    ${!canEdit ? 'readonly' : ''}
-                    class="w-full bg-transparent outline-none border-none ${textClass} p-0 m-0 ${!canEdit ? 'opacity-60' : ''}">
-            </div>`;
-    }).join('');
-
-    // 5. Inicialización post-render
-    if (window.lucide) lucide.createIcons();
-    hydrateAllSelects(selectHydrations);
-}
 
         function hydrateAllSelects(hydrations) {
             hydrations.forEach(item => {
@@ -467,41 +525,41 @@ function renderFields(config, data, isNew = false) {
 
         // --- MANEJO DE FORMULARIOS ---
 
-async function handleEditSubmit(e) {
-    e.preventDefault();
-    const submitBtn = document.getElementById('submitBtn');
-    submitBtn.textContent = "Procesando...";
-    submitBtn.disabled = true;
+        async function handleEditSubmit(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.textContent = "Procesando...";
+            submitBtn.disabled = true;
 
-    const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
-    const tableName = currentData.TABLA_ORIGEN || "TD101_BASIC";
-    const tablePrefix = tableName.split('_')[0].toUpperCase();
-    const headers = Object.keys(currentData).filter(k => k !== 'TABLA_ORIGEN');
-    const primaryKeyField = getTablePrimaryKey(headers, tableName);
-    
-    const formData = new FormData(e.target);
-    const formEntries = Object.fromEntries(formData.entries());
+            const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
+            const tableName = currentData.TABLA_ORIGEN || "TD101_BASIC";
+            const tablePrefix = tableName.split('_')[0].toUpperCase();
+            const headers = Object.keys(currentData).filter(k => k !== 'TABLA_ORIGEN');
+            const primaryKeyField = getTablePrimaryKey(headers, tableName);
+            
+            const formData = new FormData(e.target);
+            const formEntries = Object.fromEntries(formData.entries());
 
-    const payload = {
-        action: "editDynamicDataTD",
-        TABLA_DESTINO: tableName,
-        CAMPO_CLAVE: primaryKeyField,
-        ...currentData,
-        ...formEntries,
-        [`${tablePrefix}TYPEREG`]: document.getElementById('input-typereg')?.value || currentData[`${tablePrefix}TYPEREG`],
-        currentUser: localStorage.getItem(KEYS.USUARIO_ID) || "UserSys"
-    };
+            const payload = {
+                action: "editDynamicDataTD",
+                TABLA_DESTINO: tableName,
+                CAMPO_CLAVE: primaryKeyField,
+                ...currentData,
+                ...formEntries,
+                [`${tablePrefix}TYPEREG`]: document.getElementById('input-typereg')?.value || currentData[`${tablePrefix}TYPEREG`],
+                currentUser: localStorage.getItem(KEYS.USUARIO_ID) || "UserSys"
+            };
 
-    delete payload.TABLA_ORIGEN;
-    delete payload.IS_NEW;
+            delete payload.TABLA_ORIGEN;
+            delete payload.IS_NEW;
 
-    // Llamamos a la función centralizada
-    await executeSubmit(payload, 'Actualización');
-    
-    // El botón se restaura si algo falla (si tiene éxito, la página se recarga)
-    submitBtn.textContent = "Guardar Cambios";
-    submitBtn.disabled = false;
-}
+            // Llamamos a la función centralizada
+            await executeSubmit(payload, 'Actualización');
+            
+            // El botón se restaura si algo falla (si tiene éxito, la página se recarga)
+            submitBtn.textContent = "Guardar Cambios";
+            submitBtn.disabled = false;
+        }
 
     </script>
 
@@ -528,52 +586,39 @@ async function handleEditSubmit(e) {
             if(window.lucide) lucide.createIcons();
         }
 
-async function handleInsertSubmit(e) {
-    e.preventDefault();
-    const submitBtn = document.getElementById('submitBtn');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = "Procesando...";
-    submitBtn.disabled = true;
+        async function handleInsertSubmit(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = "Procesando...";
+            submitBtn.disabled = true;
 
-    try {
-        const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
-        const currentConfig = JSON.parse(localStorage.getItem(STORAGE_CONFIG) || '{}');
-        const tableName = currentData.TABLA_ORIGEN || "TD101_BASIC"; 
-        const tablePrefix = tableName.split('_')[0].toUpperCase();
-        
-        // Determinar headers y primary key
-        const headers = Object.keys(currentConfig).length > 0 ? Object.keys(currentConfig) : Object.keys(currentData);
-        const primaryKeyField = getTablePrimaryKey(headers, tableName);
-        
-        const formData = new FormData(e.target);
-        const formPayload = Object.fromEntries(formData.entries());
-        const tiendaId = localStorage.getItem(KEYS.TIENDA_ID);
-        
-        if (!tiendaId) throw new Error("No se encontró el ID de Localidad (TIENDA_ID).");
+            try {
+                    const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
+                    const tableName = currentData.TABLA_ORIGEN; 
+                    const tablePrefix = tableName.split('_')[0].toUpperCase();
+                    
+                    const formData = new FormData(e.target);
+                    const formPayload = Object.fromEntries(formData.entries());
+                    const tiendaId = localStorage.getItem(KEYS.TIENDA_ID);
+                    
+                    if (!tiendaId) throw new Error("Falta ID de Localidad.");
 
-        // Construcción del Payload
-        const payload = {
-            action: "registerDynamicDataTD",
-            TABLA_DESTINO: tableName,
-            CAMPO_CLAVE: primaryKeyField,
-            "TD101LOC": tiendaId, 
-            [`${tablePrefix}RegistroUser`]: localStorage.getItem(KEYS.USUARIO_ID) || "UserSys",
-            ...formPayload
-        };
+                    const payload = {
+                        action: "registerDynamicDataTD",
+                        TABLA_DESTINO: tableName,
+                        CAMPO_CLAVE: getTablePrimaryKey(Object.keys(formPayload), tableName),
+                        // Dinamismo total: El campo de localidad ahora sigue el prefijo de la tabla
+                        [`${tablePrefix}LOC`]: tiendaId, 
+                        [`${tablePrefix}RegistroUser`]: localStorage.getItem(KEYS.USUARIO_ID) || "UserSys",
+                        ...formPayload
+                    };
 
-        // --- DELEGACIÓN A LA FUNCIÓN CENTRAL ---
-        // Pasamos el payload y el título deseado para el modal
-        await executeSubmit(payload, 'Nuevo Registro');
-
-    } catch (err) {
-        console.error("❌ Error:", err);
-        showSystemModal({ title: 'Error', text: err.message, type: 'warning' });
-    } finally {
-        // En caso de error (porque si hay éxito la página se recarga), restauramos el botón
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-    }
-}      
+                    await executeSubmit(payload, 'Nuevo Registro');
+                } catch (err) {
+                    showSystemModal({ title: 'Error', text: err.message, type: 'warning' });
+                }
+        }   
 
         function renderToggleHTML(label, value, status, isBlocked, prefix, colId) {
             const displayStatus = (status === "" || status === "Registrado") ? "Registrado" : status;           
@@ -612,9 +657,14 @@ async function handleInsertSubmit(e) {
         function showRegisterMode() {
             const config = JSON.parse(localStorage.getItem(STORAGE_CONFIG));
             const data = JSON.parse(localStorage.getItem(STORAGE_DATA));  
-            document.getElementById('formTitle').textContent = "Nuevo Registro";
+            const friendlyName = getFriendlyTableName(data.TABLA_ORIGEN);
+
+            // Título dinámico para Nuevo Registro
+            document.getElementById('formTitle').textContent = `Nuevo Registro: ${friendlyName}`;
+            
             document.getElementById('formAction').value = "registerDynamicDataTD";
             document.getElementById('submitBtn').textContent = "Crear Nuevo Registro";
+            
             renderFields(config, { TABLA_ORIGEN: data.TABLA_ORIGEN }, true);
             togglePanels('edit');
         }
@@ -622,9 +672,14 @@ async function handleInsertSubmit(e) {
         function showEditMode() {
             const config = JSON.parse(localStorage.getItem(STORAGE_CONFIG));
             const data = JSON.parse(localStorage.getItem(STORAGE_DATA));
-            document.getElementById('formTitle').textContent = "Editar Selección";
+            const friendlyName = getFriendlyTableName(data.TABLA_ORIGEN);
+
+            // Título dinámico para Edición
+            document.getElementById('formTitle').textContent = `Editar Selección: ${friendlyName}`;
+            
             document.getElementById('formAction').value = "editDynamicDataTD";
             document.getElementById('submitBtn').textContent = "Guardar Cambios";           
+            
             renderFields(config, data, false);
             togglePanels('edit');
         }
@@ -632,21 +687,24 @@ async function handleInsertSubmit(e) {
         async function showExcludedMode() {
             const data = JSON.parse(localStorage.getItem(STORAGE_DATA));
             const tableName = data.TABLA_ORIGEN;
+            const tablePrefix = tableName.split('_')[0].toUpperCase(); // Obtener prefijo (ej. TD102)
             const pkField = getTablePrimaryKey(Object.keys(data), tableName);          
+            
             const confirm = await showSystemModal({
                 title: '¿Confirmar Bloqueo?',
-                text: `El registro con ID ${data[pkField]} será marcado como "Bloqueado".`,
+                text: `El registro será marcado como "Bloqueado".`,
                 type: 'warning',
                 confirmText: 'Sí, Bloquear'
             });
+
             if (confirm) {
                 const payload = {
                     action: 'editDynamicDataTD',
                     TABLA_DESTINO: tableName,
                     CAMPO_CLAVE: pkField,
-                    TD101RegistroUser: localStorage.getItem(KEYS.USUARIO_ID),
+                    [`${tablePrefix}RegistroUser`]: localStorage.getItem(KEYS.USUARIO_ID),
                     [pkField]: data[pkField],
-                    TD101TYPEREG: 'Bloqueado'
+                    [`${tablePrefix}TYPEREG`]: 'Bloqueado' // Prefijo dinámico
                 };
                 await executeSubmit(payload);
             }
@@ -686,50 +744,128 @@ async function handleInsertSubmit(e) {
             }
         }
 
-// Función centralizada para comunicación con GAS
-async function executeSubmit(payload, customTitle = '¡Éxito!') {
-    try {
-        const r = await fetch(GAS_SCRIPT_URL, { 
-            method: 'POST', 
-            body: new URLSearchParams(payload) 
-        });
-        const res = await r.json();
+        // Función centralizada para comunicación con GAS
+        async function executeSubmit(payload, customTitle = '¡Éxito!') {
+            try {
+                const r = await fetch(GAS_SCRIPT_URL, { 
+                    method: 'POST', 
+                    body: new URLSearchParams(payload) 
+                });
+                const res = await r.json();
 
-        if (res.success) {
-            // Si el backend devuelve nuevos datos (como el ID generado), los guardamos
-            if (res.data) {
-                const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
-                localStorage.setItem(STORAGE_DATA, JSON.stringify({
-                    ...currentData,
-                    ...res.data,
-                    IS_NEW: false
-                }));
+                if (res.success) {
+                    // Si el backend devuelve nuevos datos (como el ID generado), los guardamos
+                    if (res.data) {
+                        const currentData = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
+                        localStorage.setItem(STORAGE_DATA, JSON.stringify({
+                            ...currentData,
+                            ...res.data,
+                            IS_NEW: false
+                        }));
+                    }
+
+                    // Usamos res.message directamente del backend
+                    await showSystemModal({
+                        title: customTitle, 
+                        text: res.message, 
+                        type: 'info' // Compatible con tu plantilla
+                    });
+                    
+                    location.reload();
+                } else {
+                    await showSystemModal({
+                        title: 'Error', 
+                        text: res.message, 
+                        type: 'warning'
+                    });
+                }
+            } catch (err) {
+                console.error("Error de red:", err);
+                await showSystemModal({
+                    title: 'Error', 
+                    text: 'Error de conexión con el servidor', 
+                    type: 'warning'
+                });
             }
-
-            // Usamos res.message directamente del backend
-            await showSystemModal({
-                title: customTitle, 
-                text: res.message, 
-                type: 'info' // Compatible con tu plantilla
-            });
-            
-            location.reload();
-        } else {
-            await showSystemModal({
-                title: 'Error', 
-                text: res.message, 
-                type: 'warning'
-            });
         }
-    } catch (err) {
-        console.error("Error de red:", err);
-        await showSystemModal({
-            title: 'Error', 
-            text: 'Error de conexión con el servidor', 
-            type: 'warning'
-        });
-    }
-}
+    </script>
+        <script>
+        function setupNombreCAutoCalculate(tablePrefix) {
+            const n1 = document.getElementById(`input-${tablePrefix}NOMBRE1`);
+            const n2 = document.getElementById(`input-${tablePrefix}NOMBRE2`);
+            const nc = document.getElementById(`input-${tablePrefix}NOMBREC`);
+            if (!n1 || !n2 || !nc) return;
+            const particles = ["de los", "de la", "de", "del", "mc"];
+            const processNombre1 = (text) => {
+                const val = text.trim();
+                if (!val) return "";
+                const parts = val.split(/\s+/);               
+                for (let i = 0; i < parts.length; i++) {
+                    for (let p of particles) {
+                        const pParts = p.split(" ");
+                        if (parts.slice(i, i + pParts.length).join(" ").toLowerCase() === p) {
+                            const blockBefore = parts.slice(0, i + pParts.length).join(" ");
+                            if (parts[i + pParts.length]) {
+                                const initial = parts[i + pParts.length].charAt(0).toUpperCase();
+                                return `${blockBefore} ${initial}.`; // Ej: MARIA DE LOS C.
+                            }
+                            return blockBefore;
+                        }
+                    }
+                }
+                let res = parts[0];
+                if (parts[1]) res += " " + parts[1].charAt(0).toUpperCase() + ".";
+                return res;
+            };
+            const processNombre2 = (text) => {
+                const val = text.trim();
+                if (!val) return "";
+                if (val.toLowerCase().startsWith("o'")) {
+                    const parts = val.split(/\s+/);
+                    return parts[1] ? `${parts[0]} ${parts[1].charAt(0).toUpperCase()}.` : parts[0];
+                }
+                const parts = val.split(/\s+/);
+                for (let p of particles) {
+                    const pParts = p.split(" ");
+                    if (parts.slice(0, pParts.length).join(" ").toLowerCase() === p) {
+                        const mainBlock = parts.slice(0, pParts.length + 1).join(" ");
+                        const remaining = parts.slice(pParts.length + 1);
+                        return remaining.length > 0 ? `${mainBlock} ${remaining[0].charAt(0).toUpperCase()}.` : mainBlock;
+                    }
+                    for (let i = 1; i < parts.length; i++) {
+                        if (parts.slice(i, i + pParts.length).join(" ").toLowerCase() === p) {
+                            const mainBlock = parts.slice(0, i + pParts.length + 1).join(" ");
+                            const remaining = parts.slice(i + pParts.length + 1);
+                            return remaining.length > 0 ? `${mainBlock} ${remaining[0].charAt(0).toUpperCase()}.` : mainBlock;
+                        }
+                    }
+                }
+                return parts[1] ? `${parts[0]} ${parts[1].charAt(0).toUpperCase()}.` : parts[0];
+            };
+            const calculate = () => {
+                const n1Val = processNombre1(n1.value);
+                const n2Val = processNombre2(n2.value);               
+                let final = n1Val;
+                if (n2Val) final += (final ? " " : "") + n2Val;
+                nc.value = final.toUpperCase();
+            };
+            n1.addEventListener('input', calculate);
+            n2.addEventListener('input', calculate);
+        }
+
+console.group("🔍 REVISIÓN DE LOCALSTORAGE");
+console.log("👤 Datos de Usuario (KEYS):");
+Object.entries(KEYS).forEach(([key, storageKey]) => {
+    console.log(`   ${key}: ${localStorage.getItem(storageKey)}`);
+});
+
+console.log("📊 Configuración de Tabla (TABLE_CONFIG):");
+console.table(JSON.parse(localStorage.getItem('TABLE_CONFIG') || '{}'));
+
+console.log("📝 Datos de la Fila (TABLE_DATA):");
+console.table(JSON.parse(localStorage.getItem('TABLE_DATA') || '{}'));
+console.groupEnd();
+
     </script>
 </body>
 </html>
