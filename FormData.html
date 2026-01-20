@@ -41,6 +41,16 @@
             cursor: pointer;
             filter: none; /* Elimina filtros invertidos si existieran */
         }
+        /* Estilo para el contenedor de opciones del select nativo */
+        select option {
+            background-color: #1f2937 !important; /* gray-900 */
+            color: #d1d5db !important;           /* gray-300 */
+        }
+
+        /* Eliminar el fondo blanco en iOS y asegurar el modo oscuro */
+        select {
+            color-scheme: dark;
+        }
     </style>
 </head>
 <body class="dark">
@@ -436,86 +446,82 @@ console.groupEnd();
             if(window.lucide) lucide.createIcons();
         }
 
-        function renderFields(config, data, isNew = false) {
-            const container = document.getElementById('editDataFormFields');
-            const prefix = (data.TABLA_ORIGEN || "").split('_')[0].toUpperCase();
-            const tv001 = JSON.parse(localStorage.getItem('FULL_DATA_TV001') || '[]');
-            const selectHydrations = [];
+function renderFields(config, data, isNew = false) {
+    const container = document.getElementById('editDataFormFields');
+    const prefix = (data.TABLA_ORIGEN || "").split('_')[0].toUpperCase();
+    const tv001 = JSON.parse(localStorage.getItem('FULL_DATA_TV001') || '[]');
+    const selectHydrations = [];
 
-            container.innerHTML = Object.keys(config).map(colId => {
-                const field = config[colId];
-                const cleanId = colId.toUpperCase().trim();
-                let value = isNew ? '' : (data[colId] || '');
+    container.innerHTML = Object.keys(config).map(colId => {
+        const field = config[colId];
+        const cleanId = colId.toUpperCase().trim();
+        let value = isNew ? '' : (data[colId] || '');
 
-                // --- 1. PRIORIDAD ABSOLUTA: EL TOGGLE (IDNOMBRE) ---
-                if (cleanId === `${prefix}IDNOMBRE`) {
-                    const status = data[`${prefix}TYPEREG`] || (isNew ? "Registrado" : "");
-                    const isBlocked = status === "Bloqueado";
-                    // IMPORTANTE: El 'return' aquí detiene el proceso para esta columna
-                    return renderToggleHTML(field.label, value, status, isBlocked, prefix, colId);
-                }
-
-                // --- 2. CAMPOS OCULTOS (ID) ---
-                if (cleanId === `${prefix}ID`) {
-                    return isNew ? '' : `<input type="hidden" name="${colId}" value="${value}">`;
-                }
-
-                // --- 3. LÓGICA DE EDICIÓN Y FORMATO ---
-                const isCalculated = cleanId.includes('NOMBREC');
-                const canEdit = isNew 
-                    ? (!isCalculated && !cleanId.includes('REGISTRO') && field.editable !== false) 
-                    : field.editable !== false;
-
-                // Formato de Fechas y Números
-                let inputType = "text";
-                if (cleanId.includes('FECHA')) {
-                    inputType = "date";
-                    if (value) {
-                        const d = new Date(value);
-                        if (!isNaN(d.getTime())) value = d.toISOString().split('T')[0];
-                    }
-                } else if (!isNew && value !== '') {
-                    value = typeof getFormattedValue === 'function' ? getFormattedValue(colId, value) : value;
-                }
-
-                // --- 4. SELECTORES (CATÁLOGOS) ---
-                const masterMatch = tv001.filter(row => row.Encabezado_Tabla?.toUpperCase().trim() === cleanId);
-                if (masterMatch.length > 0 && canEdit) {
-                    const selectId = `select-${cleanId}`;
-                    selectHydrations.push({ id: selectId, options: masterMatch.map(m => m.Valores_Encabezado), current: value });
-                    return `
-                        <div class="border-b border-gray-700/40 py-1">
-                            <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
-                            <div class="flex items-center h-[32px]">
-                                <select name="${colId}" id="${selectId}" class="w-full bg-transparent text-blue-300 outline-none text-[18px] font-bold p-0 appearance-none cursor-pointer">
-                                    <option value="${value}">${value || 'Seleccione...'}</option>
-                                </select>
-                            </div>
-                        </div>`;
-                }
-
-                // --- 5. INPUTS NORMALES ---
-                const isImportant = cleanId.includes('NOMBREC') || cleanId.includes('DAT01');
-                const textClass = isImportant ? 'text-blue-300 font-bold text-[22px]' : 'text-gray-200 text-[18px]';
-
-                return `
-                    <div class="border-b border-gray-700/40 py-1">
-                        <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
-                        <div class="flex items-center h-[32px]">
-                            <input type="${inputType}" name="${colId}" id="input-${cleanId}" value="${value}" 
-                                ${!canEdit ? 'readonly' : ''} 
-                                class="w-full bg-transparent outline-none text-gray-200 text-[18px] p-0 leading-tight focus:ring-0 ${!canEdit ? 'opacity-60' : ''} scheme-dark">
-                        </div>
-                    </div>`;
-            }).join('');
-
-            // --- RE-INICIALIZACIÓN CRÍTICA ---
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-            hydrateAllSelects(selectHydrations);
-            if (document.getElementById(`input-${prefix}NOMBRE1`)) setupNombreCAutoCalculate(prefix);
+        // --- 1. PRIORIDAD ABSOLUTA: EL TOGGLE (IDNOMBRE) ---
+        if (cleanId === `${prefix}IDNOMBRE`) {
+            const status = data[`${prefix}TYPEREG`] || (isNew ? "Registrado" : "");
+            const isBlocked = status === "Bloqueado";
+            return renderToggleHTML(field.label, value, status, isBlocked, prefix, colId);
         }
+
+        // --- 2. CAMPOS OCULTOS (ID) ---
+        if (cleanId === `${prefix}ID`) {
+            return isNew ? '' : `<input type="hidden" name="${colId}" value="${value}">`;
+        }
+
+        // --- 3. LÓGICA DE EDICIÓN Y FORMATO ---
+        const isCalculated = cleanId.includes('NOMBREC');
+        const canEdit = isNew 
+            ? (!isCalculated && !cleanId.includes('REGISTRO') && field.editable !== false) 
+            : field.editable !== false;
+
+        let inputType = "text";
+        if (cleanId.includes('FECHA')) {
+            inputType = "date";
+            if (value) {
+                const d = new Date(value);
+                if (!isNaN(d.getTime())) value = d.toISOString().split('T')[0];
+            }
+        } else if (!isNew && value !== '') {
+            value = typeof getFormattedValue === 'function' ? getFormattedValue(colId, value) : value;
+        }
+
+        // --- 4. SELECTORES (CATÁLOGOS) - ACTUALIZADO ---
+        const masterMatch = tv001.filter(row => row.Encabezado_Tabla?.toUpperCase().trim() === cleanId);
+        if (masterMatch.length > 0 && canEdit) {
+            const selectId = `select-${cleanId}`;
+            selectHydrations.push({ id: selectId, options: masterMatch.map(m => m.Valores_Encabezado), current: value });
+            return `
+                <div class="border-b border-gray-700/40 py-1">
+                    <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
+                    <div class="flex items-center h-[32px]">
+                        <select name="${colId}" id="${selectId}" 
+                            class="w-full bg-transparent text-blue-300 outline-none text-[18px] font-bold p-0 appearance-none cursor-pointer scheme-dark">
+                            <option value="${value}" class="bg-gray-900 text-gray-200">${value || 'Seleccione...'}</option>
+                        </select>
+                    </div>
+                </div>`;
+        }
+
+        // --- 5. INPUTS NORMALES ---
+        const isImportant = cleanId.includes('NOMBREC') || cleanId.includes('DAT01');
+        const textClass = isImportant ? 'text-blue-300 font-bold text-[22px]' : 'text-gray-200 text-[18px]';
+
+        return `
+            <div class="border-b border-gray-700/40 py-1">
+                <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
+                <div class="flex items-center h-[32px]">
+                    <input type="${inputType}" name="${colId}" id="input-${cleanId}" value="${value}" 
+                        ${!canEdit ? 'readonly' : ''} 
+                        class="w-full bg-transparent outline-none text-gray-200 text-[18px] p-0 leading-tight focus:ring-0 ${!canEdit ? 'opacity-60' : ''} scheme-dark">
+                </div>
+            </div>`;
+    }).join('');
+
+    if (window.lucide) lucide.createIcons();
+    hydrateAllSelects(selectHydrations);
+    if (document.getElementById(`input-${prefix}NOMBRE1`)) setupNombreCAutoCalculate(prefix);
+}
 
         function hydrateAllSelects(hydrations) {
             hydrations.forEach(item => {
