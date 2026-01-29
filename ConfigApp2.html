@@ -131,29 +131,29 @@
         background: linear-gradient(to right, rgba(0,0,0,0.2), transparent);
     }
     /* 1. Asegurar que el encabezado (thead) sea pegajoso arriba */
-#dyn-thead th {
-    position: sticky;
-    top: 0;
-    z-index: 20; /* Capa base para encabezados */
-    background-color: #111827; /* Color de fondo sólido */
-}
+    #dyn-thead th {
+        position: sticky;
+        top: 0;
+        z-index: 20; /* Capa base para encabezados */
+        background-color: #111827; /* Color de fondo sólido */
+    }
 
-/* 2. El encabezado de la columna # (la esquina superior izquierda) */
-#dyn-thead th:first-child {
-    position: sticky;
-    left: 0;
-    top: 0;
-    z-index: 30; /* Capa máxima: por encima de los otros TH y de los TD */
-    background-color: #1f2937; /* Un tono ligeramente distinto para destacar la esquina */
-}
+    /* 2. El encabezado de la columna # (la esquina superior izquierda) */
+    #dyn-thead th:first-child {
+        position: sticky;
+        left: 0;
+        top: 0;
+        z-index: 30; /* Capa máxima: por encima de los otros TH y de los TD */
+        background-color: #1f2937; /* Un tono ligeramente distinto para destacar la esquina */
+    }
 
-/* 3. Las celdas del cuerpo solo se fijan a la izquierda */
-#dyn-tbody td:first-child {
-    position: sticky;
-    left: 0;
-    z-index: 10;
-    background-color: #111827;
-}
+    /* 3. Las celdas del cuerpo solo se fijan a la izquierda */
+    #dyn-tbody td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 10;
+        background-color: #111827;
+    }
 
 </style>
 </head>
@@ -277,35 +277,33 @@
     </div>
 
 <script>
-    // --- 1. CONFIGURACIÓN Y VARIABLES GLOBALES ---
+    /**
+     * --- 1. CONFIGURACIÓN, CLAVES Y ESTADO GLOBAL ---
+     */
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwCNpyLy2e59m3A03v10PZKYSsRvyJz4llCk_6OWQPQV0yMotgTj303bXGcxTiClVmTGQ/exec";
     
-    // Almacenamiento de datos de tabla y configuración
+    const KEYS = {
+        TIENDA: 'Usuario_Tienda', TIENDA_ID: 'Usuario_Tienda_ID', NOMBRE: 'Usuario_Nombre',
+        PERFIL: 'Usuario_Perfil', IDX: 'Usuario_Idx', CEDULA: 'Usuario_Cedula',
+        USUARIO_ID: 'Usuario_ID', VIEW_MODE:'App_View_Mode', CORREO: 'Usuario_Correo'
+    };
+
     let currentTableData = [];
     let currentHeadersConfig = [];
     let USER_INFO = {}; 
-    let sortDirection = 'asc'; // 'asc' o 'desc'
+    let sortDirection = 'asc';
     let currentSortColumn = null;
+    let friendlyNamesMap = {}; // Almacena los nombres amigables para uso global
 
-    // Claves de LocalStorage
-    const KEYS = {
-        TIENDA: 'Usuario_Tienda',
-        NOMBRE: 'Usuario_Nombre',
-        PERFIL: 'Usuario_Perfil',
-        IDX: 'Usuario_Idx',
-        CEDULA: 'Usuario_Cedula',
-        ID: 'Usuario_Id',
-        VIEW_MODE:'App_View_Mode',
-        CORREO: 'Usuario_Correo'
-    };
-    
-    // --- 2. INICIALIZACIÓN Y EVENTOS PRINCIPALES ---
+    /**
+     * --- 2. INICIALIZACIÓN Y CICLO DE VIDA ---
+     */
     document.addEventListener('DOMContentLoaded', () => {
         if (!validateSession()) return;
 
         initializeUserInfo();
         
-        // --- NUEVA LÍNEA: Aplicar el modo de vista guardado ---
+        // Aplicar modo de vista (Mobile/Desktop)
         const savedMode = localStorage.getItem(KEYS.VIEW_MODE) || 'mobile';
         applyViewMode(savedMode);
 
@@ -314,37 +312,12 @@
         setupNavigationEvents();    
         
         if (window.lucide) lucide.createIcons();
-        console.log("Aplicación inicializada correctamente.");
+        console.log("🚀 Aplicación inicializada.");
     });
-
-        function toggleView(){const m=localStorage.getItem(KEYS.VIEW_MODE)==='desktop'?'mobile':'desktop';localStorage.setItem(KEYS.VIEW_MODE,m);applyViewMode(m)}
-        
-function applyViewMode(m) {
-    const c = document.getElementById('app-container');
-    const i = document.getElementById('view-icon-container');
-    const modal = document.getElementById('table-modal'); // Referencia al modal
-    
-    if (!c || !i) return;
-
-    if (m === 'desktop') {
-        c.classList.replace('mode-mobile', 'mode-desktop');
-        // Opcional: Si el modal está fuera de app-container, dale la clase también
-        if(modal) modal.classList.add('mode-desktop'); 
-        
-        i.innerHTML = '<i data-lucide="smartphone" class="w-5 h-5 text-blue-400"></i>';
-    } else {
-        c.classList.replace('mode-desktop', 'mode-mobile');
-        if(modal) modal.classList.remove('mode-desktop');
-        
-        i.innerHTML = '<i data-lucide="monitor" class="w-5 h-5 text-emerald-400"></i>';
-    }
-
-    if (window.lucide) lucide.createIcons();
-}
 
     function validateSession() {
         const correo = localStorage.getItem(KEYS.CORREO);
-        const id = localStorage.getItem(KEYS.ID);
+        const id = localStorage.getItem(KEYS.USUARIO_ID);
         if (!correo && !id) {
             window.location.replace('index.html');
             return false;
@@ -368,21 +341,59 @@ function applyViewMode(m) {
         }
     }
 
+    /**
+     * --- 3. UI: MODOS DE VISTA Y NAVEGACIÓN ---
+     */
+    function toggleView() {
+        const m = localStorage.getItem(KEYS.VIEW_MODE) === 'desktop' ? 'mobile' : 'desktop';
+        localStorage.setItem(KEYS.VIEW_MODE, m);
+        applyViewMode(m);
+    }
+        
+    function applyViewMode(m) {
+        const c = document.getElementById('app-container');
+        const i = document.getElementById('view-icon-container');
+        const modal = document.getElementById('table-modal');
+        
+        if (!c || !i) return;
+
+        if (m === 'desktop') {
+            c.classList.replace('mode-mobile', 'mode-desktop');
+            if(modal) modal.classList.add('mode-desktop'); 
+            i.innerHTML = '<i data-lucide="smartphone" class="w-5 h-5 text-blue-400"></i>';
+        } else {
+            c.classList.replace('mode-desktop', 'mode-mobile');
+            if(modal) modal.classList.remove('mode-desktop');
+            i.innerHTML = '<i data-lucide="monitor" class="w-5 h-5 text-emerald-400"></i>';
+        }
+        if (window.lucide) lucide.createIcons();
+    }
+
     function setupNavigationEvents() {
-        const footerButtons = document.querySelectorAll('.footer-btn');
-        footerButtons.forEach(btn => {
+        document.querySelectorAll('.footer-btn').forEach(btn => {
             btn.addEventListener('click', () => loadContent(btn.getAttribute('data-section')));
         });
     }
 
-    // --- 3. SEGURIDAD Y NAVEGACIÓN ---
+    function loadContent(section) {
+        if (section === 'Configuración') return;
+        const NAV_MAP = { 'Base': 'Base2.html', 'Datos': 'Datos2.html', 'Agregar': 'AgregarReg.html', 'Perfil': 'PerfilUsuario.html' }; 
+
+        if (section === 'Agregar') {
+            const cedula = localStorage.getItem(KEYS.CEDULA);
+            if (!cedula || cedula.trim() === "") {
+                showSystemModal({ title: 'Acceso Restringido', text: 'Registre el dato CLAVE para su búsqueda.', type: 'warning' });
+                return;
+            }
+        }
+        if (NAV_MAP[section]) window.location.href = NAV_MAP[section];
+    }
+
     function checkAccessPermissions() {
         const cedula = localStorage.getItem(KEYS.CEDULA);
-        const btnVacaciones = document.getElementById('btn-vacaciones');
-        const btnAgregar = document.getElementById('btn-agregar');
         const isRestricted = !cedula || cedula.trim() === "";
-
-        [btnVacaciones, btnAgregar].forEach(btn => {
+        ['btn-vacaciones', 'btn-agregar'].forEach(id => {
+            const btn = document.getElementById(id);
             if (btn) {
                 btn.disabled = isRestricted;
                 btn.classList.toggle('opacity-30', isRestricted);
@@ -391,66 +402,62 @@ function applyViewMode(m) {
         });
     }
 
-    function loadContent(section) {
-        if (section === 'Configuración') return;
-
-        const NAV_MAP = { 
-            'Base': 'Base2.html', 
-            'Datos': 'Datos2.html', 
-            'Agregar': 'AgregarReg.html', 
-            'Perfil': 'PerfilUsuario.html' 
-        }; 
-
-        // Validación de cédula para secciones críticas
-        const vistasRestringidas = 'Agregar';
-        if (vistasRestringidas.includes(section)) {
-            const cedula = localStorage.getItem(KEYS.CEDULA);
-            if (!cedula || cedula.trim() === "") {
-                showSystemModal({
-                    title: 'Acceso Restringido',
-                    text: 'Registre el dato CLAVE para su búsqueda en la sección correspondiente.',
-                    type: 'warning'
-                });
-                return;
-            }
-        }
-
-        if (NAV_MAP[section]) window.location.href = NAV_MAP[section];
-    }
-
-    function logoutAndClearCache() { 
-        localStorage.clear(); 
-        window.location.href = 'index.html'; 
-    }
-
-    // --- 4. CARGA Y GESTIÓN DE TABLAS (API) ---
+    /**
+     * --- 4. COMUNICACIÓN CON EL BACKEND (API) ---
+     */
     async function fetchAvailableTables() {
         const grid = document.getElementById('table-menu-grid');
         const tienda = localStorage.getItem(KEYS.TIENDA) || 'DEFAULT';
+        
         try {
-            const res = await fetch(`${SCRIPT_URL}?action=getAvailableTables&userTienda=${tienda}`);
-            const tables = await res.json();
+            // Ejecutamos ambas peticiones en paralelo para ganar velocidad
+            const [resTables, resFriendly] = await Promise.all([
+                fetch(`${SCRIPT_URL}?action=getAvailableTables&userTienda=${tienda}`),
+                fetch(`${SCRIPT_URL}?action=getTableFriendlyNames&userTienda=${tienda}`)
+            ]);
+
+            const tables = await resTables.json();
+            const friendlyRes = await resFriendly.json();
+            
+            // --- GUARDADO GLOBAL ---
+            // Guardamos el mapa en la variable global para que handleLoadTable lo use
+            friendlyNamesMap = friendlyRes.success ? friendlyRes.data : {};
+            
             grid.innerHTML = ''; 
+            
             tables.forEach(t => {
+                const techName = t.trim();
+                const info = friendlyNamesMap[techName];
+                
+                // Si existe en el mapa usamos el label, si no, el nombre técnico
+                const friendlyName = (info && info.label) ? info.label : techName;
+
                 const btn = document.createElement('div');
                 btn.className = 'btn-table-custom';
                 btn.innerHTML = `
                     <i data-lucide="table-2" class="w-6 h-6 text-blue-400"></i>
-                    <span class="flex-grow cursor-pointer" onclick="handleLoadTable('${t}')">${t}</span>
+                    <div class="flex flex-col flex-grow overflow-hidden cursor-pointer" onclick="handleLoadTable('${techName}')">
+                        <span style="font-size: 18px !important; font-weight: 600; line-height: 1.1;" 
+                            class="text-blue-400 uppercase tracking-wider block">
+                            ${friendlyName}
+                        </span>
+                        <span class="text-[10px] text-gray-500 truncate italic">${techName}</span>
+                    </div>
                     <div class="btn-table-actions">
-                        <button class="action-icon-btn" onclick="event.stopPropagation(); handleLoadTable('${t}')" title="Configurar">
+                        <button class="action-icon-btn" onclick="event.stopPropagation(); handleLoadTable('${techName}')">
                             <i data-lucide="settings-2" class="w-6 h-6 text-yellow-400"></i>
                         </button>
-                        <button class="action-icon-btn download-btn" onclick="event.stopPropagation(); downloadFullTable('${t}')" title="Descarga Completa">
+                        <button class="action-icon-btn download-btn" onclick="event.stopPropagation(); downloadFullTable('${techName}')">
                             <i data-lucide="cloud-download" class="w-6 h-6 text-white"></i>
                         </button>
                     </div>`;
                 grid.appendChild(btn);
             });
         } catch (e) { 
-            grid.innerHTML = '<p class="text-red-400 text-center">Error al conectar con el servidor</p>'; 
+            console.error("Error en fetchAvailableTables:", e);
+            grid.innerHTML = '<p class="text-red-400 text-center">Error de conexión al cargar tablas</p>'; 
         } finally { 
-            lucide.createIcons(); 
+            if (window.lucide) lucide.createIcons(); 
         }
     }
 
@@ -459,72 +466,121 @@ function applyViewMode(m) {
         const container = document.getElementById('columns-list-container');
         const title = document.getElementById('config-table-title');
         
-        // Mover panel debajo de la tarjeta seleccionada
+        // 1. Obtener nombre amigable desde el mapa global
+        const info = friendlyNamesMap[tableName];
+        const friendlyName = (info && info.label) ? info.label : tableName;
+
+        // 2. Posicionar el panel debajo de la tarjeta clickeada
+        // Buscamos el elemento que contiene el nombre técnico para mayor precisión
         const allButtons = document.querySelectorAll('.btn-table-custom');
         allButtons.forEach(b => {
-            if (b.querySelector('span')?.textContent.trim() === tableName) b.after(panel);
+            if (b.innerHTML.includes(`'${tableName}'`)) {
+                b.after(panel);
+            }
         });
 
+        // 3. Preparar UI del panel
         panel.classList.remove('hidden');
-        container.innerHTML = '<div class="p-8 text-center"><i data-lucide="loader-2" class="mx-auto w-8 h-8 text-blue-400 spinner"></i></div>';
-        lucide.createIcons();
+        container.innerHTML = `
+            <div class="p-8 text-center">
+                <i data-lucide="loader-2" class="mx-auto w-8 h-8 text-blue-400 spinner"></i>
+                <p class="text-xs text-gray-500 mt-2">Cargando estructura...</p>
+            </div>`;
+        if (window.lucide) lucide.createIcons();
         
-        title.textContent = `Configuración: ${tableName}`;
-        title.dataset.table = tableName;
+        // Título visible vs ID de tabla (dataset)
+        title.textContent = `Configuración: ${friendlyName}`;
+        title.dataset.table = tableName; // Mantenemos el nombre técnico para la API
 
         try {
             const tienda = localStorage.getItem(KEYS.TIENDA) || 'DEFAULT';
             const perfil = localStorage.getItem(KEYS.PERFIL) || 'INVITADO';
+            
+            // Petición al backend usando el nombre técnico (tableName)
             const res = await fetch(`${SCRIPT_URL}?targetSheet=${encodeURIComponent(tableName)}&userTienda=${tienda}&userProfile=${perfil}`);
             const result = await res.json();
 
             if (result.error) throw new Error(result.error);
 
+            // Guardar datos en el estado global del script
             currentTableData = result.data;
+            
+            // Configurar y renderizar columnas
             setupHeadersConfig(tableName, result);
             renderColumnConfig();
             
+            // Scroll suave hacia el panel abierto
             setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+
         } catch (e) {
-            container.innerHTML = `<p class="text-red-400 text-center p-4">Error: ${e.message}</p>`;
+            console.error("Error en handleLoadTable:", e);
+            container.innerHTML = `
+                <div class="p-4 bg-red-900/20 border border-red-500/50 rounded-lg text-center">
+                    <p class="text-red-400 text-sm">Error al cargar la tabla: ${e.message}</p>
+                </div>`;
         }
     }
 
     async function downloadFullTable(tableName) {
+        // 1. Obtener el nombre amigable para el mensaje de confirmación
+        const info = friendlyNamesMap[tableName];
+        const friendlyName = (info && info.label) ? info.label : tableName;
+
+        // 2. Confirmación personalizada
         const proceder = await showSystemModal({
-            title: 'Descarga Completa',
-            text: `¿Deseas descargar todos los registros de "${tableName}"?`,
+            title: 'Descarga de Base de Datos',
+            text: `¿Deseas descargar todos los registros de "${friendlyName}"? Esta operación puede tardar unos segundos dependiendo del volumen de datos.`,
             type: 'info',
-            confirmText: 'Descargar',
+            confirmText: 'Descargar Todo',
             cancelText: 'Cancelar'
         });
 
         if (!proceder) return;
 
+        // 3. UI: Mostrar cargador global
         const globalLoader = document.getElementById('global-loader');
-        globalLoader.classList.remove('hidden');
-        lucide.createIcons();
+        if (globalLoader) {
+            globalLoader.classList.remove('hidden');
+            if (window.lucide) lucide.createIcons();
+        }
 
         try {
             const tienda = localStorage.getItem(KEYS.TIENDA) || 'DEFAULT';
             const perfil = localStorage.getItem(KEYS.PERFIL) || 'INVITADO';
+            
+            // Construcción de URL con el parámetro fullLoad=true
             const url = `${SCRIPT_URL}?targetSheet=${encodeURIComponent(tableName)}&userTienda=${tienda}&userProfile=${perfil}&fullLoad=true`;
+            
             const res = await fetch(url);
             const result = await res.json();
             
             if (result.error) throw new Error(result.error);
             
+            // 4. Actualizar estado global con los nuevos datos masivos
             currentTableData = result.data;
+            
+            // 5. Preparar la configuración de columnas (usa tableName para buscar config guardada)
             setupHeadersConfig(tableName, result);
+            
+            // 6. Abrir el modal con los datos cargados
             processFinalData(tableName); 
+
         } catch (e) {
-            showSystemModal({ title: 'Error', text: e.message, type: 'warning' });
+            console.error("Error en downloadFullTable:", e);
+            showSystemModal({ 
+                title: 'Error de Descarga', 
+                text: `No se pudieron obtener los datos: ${e.message}`, 
+                type: 'warning' 
+            });
         } finally {
-            globalLoader.classList.add('hidden');
+            // 7. UI: Ocultar cargador global
+            if (globalLoader) globalLoader.classList.add('hidden');
         }
     }
 
-    // --- 5. CONFIGURACIÓN DE COLUMNAS (UI Y LÓGICA) ---
+    /**
+     * --- 5. GESTIÓN DE CONFIGURACIÓN DE COLUMNAS ---
+     */
     function setupHeadersConfig(tableName, result) {
         const savedConfig = JSON.parse(localStorage.getItem(`config_${tableName}`) || 'null');
         currentHeadersConfig = result.columnOrder.map((id, idx) => {
@@ -544,26 +600,18 @@ function applyViewMode(m) {
         container.innerHTML = currentHeadersConfig.map((col, index) => {
             const isOff = !col.visible;
             const opacityClass = isOff ? 'opacity-30 pointer-events-none' : 'opacity-100';
-            const lupaColor = col.filterValue ? 'text-red-500 animate-pulse' : 'text-gray-500';
-            
             return `
                 <div class="config-row flex items-center gap-2 ${isOff ? 'bg-gray-800/50' : ''}">
                     <div class="move-controls flex gap-1 ${opacityClass}">
-                        <button class="btn-move p-1 bg-gray-700 rounded" onclick="moveColumn(${index}, -1)" ${index === 0 || isOff ? 'disabled' : ''}>
-                            <i data-lucide="chevron-up" class="w-4 h-4"></i>
-                        </button>
-                        <button class="btn-move p-1 bg-gray-700 rounded" onclick="moveColumn(${index}, 1)" ${index === currentHeadersConfig.length - 1 || isOff ? 'disabled' : ''}>
-                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                        </button>
+                        <button class="btn-move p-1 bg-gray-700 rounded" onclick="moveColumn(${index}, -1)" ${index === 0 || isOff ? 'disabled' : ''}><i data-lucide="chevron-up" class="w-4 h-4"></i></button>
+                        <button class="btn-move p-1 bg-gray-700 rounded" onclick="moveColumn(${index}, 1)" ${index === currentHeadersConfig.length - 1 || isOff ? 'disabled' : ''}><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
                     </div>
                     <span class="label-col flex-grow text-xs truncate ${isOff ? 'text-gray-600' : 'text-gray-200'}">${col.label}</span>
-                    <button onclick="setColumnFilter(${index})" ${isOff ? 'disabled' : ''} class="p-1.5 rounded ${opacityClass} ${lupaColor} hover:bg-gray-700">
-                        <i data-lucide="search" class="w-4 h-4"></i>
-                    </button>
+                    <button onclick="setColumnFilter(${index})" ${isOff ? 'disabled' : ''} class="p-1.5 rounded ${opacityClass} ${col.filterValue ? 'text-red-500 animate-pulse' : 'text-gray-500'} hover:bg-gray-700"><i data-lucide="search" class="w-4 h-4"></i></button>
                     <input type="checkbox" class="w-5 h-5 accent-emerald-500 cursor-pointer" ${col.visible ? 'checked' : ''} onchange="updateColVis(${index}, this.checked)">
                 </div>`;
         }).join('');
-        lucide.createIcons();
+        if (window.lucide) lucide.createIcons();
     }
 
     function moveColumn(idx, dir) {
@@ -572,91 +620,84 @@ function applyViewMode(m) {
         renderColumnConfig();
     }
 
-    function updateColVis(idx, val) { 
-        currentHeadersConfig[idx].visible = val; 
-        renderColumnConfig(); 
-    }
-
-    async function setColumnFilter(idx) {
-        const col = currentHeadersConfig[idx];
-        const newValue = await showSystemModal({
-            title: `Filtrar: ${col.label}`,
-            text: 'Escribe el texto para filtrar esta columna:',
-            type: 'info',
-            confirmText: 'Aplicar',
-            cancelText: 'Cancelar',
-            showInput: true,
-            inputValue: col.filterValue || ''
-        });
-
-        if (newValue !== null) {
-            currentHeadersConfig[idx].filterValue = newValue.trim();
-            renderColumnConfig();
-            if (!document.getElementById('table-modal').classList.contains('hidden')) {
-                filterModalTable(document.getElementById('modal-search-input').value);
-            }
-        }
-    }
+    function updateColVis(idx, val) { currentHeadersConfig[idx].visible = val; renderColumnConfig(); }
 
     async function saveCurrentConfig() {
         const name = document.getElementById('config-table-title').dataset.table;
-        const userId = localStorage.getItem(KEYS.ID);
-        const userName = localStorage.getItem(KEYS.NOMBRE);
         const configData = JSON.stringify(currentHeadersConfig);
-
         localStorage.setItem(`config_${name}`, configData);
 
         try {
-            const url = `${SCRIPT_URL}?action=saveTableConfig&userId=${encodeURIComponent(userId)}&userName=${encodeURIComponent(userName)}&tableName=${encodeURIComponent(name)}&configData=${encodeURIComponent(configData)}`;
+            const url = `${SCRIPT_URL}?action=saveTableConfig&userId=${encodeURIComponent(localStorage.getItem(KEYS.USUARIO_ID))}&userName=${encodeURIComponent(localStorage.getItem(KEYS.NOMBRE))}&tableName=${encodeURIComponent(name)}&configData=${encodeURIComponent(configData)}`;
             await fetch(url);
             showSystemModal({ title: 'Éxito', text: `Vista de "${name}" sincronizada.`, type: 'success' });
-        } catch (e) { console.error("Error sincronización:", e); }
+        } catch (e) { console.error(e); }
     }
 
-    // --- 6. PROCESAMIENTO Y RENDERIZADO DE TABLA MODAL ---
-function processFinalData(tableName = "") {
-    const activeCols = currentHeadersConfig.filter(c => c.visible);
-    if (!activeCols.length) {
-        showSystemModal({ title: 'Atención', text: 'Selecciona al menos una columna.', type: 'warning' });
-        return;
-    }
+    /**
+     * --- 6. PROCESAMIENTO Y RENDERIZADO DE TABLA MODAL ---
+     */
+    function processFinalData(tableName = "") {
+        // 1. Identificar columnas activas
+        const activeCols = currentHeadersConfig.filter(c => c.visible);
+        if (!activeCols.length) {
+            showSystemModal({ title: 'Atención', text: 'Selecciona al menos una columna para visualizar.', type: 'warning' });
+            return;
+        }
 
-    const finalTableName = tableName || document.getElementById('config-table-title').dataset.table || "Tabla";
-    const prefix = (currentTableData.length === 20) ? "Vista Previa" : "BD Tabla";
-    
-    document.getElementById('modal-main-title').textContent = `${prefix}: ${finalTableName.toUpperCase()} (${currentTableData.length} REGISTROS)`;
-    
-    const thead = document.getElementById('dyn-thead');
+        // 2. Determinar nombres (Técnico vs Amigable)
+        // Usamos el tableName pasado por argumento o el que esté guardado en el dataset del título de configuración
+        const techName = tableName || document.getElementById('config-table-title').dataset.table || "Tabla";
+        const info = friendlyNamesMap[techName];
+        const friendlyName = (info && info.label) ? info.label : techName;
 
-    // 1. Definimos el encabezado para la columna virtual de índice
-    const indexHeader = `<th class="text-center p-2 text-gray-400 w-10 font-bold border-b border-gray-600 bg-gray-800 sticky left-0 top-0 z-30">#</th>`;
+        // 3. Configurar Título del Modal
+        const prefix = (currentTableData.length <= 20) ? "Vista Previa" : "BD Completa";
+        const modalTitleEl = document.getElementById('modal-main-title');
+        if (modalTitleEl) {
+            modalTitleEl.textContent = `${prefix}: ${friendlyName.toUpperCase()} (${currentTableData.length} REGISTROS)`;
+        }
 
-    // 2. Generar el HTML uniendo el índice con las columnas activas
-    thead.innerHTML = `<tr>
-        ${indexHeader} 
-        ${activeCols.map(c => {
+        // 4. Renderizar Encabezados (Thead)
+        const thead = document.getElementById('dyn-thead');
+        
+        // Celda fija para el correlativo (#)
+        const indexHeader = `<th class="text-center p-2 text-gray-400 w-10 font-bold border-b border-gray-600 bg-gray-800 sticky left-0 top-0 z-30">#</th>`;
+
+        // Mapeo de columnas con lógica de ordenamiento (Sort)
+        const columnHeaders = activeCols.map(c => {
             let iconName = 'chevrons-up-down';
             let iconClass = 'text-gray-500';
             
+            // Si es la columna por la que estamos ordenando, resaltamos el icono
             if (currentSortColumn === c.id) {
                 iconName = sortDirection === 'asc' ? 'chevron-up' : 'chevron-down';
                 iconClass = 'text-blue-400';
             }
 
             return `
-                <th class="cursor-pointer hover:bg-gray-700 transition-colors p-2 text-center border-b border-gray-600" onclick="sortTableByColumn('${c.id}')">
+                <th class="cursor-pointer hover:bg-gray-700 transition-colors p-2 text-center border-b border-gray-600 bg-gray-800 sticky top-0 z-20" 
+                    onclick="sortTableByColumn('${c.id}')">
                     <div class="flex items-center justify-center gap-1">
-                        <span>${c.label}</span>
+                        <span class="whitespace-nowrap">${c.label}</span>
                         <i data-lucide="${iconName}" class="w-4 h-4 ${iconClass}"></i>
                     </div>
                 </th>`;
-        }).join('')}
-    </tr>`;
-    
-    filterModalTable(document.getElementById('modal-search-input').value || ""); 
-    document.getElementById('table-modal').classList.remove('hidden');
-    if (window.lucide) lucide.createIcons();
-}
+        }).join('');
+
+        thead.innerHTML = `<tr>${indexHeader}${columnHeaders}</tr>`;
+        
+        // 5. Aplicar filtros y renderizar filas (Tbody)
+        // Pasamos el valor actual del buscador global para mantener la persistencia
+        const globalSearchInput = document.getElementById('modal-search-input');
+        filterModalTable(globalSearchInput ? globalSearchInput.value : ""); 
+
+        // 6. Mostrar el modal y refrescar iconos
+        const modal = document.getElementById('table-modal');
+        if (modal) modal.classList.remove('hidden');
+        
+        if (window.lucide) lucide.createIcons();
+    }
 
     function filterModalTable(globalQuery) {
         const gQ = globalQuery.trim().toLowerCase();
@@ -665,85 +706,85 @@ function processFinalData(tableName = "") {
 
         const filtered = currentTableData.filter(row => {
             const matchesCol = colFilters.every(col => String(row[col.id] || "").toLowerCase().includes(col.filterValue.toLowerCase()));
-            if (!matchesCol) return false;
-            if (gQ === "") return true;
-            return activeCols.some(col => String(row[col.id] || "").toLowerCase().includes(gQ));
+            return matchesCol && (gQ === "" || activeCols.some(col => String(row[col.id] || "").toLowerCase().includes(gQ)));
         });
 
         renderTableRows(filtered, activeCols);
     }
 
-function renderTableRows(data, cols) {
-    const tbody = document.getElementById('dyn-tbody');
-    
-    // Añadimos 'index' como segundo parámetro del map para el correlativo
-    tbody.innerHTML = data.map((row, index) => {
+    function renderTableRows(data, cols) {
+        const tbody = document.getElementById('dyn-tbody');
         
-        // 1. Crear la celda virtual de índice (#)
-        // Usamos index + 1 para que empiece en 1 y no en 0
-        const indexCell = `<td class="text-center px-2 py-1 border-b border-gray-800 text-gray-500 font-mono text-[10px] bg-gray-900 sticky left-0 z-10 w-10">${index + 1}</td>`;
-        // 2. Procesar el resto de las celdas (tu lógica original)
-        const cells = cols.map(c => {
-            let val = row[c.id];
-            let align = 'text-left';
-            let extra = '';
-
-            // Formateo por tipo de columna
-            if (['INGRESO', 'DIA_INICIO', 'DIA_FINAL'].includes(c.id)) val = formatDate(val);
-            else if (c.id === 'RegistroDate') val = formatDateTime(val);
-            else if (['CEDULA', 'DIF', 'DIAS_VAC2', 'DIAS_VACACIONES', 'BONO_VACACIONAL'].includes(c.id)) val = formatNumberWithDots(val);
+        tbody.innerHTML = data.map((row, index) => {
+            // 1. Celda de índice (Correlativo)
+            const indexCell = `<td class="text-center px-2 py-1 border-b border-gray-800 text-gray-500 font-mono text-[10px] bg-gray-900 sticky left-0 z-10 w-10">${index + 1}</td>`;
             
-            // Alineación
-            if (['VACACIONES_ID', 'PERIODO', 'REGISTRO_ID', 'INGRESO', 'DIA_INICIO', 'DIA_FINAL', 'RegistroDate'].includes(c.id)) align = 'text-center';
-            else if (['DIF', 'DIAS_VAC2', 'DIAS_VACACIONES', 'CEDULA', 'BONO_VACACIONAL'].includes(c.id)) align = 'text-right';
-            
-            if (c.id === 'DESCRIPCION_CONCEPTO') extra = ' cell-fixed-width-scroll';
+            // 2. Celdas de datos dinámicas
+            const cells = cols.map(c => {
+                let val = row[c.id];
+                let align = 'text-left'; // Alineación por defecto
+                const colId = String(c.id).toUpperCase();
 
-            return `<td class="${align}${extra} px-3 py-1 border-b border-gray-800">${val ?? ''}</td>`;
+                // --- LÓGICA DE FORMATEO AUTOMÁTICO ---
+                
+                // Detectar Fechas por nombre de columna
+                if (colId.includes('FECHA') || colId.includes('DIA_') || colId.includes('INGRESO')) {
+                    val = formatDate(val);
+                    align = 'text-center';
+                } 
+                // Detectar Fecha+Hora
+                else if (colId.includes('DATE') || colId.includes('TIMESTAMP') || colId.includes('REGISTRO')) {
+                    val = formatDateTime(val);
+                    align = 'text-center';
+                }
+                // Detectar Números/Montos (Si el valor es numérico y no es un ID)
+                else if ((typeof val === 'number' || (!isNaN(val) && val !== '')) && !colId.endsWith('ID')) {
+                    val = formatNumberWithDots(val);
+                    align = 'text-right';
+                }
+
+                // --- LÓGICA DE ALINEACIÓN POR PALABRAS CLAVE ---
+                if (colId.includes('ID') || colId.includes('CODIGO') || colId.includes('PERIODO')) {
+                    align = 'text-center';
+                }
+
+                // --- CLASES ESPECIALES ---
+                // Si el texto es muy largo (ej. descripciones), aplicamos scroll opcional
+                const specialClass = colId.includes('DESCRIPCION') || colId.includes('OBSERV') ? 'cell-fixed-width-scroll' : '';
+
+                return `<td class="${align} ${specialClass} px-3 py-1 border-b border-gray-800 whitespace-nowrap">
+                            ${val ?? ''}
+                        </td>`;
+            }).join('');
+
+            return `<tr class="hover:bg-gray-800/50 transition-colors">${indexCell}${cells}</tr>`;
         }).join('');
-
-        // 3. Retornar la fila completa uniendo el índice con las demás celdas
-        return `<tr>${indexCell}${cells}</tr>`;
-    }).join('');
-}
-
-function sortTableByColumn(columnId) {
-    // 1. Alternar dirección o cambiar de columna
-    if (currentSortColumn === columnId) {
-        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-        currentSortColumn = columnId;
-        sortDirection = 'asc';
     }
 
-    // 2. Ordenar los datos originales
-    currentTableData.sort((a, b) => {
-        let valA = a[columnId];
-        let valB = b[columnId];
+    /**
+     * --- 7. UTILIDADES DE ORDENAMIENTO Y FORMATO ---
+     */
+    function sortTableByColumn(columnId) {
+        sortDirection = (currentSortColumn === columnId && sortDirection === 'asc') ? 'desc' : 'asc';
+        currentSortColumn = columnId;
 
-        // Normalización básica para números (si vienen como string con puntos/comas)
-        if (typeof valA === 'string' && !isNaN(valA.replace(',', '.'))) valA = parseFloat(valA.replace(',', '.'));
-        if (typeof valB === 'string' && !isNaN(valB.replace(',', '.'))) valB = parseFloat(valB.replace(',', '.'));
+        currentTableData.sort((a, b) => {
+            let valA = a[columnId], valB = b[columnId];
+            if (typeof valA === 'string' && !isNaN(valA.replace(',', '.'))) valA = parseFloat(valA.replace(',', '.'));
+            if (typeof valB === 'string' && !isNaN(valB.replace(',', '.'))) valB = parseFloat(valB.replace(',', '.'));
+            if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+            if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+            return 0;
+        });
+        processFinalData();
+    }
 
-        if (valA === null || valA === undefined) return 1;
-        if (valB === null || valB === undefined) return -1;
-
-        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
-        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
-        return 0;
-    });
-
-    // 3. Re-renderizar la tabla (mantiene filtros activos)
-    processFinalData();
-}
-
-    // --- 7. FORMATEADORES Y UTILIDADES ---
     function formatNumberWithDots(v) {
         if (!v && v !== 0) return '';
         const number = parseFloat(String(v).replace(',', '.'));
         if (isNaN(number)) return v;
-        const decimals = Math.abs(number - Math.round(number)) < 0.001 ? 0 : 2;
-        return new Intl.NumberFormat('es-ES', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(number);
+        const dec = Math.abs(number - Math.round(number)) < 0.001 ? 0 : 2;
+        return new Intl.NumberFormat('es-ES', { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(number);
     }
 
     function formatDate(v) {
@@ -753,78 +794,61 @@ function sortTableByColumn(columnId) {
     }
 
     function formatDateTime(v) {
-        if (!v) return 'N/A';
         const d = new Date(v);
-        if (isNaN(d.getTime())) return v;
-        return `${formatDate(v)} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
+        return isNaN(d.getTime()) ? v : `${formatDate(v)} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
     }
 
-    function clearSearch() {
-        const input = document.getElementById('modal-search-input');
-        input.value = ''; filterModalTable(''); input.focus();
-    }
-
-    function closeTableModal() { document.getElementById('table-modal').classList.add('hidden'); }
-
-    async function closeConfigPanel() {
-        const ok = await showSystemModal({ title: '¿Cerrar editor?', text: 'Se perderán los cambios no guardados.', type: 'warning', confirmText: 'Cerrar', cancelText: 'Cancelar' });
-        if (ok) {
-            document.getElementById('column-config-panel').classList.add('hidden');
-        }
-    }
-
-    // --- 8. MODAL DE SISTEMA DINÁMICO ---
+    /**
+     * --- 8. MODAL DE SISTEMA Y CIERRE ---
+     */
     function showSystemModal({ title, text, type = 'info', confirmText = 'Aceptar', cancelText = null, showInput = false, inputValue = '' }) {
         return new Promise((resolve) => {
             const modal = document.getElementById('system-modal');
-            const iconEl = document.getElementById('sys-modal-icon');
             const actionsEl = document.getElementById('sys-modal-actions');
-            
             modal.querySelectorAll('.input-wrapper-dynamic').forEach(el => el.remove());
+            
             document.getElementById('sys-modal-title').textContent = title;
             document.getElementById('sys-modal-text').textContent = text;
-
-            const icons = {
-                success: '<i data-lucide="check-circle-2" class="w-12 h-12 text-emerald-400"></i>',
-                warning: '<i data-lucide="alert-triangle" class="w-12 h-12 text-amber-400"></i>',
-                info: '<i data-lucide="search" class="w-12 h-12 text-blue-400"></i>'
-            };
-            iconEl.innerHTML = icons[type] || icons.info;
+            
+            const icons = { success: 'check-circle-2', warning: 'alert-triangle', info: 'search' };
+            document.getElementById('sys-modal-icon').innerHTML = `<i data-lucide="${icons[type] || 'info'}" class="w-12 h-12 ${type === 'success' ? 'text-emerald-400' : type === 'warning' ? 'text-amber-400' : 'text-blue-400'}"></i>`;
 
             let inputField = null;
             if (showInput) {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'input-wrapper-dynamic relative flex items-center mb-4 mt-2';
-                wrapper.innerHTML = `<input type="text" value="${inputValue}" class="w-full bg-gray-800 border border-gray-700 rounded-lg py-2 pl-4 pr-10 text-sm text-white outline-none focus:border-blue-500" placeholder="Texto...">
+                wrapper.innerHTML = `<input type="text" value="${inputValue}" class="w-full bg-gray-800 border border-gray-700 rounded-lg py-2 pl-4 pr-10 text-sm text-white outline-none focus:border-blue-500">
                                      <button class="absolute right-2 text-red-500"><i data-lucide="x" class="w-4 h-4"></i></button>`;
                 inputField = wrapper.querySelector('input');
                 wrapper.querySelector('button').onclick = () => { inputField.value = ''; inputField.focus(); };
                 document.getElementById('sys-modal-text').after(wrapper);
-                inputField.onkeydown = (e) => { if (e.key === 'Enter') btnConfirm.click(); };
             }
 
             actionsEl.innerHTML = '';
             const finalize = (v) => { modal.classList.add('hidden'); resolve(v); };
 
             if (cancelText) {
-                const btnCancel = document.createElement('button');
-                btnCancel.className = 'px-4 py-2 rounded-lg bg-gray-700 text-gray-300 text-sm';
-                btnCancel.textContent = cancelText;
-                btnCancel.onclick = () => finalize(null);
-                actionsEl.appendChild(btnCancel);
+                const btnC = document.createElement('button');
+                btnC.className = 'px-4 py-2 rounded-lg bg-gray-700 text-gray-300 text-sm';
+                btnC.textContent = cancelText;
+                btnC.onclick = () => finalize(null);
+                actionsEl.appendChild(btnC);
             }
 
-            const btnConfirm = document.createElement('button');
-            btnConfirm.className = `px-4 py-2 rounded-lg text-white text-sm ${type === 'success' ? 'bg-emerald-600' : 'bg-blue-600'}`;
-            btnConfirm.textContent = confirmText;
-            btnConfirm.onclick = () => finalize(showInput ? inputField.value : true);
-            actionsEl.appendChild(btnConfirm);
+            const btnOK = document.createElement('button');
+            btnOK.className = `px-4 py-2 rounded-lg text-white text-sm ${type === 'success' ? 'bg-emerald-600' : 'bg-blue-600'}`;
+            btnOK.textContent = confirmText;
+            btnOK.onclick = () => finalize(showInput ? inputField.value : true);
+            actionsEl.appendChild(btnOK);
 
             modal.classList.remove('hidden');
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
             if (inputField) setTimeout(() => inputField.focus(), 50);
         });
     }
+
+    function closeTableModal() { document.getElementById('table-modal').classList.add('hidden'); }
+    function logoutAndClearCache() { localStorage.clear(); window.location.href = 'index.html'; }
 </script>
 </body>
 </html>
