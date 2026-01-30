@@ -876,11 +876,21 @@
     }
 
     async function closeConfigPanel() {
-        const ok = await showSystemModal({ title: '¿Cerrar editor?', text: 'Se perderán los cambios no guardados.', type: 'warning', confirmText: 'Cerrar', cancelText: 'Cancelar' });
+        const ok = await showSystemModal({ 
+            title: '¿Cerrar editor?', 
+            text: 'Se perderán los cambios no guardados.', 
+            type: 'warning', 
+            confirmText: 'Cerrar', 
+            cancelText: 'Cancelar' 
+        });
+        
         if (ok) {
             document.getElementById('column-config-panel').classList.add('hidden');
+            // Opcional: Volver suavemente a la parte superior para no perder el foco
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     }
+    
     function closeTableModal() { document.getElementById('table-modal').classList.add('hidden'); }
     function logoutAndClearCache() { localStorage.clear(); window.location.href = 'index.html'; }
 </script>
