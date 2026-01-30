@@ -237,7 +237,7 @@
                             </div> 
                         </div> 
 
-                        <div class="metric-card flex-1 flex flex-col items-center justify-center text-center p-2"> 
+                        <div class="hidden metric-card flex-1 flex flex-col items-center justify-center text-center p-2"> 
                             <i data-lucide="user-check" class="w-6 h-6 text-green-500 mb-1"></i> 
                             <div class="flex flex-col items-center"> 
                                 <span class="text-xl font-extrabold text-green-500 leading-none block" data-metric="data_metric2">0</span> 
@@ -875,6 +875,12 @@
         });
     }
 
+    async function closeConfigPanel() {
+        const ok = await showSystemModal({ title: '¿Cerrar editor?', text: 'Se perderán los cambios no guardados.', type: 'warning', confirmText: 'Cerrar', cancelText: 'Cancelar' });
+        if (ok) {
+            document.getElementById('column-config-panel').classList.add('hidden');
+        }
+    }
     function closeTableModal() { document.getElementById('table-modal').classList.add('hidden'); }
     function logoutAndClearCache() { localStorage.clear(); window.location.href = 'index.html'; }
 </script>
