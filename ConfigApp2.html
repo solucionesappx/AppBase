@@ -68,7 +68,7 @@
 
     /* MODAL VISTA PREVIA: Fondo Unificado */
     .modal-overlay { position: fixed; inset: 0; background: rgba(17, 24, 39, 0.9); z-index: 100; display: flex; justify-content: center; padding-top: 40px; }
-    .modal-content { background: var(--color-bg-deep); border: 1px solid var(--border-color); width: 95%; max-width: 460px; height: 80vh; border-radius: 1rem; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+    .modal-content { background: var(--color-bg-deep); border: 1px solid var(--border-color); width: 95%; max-width: 460px; height: 90vh; border-radius: 1rem; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
     
     .modal-header { padding: 1.25rem; background: var(--color-bg-deep); }
     .modal-header input { background: #1f2937; border: 1px solid var(--border-color); color: var(--color-text-dark); }
@@ -209,7 +209,7 @@
         <div id="table-modal" class="hidden modal-overlay">
             <div class="modal-content shadow-2xl">
                 <div class="modal-header">
-                    <div class="flex items-center justify-between mb-4 gap-4">
+                    <div class="flex items-center justify-between mb-2 gap-4">
                         <h3 id="modal-main-title" class="text-blue-400 font-bold uppercase text-[11px] tracking-widest leading-tight flex-grow">
                             Cargando...
                         </h3>
@@ -219,6 +219,34 @@
                         </button>
                     </div>
                     
+                    <div class="flex justify-center items-center space-x-2 p-2">
+                        
+                        <div id="metric-total-records" class="metric-card flex-1 flex flex-col items-center justify-center text-center p-2"> 
+                            <i data-lucide="building" class="w-7 h-7 text-blue-500 mb-1"></i> 
+                            <div class="flex flex-col items-center"> 
+                                <span class="text-xl font-extrabold text-blue-500 leading-none block" data-metric="total">0</span> 
+                                <span class="text-[10px] text-gray-300 leading-tight block mt-1">Unidades</span> 
+                            </div> 
+                        </div> 
+
+                        <div class="metric-card flex-1 flex flex-col items-center justify-center text-center p-2"> 
+                            <i data-lucide="user-minus" class="w-6 h-6 text-red-500 mb-1"></i> 
+                            <div class="flex flex-col items-center"> 
+                                <span class="text-xl font-extrabold text-red-500 leading-none block" data-metric="data_metric1">0</span> 
+                                <span class="text-[10px] text-gray-300 leading-tight block mt-1">Datos1</span> 
+                            </div> 
+                        </div> 
+
+                        <div class="metric-card flex-1 flex flex-col items-center justify-center text-center p-2"> 
+                            <i data-lucide="user-check" class="w-6 h-6 text-green-500 mb-1"></i> 
+                            <div class="flex flex-col items-center"> 
+                                <span class="text-xl font-extrabold text-green-500 leading-none block" data-metric="data_metric2">0</span> 
+                                <span class="text-[10px] text-gray-300 leading-tight block mt-1">Datos2</span> 
+                            </div> 
+                        </div> 
+
+                    </div>
+
                     <div class="relative flex items-center">
                         <i data-lucide="search" class="absolute left-3 w-4 h-4 text-gray-500"></i>
                         
