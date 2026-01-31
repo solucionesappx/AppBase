@@ -274,6 +274,80 @@
             n1.addEventListener('input', calculate);
             n2.addEventListener('input', calculate);
         }
+
+        async function loadTableNames() {
+            const tienda = localStorage.getItem(KEYS.TIENDA) || 'DEFAULT';
+            try {
+                const r = await fetch(`${GAS_SCRIPT_URL}?action=getTableFriendlyNames&appTienda=${tienda}`);
+                const res = await r.json();
+                if (res.success) {
+                    // Guardamos el mapa de nombres amigables
+                    localStorage.setItem('TABLE_FRIENDLY_NAMES', JSON.stringify(res.data));
+                }
+            } catch (e) { console.error("Error cargando nombres amigables", e); }
+        }
+
+        function getFriendlyTableName(technicalName) {
+            const raw = localStorage.getItem('TABLE_FRIENDLY_NAMES');
+            const friendlyNames = JSON.parse(raw || '{}');
+            return friendlyNames[technicalName]?.label || technicalName;
+        }
+
+        function updateFormTitle(technicalName, isNew = false) {
+            const label = getFriendlyTableName(technicalName);
+            const formTitleEl = document.getElementById('formTitle');
+            if (formTitleEl) {
+                const accion = isNew ? "Nuevo Registro" : "Editar Selección";
+                formTitleEl.textContent = `${accion}: ${label}`;
+            }
+        }    
+
+        function getTablePrimaryKey(headers, tableName) {
+            const prefix = tableName.split('_')[0].toUpperCase();
+            return headers.find(h => h.trim().toUpperCase() === `${prefix}ID`) || headers[0];
+        }
+
+        function hydrateAllSelects(hydrations) {
+            hydrations.forEach(item => {
+                const el = document.getElementById(item.id);
+                if (!el) return;
+
+                const flat = item.options.flatMap(opt => {
+                    try { 
+                        return (typeof opt === 'string' && opt.trim().startsWith('[')) ? JSON.parse(opt) : opt; 
+                    } catch { return opt; }
+                });
+
+                const unique = [...new Set(flat)].filter(Boolean).sort();
+                
+                // Determinamos si debemos forzar la selección
+                const hasCurrentValue = item.current && String(item.current).trim() !== "";
+                
+                let optionsHTML = "";
+                
+                // Si NO es duplicado y NO tiene valor, ponemos el selector vacío al inicio
+                if (!item.isDuplicate && !hasCurrentValue) {
+                    optionsHTML += `<option value="" selected>-- Seleccionar --</option>`;
+                } else {
+                    optionsHTML += `<option value="">-- Seleccionar --</option>`;
+                }
+
+                optionsHTML += unique.map(val => {
+                    const valStr = String(val).trim();
+                    const currStr = String(item.current).trim();
+                    const isSelected = valStr === currStr;
+                    
+                    return `<option value="${val}" ${isSelected ? 'selected' : ''}>${val}</option>`;
+                }).join('');
+
+                el.innerHTML = optionsHTML;
+
+                // Refuerzo por JavaScript para asegurar la selección en el DOM
+                if (hasCurrentValue) {
+                    el.value = item.current;
+                }
+            });
+        }       
     </script>
 
     <script>
@@ -336,33 +410,6 @@
             }
         });
 
-        async function loadTableNames() {
-            const tienda = localStorage.getItem(KEYS.TIENDA) || 'DEFAULT';
-            try {
-                const r = await fetch(`${GAS_SCRIPT_URL}?action=getTableFriendlyNames&appTienda=${tienda}`);
-                const res = await r.json();
-                if (res.success) {
-                    // Guardamos el mapa de nombres amigables
-                    localStorage.setItem('TABLE_FRIENDLY_NAMES', JSON.stringify(res.data));
-                }
-            } catch (e) { console.error("Error cargando nombres amigables", e); }
-        }
-
-        function getFriendlyTableName(technicalName) {
-            const raw = localStorage.getItem('TABLE_FRIENDLY_NAMES');
-            const friendlyNames = JSON.parse(raw || '{}');
-            return friendlyNames[technicalName]?.label || technicalName;
-        }
-
-        function updateFormTitle(technicalName, isNew = false) {
-            const label = getFriendlyTableName(technicalName);
-            const formTitleEl = document.getElementById('formTitle');
-            if (formTitleEl) {
-                const accion = isNew ? "Nuevo Registro" : "Editar Selección";
-                formTitleEl.textContent = `${accion}: ${label}`;
-            }
-        }
-
         async function fetchMasterData(currentTable) {
             const userTienda = localStorage.getItem(KEYS.TIENDA) || 'DEFAULT';
             const now = Date.now();
@@ -392,123 +439,118 @@
             }
         }
 
-        function getTablePrimaryKey(headers, tableName) {
-            const prefix = tableName.split('_')[0].toUpperCase();
-            return headers.find(h => h.trim().toUpperCase() === `${prefix}ID`) || headers[0];
-        }
+        function renderFields(config, data, isNew = false) {
+            const container = document.getElementById('editDataFormFields');
+            const prefix = (data.TABLA_ORIGEN || "").split('_')[0].toUpperCase();
+            const tv001 = JSON.parse(localStorage.getItem('FULL_DATA_TV001') || '[]');
+            const selectHydrations = [];
 
-function renderFields(config, data, isNew = false) {
-    const container = document.getElementById('editDataFormFields');
-    const prefix = (data.TABLA_ORIGEN || "").split('_')[0].toUpperCase();
-    const tv001 = JSON.parse(localStorage.getItem('FULL_DATA_TV001') || '[]');
-    const selectHydrations = [];
+            container.innerHTML = Object.keys(config).map(colId => {
+                const field = config[colId];
+                const cleanId = colId.toUpperCase().trim();
+                
+                let value = (data && data[colId] !== undefined) ? data[colId] : '';
+                let rawPlaceholder = (data._placeholders && data._placeholders[colId]) ? data._placeholders[colId] : '';
+                let formattedPlaceholder = rawPlaceholder !== '' ? getFormattedValue(colId, rawPlaceholder) : '';
 
-    container.innerHTML = Object.keys(config).map(colId => {
-        const field = config[colId];
-        const cleanId = colId.toUpperCase().trim();
-        
-        let value = (data && data[colId] !== undefined) ? data[colId] : '';
-        let rawPlaceholder = (data._placeholders && data._placeholders[colId]) ? data._placeholders[colId] : '';
-        let formattedPlaceholder = rawPlaceholder !== '' ? getFormattedValue(colId, rawPlaceholder) : '';
+                const isDuplicatedEmpty = isNew && value === "" && rawPlaceholder !== "";
+                const dynamicClass = isDuplicatedEmpty 
+                    ? "italic text-gray-500/60 placeholder-gray-500/40" 
+                    : "text-gray-200 font-medium";
 
-        const isDuplicatedEmpty = isNew && value === "" && rawPlaceholder !== "";
-        const dynamicClass = isDuplicatedEmpty 
-            ? "italic text-gray-500/60 placeholder-gray-500/40" 
-            : "text-gray-200 font-medium";
+                // --- 1. CAMPO DE IDENTIDAD (IDNOMBRE) ---
+                if (cleanId === `${prefix}IDNOMBRE`) {
+                    const rawStatus = data[`${prefix}TYPEREG`] || "Registrado";
+                    const isActuallyBlocked = rawStatus === "Bloqueado";
+                    const idClass = isDuplicatedEmpty ? "italic text-gray-500/60" : "text-blue-300 font-bold";
 
-        // --- 1. CAMPO DE IDENTIDAD (IDNOMBRE) ---
-        if (cleanId === `${prefix}IDNOMBRE`) {
-            const rawStatus = data[`${prefix}TYPEREG`] || "Registrado";
-            const isActuallyBlocked = rawStatus === "Bloqueado";
-            const idClass = isDuplicatedEmpty ? "italic text-gray-500/60" : "text-blue-300 font-bold";
+                    return `
+                        <div class="border-b border-gray-700/40 py-1">
+                            <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
+                            <div class="flex items-center justify-between min-h-[32px] gap-2">
+                                <div class="flex items-center gap-2 flex-1">
+                                    <input type="text" name="${colId}" value="${value}" 
+                                        placeholder="${formattedPlaceholder || field.label}"
+                                        oninput="this.classList.remove('italic', 'text-gray-500/60'); this.classList.add('text-blue-300', 'font-bold')"
+                                        class="bg-transparent outline-none border-none focus:ring-0 text-[22px] leading-tight p-0 m-0 w-full transition-all ${idClass}">
+                                    <span id="badge-status" class="text-[10px] px-2 py-0.5 rounded-full uppercase font-bold ${isActuallyBlocked ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'}">
+                                        ${rawStatus}
+                                    </span>
+                                </div>
+                                <input type="hidden" name="${prefix}TYPEREG" id="input-typereg" value="${rawStatus}">
+                                <button type="button" onclick="toggleRecordStatus('${prefix}')" class="focus:outline-none">
+                                    <i id="toggle-icon" data-lucide="${isActuallyBlocked ? 'toggle-left' : 'toggle-right'}" class="w-8 h-8" style="color: ${isActuallyBlocked ? '#ef4444' : '#22c55e'}"></i>
+                                </button>
+                            </div>
+                        </div>`;
+                }
 
-            return `
-                <div class="border-b border-gray-700/40 py-1">
-                    <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
-                    <div class="flex items-center justify-between min-h-[32px] gap-2">
-                        <div class="flex items-center gap-2 flex-1">
-                            <input type="text" name="${colId}" value="${value}" 
-                                placeholder="${formattedPlaceholder || field.label}"
-                                oninput="this.classList.remove('italic', 'text-gray-500/60'); this.classList.add('text-blue-300', 'font-bold')"
-                                class="bg-transparent outline-none border-none focus:ring-0 text-[22px] leading-tight p-0 m-0 w-full transition-all ${idClass}">
-                            <span id="badge-status" class="text-[10px] px-2 py-0.5 rounded-full uppercase font-bold ${isActuallyBlocked ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'}">
-                                ${rawStatus}
-                            </span>
+                // --- 2. CAMPOS OCULTOS ---
+                if (cleanId === `${prefix}ID`) {
+                    return isNew ? '' : `<input type="hidden" name="${colId}" value="${value}">`;
+                }
+
+                // --- 3. LÓGICA DE EDICIÓN ---
+                const isCalculated = cleanId.includes('NOMBREC');
+                const isRegistryInfo = cleanId.includes('REGISTRO');
+                const canEdit = isNew ? (!isCalculated && !isRegistryInfo && field.editable !== false) : field.editable !== false;
+
+                let inputType = "text";
+                let displayValue = value;
+
+                if (cleanId.includes('FECHA')) {
+                    inputType = "date";
+                    if (value) {
+                        const d = new Date(value);
+                        if (!isNaN(d.getTime())) displayValue = d.toISOString().split('T')[0];
+                    }
+                }
+
+                // --- 4. SELECTORES (BLOQUE ÚNICO) ---
+                const masterMatch = tv001.filter(row => row.Encabezado_Tabla?.toUpperCase().trim() === cleanId);
+                if (masterMatch.length > 0 && canEdit) {
+                    const selectId = `select-${cleanId}`;
+                    
+                    // Si hay un valor presente y es modo isNew, es un duplicado
+                    const isDuplicate = isNew && value !== "";
+
+                    selectHydrations.push({ 
+                        id: selectId, 
+                        options: masterMatch.map(m => m.Valores_Encabezado), 
+                        current: value,
+                        isDuplicate: isDuplicate // <--- Bandera nueva
+                    });
+
+                    return `
+                        <div class="border-b border-gray-700/40 py-1">
+                            <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
+                            <div class="flex items-center h-[32px]">
+                                <select name="${colId}" id="${selectId}" class="w-full bg-transparent text-blue-300 outline-none text-[18px] font-bold p-0 appearance-none cursor-pointer scheme-dark">
+                                    <option value="${value}">${value || '-- Seleccionar --'}</option>
+                                </select>
+                            </div>
+                        </div>`;
+                }
+
+                // --- 5. INPUTS NORMALES ---
+                const finalPlaceholder = formattedPlaceholder ? `${formattedPlaceholder}` : '';
+                return `
+                    <div class="border-b border-gray-700/40 py-1">
+                        <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
+                        <div class="flex items-center h-[32px]">
+                            <input type="${inputType}" name="${colId}" value="${displayValue}" 
+                                placeholder="${finalPlaceholder}"
+                                ${!canEdit ? 'readonly' : ''} 
+                                oninput="this.classList.remove('italic', 'text-gray-500/60')"
+                                class="w-full bg-transparent outline-none p-0 leading-tight focus:ring-0 ${dynamicClass} ${!canEdit ? 'opacity-60' : ''} scheme-dark">
                         </div>
-                        <input type="hidden" name="${prefix}TYPEREG" id="input-typereg" value="${rawStatus}">
-                        <button type="button" onclick="toggleRecordStatus('${prefix}')" class="focus:outline-none">
-                            <i id="toggle-icon" data-lucide="${isActuallyBlocked ? 'toggle-left' : 'toggle-right'}" class="w-8 h-8" style="color: ${isActuallyBlocked ? '#ef4444' : '#22c55e'}"></i>
-                        </button>
-                    </div>
-                </div>`;
+                    </div>`;
+            }).join('');
+
+            if (window.lucide) lucide.createIcons();
+            hydrateAllSelects(selectHydrations); // Llamada a la hidratación corregida
+            if (document.getElementById(`input-${prefix}NOMBRE1`)) setupNombreCAutoCalculate(prefix);
         }
-
-        // --- 2. CAMPOS OCULTOS ---
-        if (cleanId === `${prefix}ID`) {
-            return isNew ? '' : `<input type="hidden" name="${colId}" value="${value}">`;
-        }
-
-        // --- 3. LÓGICA DE EDICIÓN ---
-        const isCalculated = cleanId.includes('NOMBREC');
-        const isRegistryInfo = cleanId.includes('REGISTRO');
-        const canEdit = isNew ? (!isCalculated && !isRegistryInfo && field.editable !== false) : field.editable !== false;
-
-        let inputType = "text";
-        let displayValue = value;
-
-        if (cleanId.includes('FECHA')) {
-            inputType = "date";
-            if (value) {
-                const d = new Date(value);
-                if (!isNaN(d.getTime())) displayValue = d.toISOString().split('T')[0];
-            }
-        }
-
-        // --- 4. SELECTORES (BLOQUE ÚNICO) ---
-        const masterMatch = tv001.filter(row => row.Encabezado_Tabla?.toUpperCase().trim() === cleanId);
-        if (masterMatch.length > 0 && canEdit) {
-            const selectId = `select-${cleanId}`;
-            
-            // Si hay un valor presente y es modo isNew, es un duplicado
-            const isDuplicate = isNew && value !== "";
-
-            selectHydrations.push({ 
-                id: selectId, 
-                options: masterMatch.map(m => m.Valores_Encabezado), 
-                current: value,
-                isDuplicate: isDuplicate // <--- Bandera nueva
-            });
-
-            return `
-                <div class="border-b border-gray-700/40 py-1">
-                    <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
-                    <div class="flex items-center h-[32px]">
-                        <select name="${colId}" id="${selectId}" class="w-full bg-transparent text-blue-300 outline-none text-[18px] font-bold p-0 appearance-none cursor-pointer scheme-dark">
-                            <option value="${value}">${value || '-- Seleccionar --'}</option>
-                        </select>
-                    </div>
-                </div>`;
-        }
-
-        // --- 5. INPUTS NORMALES ---
-        const finalPlaceholder = formattedPlaceholder ? `${formattedPlaceholder}` : '';
-        return `
-            <div class="border-b border-gray-700/40 py-1">
-                <span class="text-[10px] font-bold text-blue-400 uppercase block -mb-1">${field.label}</span>
-                <div class="flex items-center h-[32px]">
-                    <input type="${inputType}" name="${colId}" value="${displayValue}" 
-                        placeholder="${finalPlaceholder}"
-                        ${!canEdit ? 'readonly' : ''} 
-                        oninput="this.classList.remove('italic', 'text-gray-500/60')"
-                        class="w-full bg-transparent outline-none p-0 leading-tight focus:ring-0 ${dynamicClass} ${!canEdit ? 'opacity-60' : ''} scheme-dark">
-                </div>
-            </div>`;
-    }).join('');
-
-    if (window.lucide) lucide.createIcons();
-    hydrateAllSelects(selectHydrations); // Llamada a la hidratación corregida
-    if (document.getElementById(`input-${prefix}NOMBRE1`)) setupNombreCAutoCalculate(prefix);
-}
 
         function renderProfile() {
             const config = JSON.parse(localStorage.getItem(STORAGE_CONFIG) || '{}');
@@ -568,62 +610,113 @@ function renderFields(config, data, isNew = false) {
             if (window.lucide) lucide.createIcons();
         }
 
-function hydrateAllSelects(hydrations) {
-    hydrations.forEach(item => {
-        const el = document.getElementById(item.id);
-        if (!el) return;
+        // --- FUNCIÓN DE APOYO PARA LIMPIEZA ---
+function sanitizePayload(formData, prefix) {
+    const entries = Object.fromEntries(formData.entries());
+    for (let key in entries) {
+        const k = key.toUpperCase();
+        if ((k.includes('MONTO') || k.includes('CANTIDAD') || k.includes('TOTAL')) && typeof entries[key] === 'string') {
+            let val = entries[key].trim();
+            if (val === "") continue;
 
-        const flat = item.options.flatMap(opt => {
-            try { 
-                return (typeof opt === 'string' && opt.trim().startsWith('[')) ? JSON.parse(opt) : opt; 
-            } catch { return opt; }
-        });
-
-        const unique = [...new Set(flat)].filter(Boolean).sort();
-        
-        // Determinamos si debemos forzar la selección
-        const hasCurrentValue = item.current && String(item.current).trim() !== "";
-        
-        let optionsHTML = "";
-        
-        // Si NO es duplicado y NO tiene valor, ponemos el selector vacío al inicio
-        if (!item.isDuplicate && !hasCurrentValue) {
-            optionsHTML += `<option value="" selected>-- Seleccionar --</option>`;
-        } else {
-            optionsHTML += `<option value="">-- Seleccionar --</option>`;
+            // LÓGICA INTELIGENTE:
+            if (val.includes(',')) {
+                // Formato Humano: "1.250,50" -> "1250.50"
+                val = val.replace(/\./g, '').replace(',', '.');
+            } else {
+                // Formato Backend: "1250.50" -> No tocamos el punto, solo limpiamos espacios
+                val = val.replace(/\s/g, '');
+            }
+            entries[key] = parseFloat(val) || 0;
         }
+    }
+    return entries;
+}
 
-        optionsHTML += unique.map(val => {
-            const valStr = String(val).trim();
-            const currStr = String(item.current).trim();
-            const isSelected = valStr === currStr;
-            
-            return `<option value="${val}" ${isSelected ? 'selected' : ''}>${val}</option>`;
-        }).join('');
-
-        el.innerHTML = optionsHTML;
-
-        // Refuerzo por JavaScript para asegurar la selección en el DOM
-        if (hasCurrentValue) {
-            el.value = item.current;
+function validateNumericFormats(formData) {
+    const entries = Object.fromEntries(formData.entries());
+    for (let [key, value] of Object.entries(entries)) {
+        const k = key.toUpperCase();
+        if (k.includes('MONTO') || k.includes('CANTIDAD') || k.includes('TOTAL')) {
+            // Si el usuario borró todo y quedó vacío, lo permitimos (sanitize pondrá 0)
+            if (value === "") continue;
+            // Si tiene coma y punto, o solo coma, está bien (formato local)
+            // Si tiene un punto pero NO coma, el backend lo aceptará como decimal puro
+            // El único error real es si hay más de una coma o caracteres raros
+            const commaCount = (value.match(/,/g) || []).length;
+            if (commaCount > 1) return false;
         }
+    }
+    return true;
+}
+
+// Función para formatear mientras se escribe
+function applyMask(input) {
+    let value = input.value.replace(/\D/g, '');
+    let numericValue = parseFloat(value) / 100;
+    if (isNaN(numericValue)) {
+        input.value = "0,00";
+        return;
+    }
+    input.value = numericValue.toLocaleString('es-ES', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
     });
 }
 
-        // --- FUNCIÓN DE APOYO PARA LIMPIEZA ---
-        function sanitizePayload(formData, prefix) {
-            const entries = Object.fromEntries(formData.entries());
-            for (let key in entries) {
-                const cleanKey = key.toUpperCase();
-                // Si parece un número formateado (ej: 1.250,50), lo limpiamos
-                if (!cleanKey.includes('ID') && !cleanKey.includes('DATA') && typeof entries[key] === 'string') {
-                    if (/^-?\d+(\.\d+)*(,\d+)?$/.test(entries[key])) { // Regex para detectar formato es-ES
-                        entries[key] = entries[key].replace(/\./g, '').replace(',', '.');
-                    }
-                }
+// Escuchador global para no tocar renderFields
+document.addEventListener('input', (e) => {
+    const target = e.target;
+    if (!target.name) return;
+    
+    const name = target.name.toUpperCase();
+    if (name.includes('MONTO') || name.includes('CANTIDAD') || name.includes('TOTAL')) {
+        applyMask(target);
+        // Feedback visual: quitar itálica de duplicado
+        target.classList.remove('italic', 'text-gray-500/60');
+    }
+});
+
+// Al hacer clic en el campo, si está vacío o tiene un punto, ponerlo en formato 0,00
+document.addEventListener('focusin', (e) => {
+    const target = e.target;
+    if (!target.name) return;
+    
+    const name = target.name.toUpperCase();
+    if (name.includes('MONTO') || name.includes('CANTIDAD') || name.includes('TOTAL')) {
+        if (target.value.includes('.') && !target.value.includes(',')) {
+            // Si viene del backend como 1500.25, lo pasamos a 1.500,25 al entrar
+            let currentVal = parseFloat(target.value);
+            if (!isNaN(currentVal)) {
+                target.value = currentVal.toLocaleString('es-ES', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
             }
-            return entries;
+        } else if (target.value === "") {
+            target.value = "0,00";
         }
+    }
+});
+
+function xformatCurrencyDynamic(input) {
+    // 1. Obtener solo los dígitos
+    let value = input.value.replace(/\D/g, '');
+    
+    // 2. Convertir a número con dos decimales
+    let numericValue = parseFloat(value) / 100;
+    
+    if (isNaN(numericValue)) {
+        input.value = "0,00";
+        return;
+    }
+
+    // 3. Formatear para mostrar al usuario (formato ES-es: 1.250,50)
+    input.value = numericValue.toLocaleString('es-ES', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
 
         // --- SUBMIT EDICIÓN ---
         async function handleEditSubmit(e) {
@@ -691,12 +784,11 @@ function duplicateCurrentRecord() {
     }
     
     if (formTitle) {
-        formTitle.textContent = "Duplicar Registro";
+        formTitle.textContent = "Nuevo Registro (duplicado)";
     }
 
     // 4. LIMPIEZA POST-RENDER
-    // Como renderFields ya se ejecutó dentro de showEditMode, 
-    // ahora los inputs ya existen en el DOM. Simplemente los manipulamos:
+
 
     // A. Eliminamos el ID para que el backend genere uno nuevo
     const idInput = document.querySelector(`input[name="${prefix}ID"]`);
