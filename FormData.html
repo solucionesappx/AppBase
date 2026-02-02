@@ -80,6 +80,9 @@
                         <button onclick="showEditMode()" class="text-yellow-400 hover:scale-110 transition-transform" title="Editar Registro">
                             <i data-lucide="file-pen" class="w-6 h-6"></i>
                         </button>
+                        <button onclick="closeFormAndReturn()" class="text-blue-400 hover:scale-110 transition-transform" title="Regresar a Datos">
+                            <i data-lucide="circle-arrow-left" class="w-6 h-6"></i>
+                        </button>
                     </div>
                 </div>
                 <div id="perfilBodyContent" class="space-y-1 pb-20"></div>
@@ -447,6 +450,22 @@
             detailPanel.classList.remove('hidden');
             editPanel.classList.add('hidden');
         }
+    }
+
+    function closeFormAndReturn() {
+        try {
+            // Obtenemos la data para inspeccionarla
+            const data = JSON.parse(localStorage.getItem(STORAGE_DATA) || '{}');
+            console.log("Tabla origen detectada:", data.TABLA_ORIGEN);
+
+            const tableToRemember = data.TABLA_ORIGEN;
+            if (tableToRemember) {
+                localStorage.setItem('LAST_VISITED_TABLE', tableToRemember);
+            }
+        } catch (e) {
+            console.error("Error al procesar el cierre:", e);
+        }
+        window.location.href = 'Datos2.html';
     }
 
     // ==========================================
